@@ -1,1 +1,1 @@
-# student-experience-multi-agent-system
+# Member Experience Multi-Agent System
