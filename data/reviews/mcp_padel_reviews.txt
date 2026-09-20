@@ -1,9 +1,16 @@
-=== MCP MADRID CENTRAL PÁDEL — MANUAL REVIEW DATASET ===
+=== MCP MADRID CENTRAL PÁDEL — REVIEW DATASET ===
 Source: padelizados.es (displaying Google reviews)
 URL: https://padelizados.es/es-es/i/70-madrid-central-padel/
 Compiled: September 2026
 
---- SIGNAL REVIEWS (19) — real, substantive, mapped to 5 patterns ---
+Luis SANCHEZ ESCALADA, 7 months ago
+"Magníficas pistas. Bar,vestuarios y fácil Parking"
+
+Eduu Regis, 8 months ago
+"Excelente sitio para jugar al Padel"
+
+Ivan Gonzalez, 8 months ago
+"Muy buen club de padel"
 
 Emilio Gonzalez, 10 months ago
 "Mucha arena en las pistas. Tengo las rodillas en carne viva.
@@ -27,6 +34,30 @@ Itziar Criado Solis, 10 months ago
 "Muy MALA mi experiencia en este club, las pistas estaban LLENAS
 DE ARENA y encima el precio de la pista es bastante elevado en
 comparación a otros club de la zona..."
+
+Xabi Bueno, 10 months ago
+"La pista 12 se ve un poco oscura, y escurre. De la 1 a la 8
+están muy bien"
+
+Luis Martinez, 10 months ago
+"El pasado sabado estuve en el club para un partido de liga y
+esta totalmente renovado, aun no esta acabado del todo pero
+tiene pinta que va a quedar de 10."
+
+amos navarro, 10 months ago
+"Club recomendable para practicar pádel"
+
+Matias Benjamin Blacutt Rocha, 9 months ago
+"Ahora con la reforma, me parece uno de los mejores clubs de
+Madrid, desde luego cuando termine de estudiar me gustaría
+federarme y poder entrenar en este club tan espectacular, la
+calidad de las pistas es de lo mejor"
+
+Alejandro Padrón Armas, 11 months ago
+"Excelente club, no puedo decir más."
+
+daniel perez, 11 months ago
+"Excelente espacio"
 
 Ruben Diez, 1 year ago
 "Si quieres jugar a las palas en la playa este es tu lugar. Las
@@ -55,17 +86,16 @@ GENERAL Pintos, 1 year ago
 "le pondría 5 estrellas, pero era mejor cuando se podía reservar
 por llamadas y ahora solo x playtomic ha perdido su esencia"
 
-ssete10, 2 years ago
-"Pues la verdad que es complicado jugar. Son las únicas
-instalaciones que te eliminan todos los partidos que reserves a
-través de playtomic. Llevo muchísimos partidos en esa aplicacion
-y pfacticamente ninguno aqui por esa razón, vivo por la zona, y
-al final siempre termino jugando en PadelSpirit o Indie, a pesar
-que esta me pilla más cerca. Además las únicas 5 veces que he
-conseguido jugar aquí sin que me eliminen el partido, las pistas
-son bastante normales, la diferencia es que en las otras dos
-mencionadas, las pistas cubiertas, tienen aire acondicionado y
-se está más fresco."
+Iñaki RM, 1 year ago
+"Las pistas interiores están muy bien, son buenas. Las
+exteriores me da la sensación de que están un poco torcidas
+pero no influye en el juego."
+
+Ignacio Frías, 1 year ago
+"buen club de pádel"
+
+Jesus Rodriguez, 1 year ago
+"Muy bien lugar para jugar padel"
 
 ana garcia orduna
 "Estoy encantada con el club, los profesores son súper buenos,
@@ -76,30 +106,6 @@ abrir partidas, etc. Además, todos estamos nivelados por
 profesores del club y las personas con las que juegas son de tu
 nivel. Las canchas están geniales y hay muy buen ambiente. Ramón
 y Jordi, mis profesores, son los mejores que he tenido nunca."
-
-Iñaki RM, 1 year ago
-"Las pistas interiores están muy bien, son buenas. Las
-exteriores me da la sensación de que están un poco torcidas
-pero no influye en el juego."
-
-Ismael Imaz Tejedor, 2 years ago
-"Unas instalaciones kojonudas, muy profesionales, aunke las
-pistas están algo desgastadas, sería bueno un cambio de tapiz"
-
-Xabi Bueno, 10 months ago
-"La pista 12 se ve un poco oscura, y escurre. De la 1 a la 8
-están muy bien"
-
-Matias Benjamin Blacutt Rocha, 9 months ago
-"Ahora con la reforma, me parece uno de los mejores clubs de
-Madrid, desde luego cuando termine de estudiar me gustaría
-federarme y poder entrenar en este club tan espectacular, la
-calidad de las pistas es de lo mejor"
-
-Luis Martinez, 10 months ago
-"El pasado sabado estuve en el club para un partido de liga y
-esta totalmente renovado, aun no esta acabado del todo pero
-tiene pinta que va a quedar de 10."
 
 Ricardo Loaiza, 2 years ago
 "Tienen una segunda nave donde están el resto de pistas, que
@@ -117,31 +123,21 @@ y diciendonos que si nos molestan las bolas que entran que
 juguemos fuera. Tenia acento argentino por si lee esto. No
 volveremos nunca!"
 
---- NOISE REVIEWS (10) — real, but no actionable content expected ---
+Ismael Imaz Tejedor, 2 years ago
+"Unas instalaciones kojonudas, muy profesionales, aunke las
+pistas están algo desgastadas, sería bueno un cambio de tapiz"
 
-Luis SANCHEZ ESCALADA, 7 months ago
-"Magníficas pistas. Bar,vestuarios y fácil Parking"
-
-Eduu Regis, 8 months ago
-"Excelente sitio para jugar al Padel"
-
-Ivan Gonzalez, 8 months ago
-"Muy buen club de padel"
-
-amos navarro, 10 months ago
-"Club recomendable para practicar pádel"
-
-Alejandro Padrón Armas, 11 months ago
-"Excelente club, no puedo decir más."
-
-daniel perez, 11 months ago
-"Excelente espacio"
-
-Ignacio Frías, 1 year ago
-"buen club de pádel"
-
-Jesus Rodriguez, 1 year ago
-"Muy bien lugar para jugar padel"
+ssete10, 2 years ago
+"Pues la verdad que es complicado jugar. Son las únicas
+instalaciones que te eliminan todos los partidos que reserves a
+través de playtomic. Llevo muchísimos partidos en esa aplicacion
+y pfacticamente ninguno aqui por esa razón, vivo por la zona, y
+al final siempre termino jugando en PadelSpirit o Indie, a pesar
+que esta me pilla más cerca. Además las únicas 5 veces que he
+conseguido jugar aquí sin que me eliminen el partido, las pistas
+son bastante normales, la diferencia es que en las otras dos
+mencionadas, las pistas cubiertas, tienen aire acondicionado y
+se está más fresco."
 
 felipe chaves, 2 years ago
 "Atención genial, pistas muy buenas"
