@@ -57,8 +57,11 @@ puede no ser suficiente para el nivel de uso del club.
 Ahora aplica este mismo formato a los patrones reales que encuentres."""
 
 
-def run_insights_agent():
-    reviews = load_reviews("data/reviews/mcp_padel_reviews_anonymized.txt")
+def run_insights_agent(filepath: str = "data/reviews/mcp_padel_reviews_anonymized.txt"):
+    """Now accepts a filepath parameter, with the current dataset as
+    the default — so LangGraph's Supervisor can pass it different
+    data dynamically later, without needing to edit this function."""
+    reviews = load_reviews(filepath)
     prompt = build_prompt(reviews)
 
     response = client.models.generate_content(
