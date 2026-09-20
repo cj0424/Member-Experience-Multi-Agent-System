@@ -35,7 +35,7 @@ def load_reviews(filepath: str) -> list[dict]:
 
 
 if __name__ == "__main__":
-    reviews = load_reviews("data/reviews/mcp_padel_reviews.txt")
+    reviews = load_reviews("data/reviews/mcp_padel_reviews_anonymized.txt")
     print(f"Loaded {len(reviews)} reviews.\n")
     for r in reviews[:3]:
         print(r)

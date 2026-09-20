@@ -1,3 +1,4 @@
 .env
 venv/
 data/reviews/mcp_padel_reviews_ORIGINAL_PRIVATE.txt
+agents/__pycache__/

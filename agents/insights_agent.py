@@ -58,7 +58,7 @@ Ahora aplica este mismo formato a los patrones reales que encuentres."""
 
 
 def run_insights_agent():
-    reviews = load_reviews("data/reviews/mcp_padel_reviews.txt")
+    reviews = load_reviews("data/reviews/mcp_padel_reviews_anonymized.txt")
     prompt = build_prompt(reviews)
 
     response = client.models.generate_content(
