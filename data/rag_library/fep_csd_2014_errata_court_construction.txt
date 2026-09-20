@@ -1,0 +1,162 @@
+=== FEP/CSD OFICIAL — FE DE ERRATAS (2014) ===
+Fuente: Federación Española de Pádel / Consejo Superior de Deportes
+Documento: "Fe de errores – Buenas prácticas en la instalación y
+mantenimiento de pistas de pádel"
+URL: padelfederacion.es/refs/docs/Fe_de_errores_ManualMantenimientoPistas_2014.pdf
+
+⚠️ NOTA DE ALCANCE: Este documento trata principalmente sobre
+normativa de CONSTRUCCIÓN y homologación de pistas (vidrios,
+mallas, postes, redes) — no sobre mantenimiento diario como la
+arena o el césped. No fundamenta directamente los patrones de
+arena/lesión ni de renovación de césped detectados en las reseñas
+reales. Se incluye aquí por completitud y correcta citación, pero
+el Agente de Planificación de Acciones no debería usarlo para esos
+dos patrones — el documento de la Diputación de Sevilla sigue
+siendo la fuente real para esos casos.
+
+--- CORRECCIONES AL TEXTO ORIGINAL ---
+
+Pág. 31, párrafo 1: Donde dice "Se recomienda que el diámetro del
+hilo del acero empleado esté entre 2 y 3 mm, autorizándose hasta
+un máximo de 4 mm" debe decir: "Se recomienda que el diámetro del
+hilo del acero empleado esté entre 3 y 4 mm."
+
+Pág. 47, párrafo 3: Donde dice "Cristales:" debe decir: "Vidrios:"
+
+Pág. 48, párrafo 5: Donde dice "ISO 3108:1974 Steel Wire Ropes…",
+el párrafo completo queda eliminado.
+
+--- TABLA CORREGIDA, PÁG. 47 ---
+Ensayo — Método:
+Envejecimiento artificial (durante 3000 hs.) / Ensayos de la
+solidez de color — UNE EN 14836 + UNE EN 20105-A02
+Envejecimiento artificial (durante 3000 hs.) / Resistencia a
+tracción de las fibras — UNE EN 14836 + UNE EN 13864
+Infiltración de agua (permeabilidad) — UNE EN 12616
+Envejecimiento acelerado por inmersión en agua caliente /
+Resistencia de las juntas - uniones pegadas — UNE EN 13744 +
+UNE EN 12228
+Resistencia a la abrasión de superficies no rellenas — UNE EN 13672
+Absorción de impactos — UNE EN 14808
+Resistencia al deslizamiento (Fricción) / Método del péndulo TRRL
+— UNE EN 13036-4
+Comportamiento vertical de una pelota (homologada) — UNE EN 12235
+
+--- TABLA CORREGIDA, PÁG. 48 ---
+Peso de las fibras — ISO 8543
+Resistencia al arranque del bucle por un extremo — ISO 4919
+Altura del pelo — ISO 2549
+Número mínimo de puntadas/m2 — ISO 1763
+Identificación de la fibra mediante DSC — ISO 11357-3
+Tipo de arena — UNE EN 14955
+Contenido en SiO2 — Requisito FEP
+Contenido en CaO — Requisito FEP
+Altura de relleno para superficies de pádel — UNE EN 15330-1
+Granulometría (80% en peso) — UNE EN 933-1
+
+--- AGREGADOS: APARTADO 4.1. HOMOLOGACIÓN DE PRODUCTOS ---
+
+a) Nueva tabla de requisitos para VIDRIOS TEMPLADOS:
+Prestación bajo impacto humano accidental mín: 1 (C) 1
+Resistencia a flexión σbB N/mm2 (menor valor): ≥ 120
+Número de partículas totales (menor valor): ≥ 40
+Longitud de partícula más larga (mm) (mayor valor): ≤ 100
+Espesor (mm) en instalaciones interiores: mín. 10 ± 0,3
+Espesor (mm) en instalaciones exteriores: mín. 12 ± 0,3
+Flecha máxima - Tamaño 2x3 m.: máx. 8 mm.
+Flecha máxima - Tamaño 2x2 m.: máx. 5 mm.
+Dimensión B = 2 m (paralela al suelo): 1995 ± 3 mm
+Dimensión H = 2 m. (perpendicular al suelo): 1995 ± 3 mm
+Dimensión H = 3 m. (perpendicular al suelo): 2995 ± 3 mm
+Diámetro de taladros de avellanado (mm): 18 ±0,1/30 ±0,2
+Distancia del centro del taladro al borde del vidrio: ≥ 50 mm
+
+Las fijaciones deberán estar calculadas para resistir un impacto,
+por ambas caras, del mismo tipo que la que se aplica en el ensayo
+pendular de resistencia al impacto (UNE EN 12600). Los tornillos
+que fijan el vidrio deberán llevar un elemento de plástico entre
+éste y el vidrio, para asegurar su correcta fijación.
+
+VIDRIOS LAMINADOS — Ensayo / Método:
+Prestación bajo impacto humano accidental / Ensayo pendular —
+UNE EN 12600
+Resistencia a impacto / Resistencia a flexión σbB N/mm2 (menor
+valor) — UNE EN 1288-3
+Número de partículas totales / Longitud de partícula más larga
+(mayor valor) / Ensayo de fragmentación — UNE EN 12150-1
+Espesor (mm) en instalaciones interiores / Dimensiones y
+tolerancias — UNE EN 12150-1
+Espesor (mm) en instalaciones exteriores / Dimensiones y
+tolerancias — UNE EN 12150-1
+Flecha máxima (2x3 m. y 2x2 m.) / Medida de la combadura — UNE EN
+12150-1
+Dimensión B = 2 m / H = 2 m / H = 3 m / Anchura y longitud — UNE
+EN 12150-1
+Diámetro de taladros de avellanado (mm) — Requisito FEP
+Distancia del centro del taladro al borde del vidrio — Requisito
+FEP
+
+b) Nueva tabla de requisitos para MALLAS ELECTROSOLDADAS:
+Certificado de acero de base no aleado de bajo contenido en
+carbono. Certificado de material (materia prima).
+Calidad de la varilla — s/UNE F1/F11
+Relación entre diámetros del alambrón bruto trefilado inicial (a)
+y la varilla final (b) — Requisito FEP
+Penetración de la soldadura — Requisito FEP
+Malla: abertura mínima (medida de diagonales) — Reglamento FEP
+Diámetro del alambre — Reglamento FEP
+Paño: longitud horizontal máxima — Requisito FEP
+Paño: longitud vertical máxima — Requisito FEP
+Tratamiento anticorrosión: espesor mínimo de zincado — Requisito
+FEP
+
+Además: la soldadura debe estar hecha en cordones, que garanticen
+una resistencia de choque de una persona contra la malla. No se
+admiten puntos simples de soldadura entre alambres ni en las
+uniones del marco con los alambres. Además, todos los fabricantes
+deberán presentar un estudio de resistencia al viento, para una
+carga de cómo mínimo 80 km/h., sin deformación plástica alguna.
+
+c) Nueva tabla de requisitos para POSTES Y REDES:
+
+POSTES — Ensayo / Método:
+Altura máxima del poste — Reglamento de juego
+Diámetro del poste (o lado si son cuadrados) / Aristas redondeadas
+- Radios mínimos — UNE EN 1510 – ap. 3.4.1. / Requisito FEP
+Deformación permanente bajo ensayo de tensión / Flecha residual
+bajo ensayo de tensión — UNE EN 1510 – ap 5.2
+
+Además: los postes deben estar concebidos de tal forma que el
+cable de tensión de la red pueda ser sostenido o guiado a una
+altura de 92 cm. Para el ensayo de tensión del cable de tensión,
+se puede utilizar un poste con altura para redes de tenis. Uno de
+ellos debe estar concebido con un dispositivo de tensión,
+destinado a ajustar el cable de tensión de la red y el otro debe
+estar equipado con un sistema de fijación y de guía de este mismo
+cable. Si llevan manivelas para ajustar la tensión, deben ser
+desmontables, plegables o quedar en el interior del poste. La
+base para los postes con cajetines a suelo, debe ser tal que el
+poste no se incline, bajo la tensión permanente del cable de
+tensión. En los postes con bases interiores, las bases deberán
+quedar embutidas en el suelo o si están sobre éste, la longitud
+máxima de la base será de 40 cm.
+
+REDES — Ensayo / Método:
+Malla de la red - espesor del hilo / fuerza de rotura del hilo de
+la malla — Requisito FEP / UNE EN ISO 1806
+Longitud de la red - postes exteriores / postes interiores —
+Reglamento de juego
+Anchura de la red / Banda superior – anchura una vez plegada
+sobre el cable de tensión — Reglamento de juego
+Banda superior - fuerza de rotura del hilo de cosido / del
+material — UNE EN 1510 – ap. 3.4.2. / EN ISO 13934-1
+Cable de tensión – diámetro / tensión mínima a resistir bajo
+fuerza de tracción — UNE EN 1510 – ap. 3.4.2. / UNE EN 1510 ap.
+4.2 y ap. 5.2.
+
+Además: la red debe tener una apertura de malla tal que impida el
+paso de la pelota. La apertura recomendada en la malla es de ≤ 42
+mm. Además, debe ser tal que no quede holgura entre la malla y el
+poste, para evitar el paso de la pelota entre estos elementos. La
+banda superior debe estar cosida a la red a doble cosido con hilo
+sintético.

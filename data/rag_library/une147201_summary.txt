@@ -1,0 +1,35 @@
+=== UNE 147201:2024 — RESUMEN OFICIAL (fuente secundaria) ===
+Fuente: Revista UNE, números 68 y 69 (revista.une.org)
+Nota: El texto completo de la norma es un documento de pago; lo
+siguiente son extractos reales publicados por UNE sobre su
+contenido, no la norma íntegra.
+
+⚠️ NOTA DE ALCANCE: Este contenido trata sobre estructura, red,
+cerramiento y protección anticorrosiva — no fundamenta
+directamente los patrones actuales de arena, temperatura,
+reserva o comunicación de obras. Se incluye por completitud.
+
+La norma reconoce como válidas las especificaciones del
+Reglamento de juego del Pádel emitido por la Federación
+Internacional de Pádel (FIP): medidas y tolerancias de
+cerramientos, fondos, laterales, postes de red, red, suelo,
+altura mínima, accesos, zona de seguridad y orientación.
+
+Establece tres niveles de protección anticorrosiva para
+estructuras metálicas según el entorno:
+- C3: pistas interiores
+- C4: exteriores
+- C5: exteriores en zonas salinas o industriales
+Ensayos exigidos: niebla salina, humedad constante, adherencia
+del recubrimiento.
+
+El conjunto de elementos estructurales debe diseñarse y
+fabricarse como un kit que permita su ensamblaje en destino. Las
+estructuras resistentes deberían ser preferiblemente de acero.
+
+--- ESPECIFICACIÓN DE RED (fuente: documento original FEP/CSD 2012) ---
+La red debe tener una longitud de 10 m y una altura de 0.88 m
+en su centro, elevándose en sus extremos hasta un máximo de
+0.92 m. La red debe ser de fibras sintéticas, siendo adecuado
+por sus propiedades técnicas el uso de polipropileno de alta
+tenacidad con protección contra la radiación.
