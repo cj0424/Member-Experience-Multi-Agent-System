@@ -7,23 +7,45 @@ this specific action, no fixed category table; (3) only then, ALL
 available secondary evidence (relevant reviews AND rating trend)
 is synthesized together — never a single signal read in isolation.
 
-Four possible outcomes (Empeorado removed — folds into Pivotar,
-since no real test has ever produced a genuine "got worse" case;
-if one ever does, this is the first place to revisit):
+Four possible outcomes:
 - FLAG DE IMPLEMENTACIÓN — execution not confirmed
 - CONTINUAR — too early to judge
 - CERRAR — strategy worked
 - PIVOTAR — tried in good faith, no clear result, worsened, or
   contradictory signals (mixed evidence is never enough to close)
+
+Reads/writes real pattern data via Supabase — unlike Agents 1-3,
+this agent's job spans real time gaps between check-ins, which
+in-memory data flow alone can't handle.
 """
 
 import os
 from dotenv import load_dotenv
 from google import genai
+from supabase import create_client
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase = create_client(supabase_url, supabase_key)
+
+
+def get_pattern_from_db(pattern_name: str) -> dict:
+    """Reads a pattern's real stored data from Supabase, instead
+    of using manually-typed test values."""
+    result = supabase.table("patterns").select("*").eq("pattern_name", pattern_name).execute()
+    if not result.data:
+        raise ValueError(f"No pattern found in database named: {pattern_name}")
+    return result.data[0]
+
+
+def update_pattern_in_db(pattern_name: str, updates: dict):
+    """Updates a pattern's stored data after a check runs — e.g.
+    incrementing cycles_since_approval, changing status."""
+    supabase.table("patterns").update(updates).eq("pattern_name", pattern_name).execute()
 
 
 def build_prompt(pattern_name: str, verification_method: str, verification_result: str,
@@ -129,31 +151,36 @@ def run_outcome_check_agent(pattern_name: str, verification_method: str, verific
     return response.text
 
 
+def run_outcome_check_from_db(pattern_name: str,
+                                new_reviews_since_approval: str = "Ninguna",
+                                rating_before: str = "No disponible",
+                                rating_after: str = "No disponible"):
+    """Real-use version: pulls the pattern's stored data from
+    Supabase automatically, instead of requiring every field to
+    be typed in manually. Reviews and ratings still come in as
+    parameters, since those come from a separate live source
+    (Google API, Phase 2) — not from this table."""
+    pattern_data = get_pattern_from_db(pattern_name)
+
+    result = run_outcome_check_agent(
+        pattern_name=pattern_data["pattern_name"],
+        verification_method=pattern_data["verification_method"],
+        verification_result=pattern_data["verification_result"],
+        action_description=pattern_data["approved_action"],
+        cycles_since_approval=pattern_data["cycles_since_approval"],
+        new_reviews_since_approval=new_reviews_since_approval,
+        rating_before=rating_before,
+        rating_after=rating_after
+    )
+
+    return result
+
+
 if __name__ == "__main__":
-    print("=== CASO A: no ejecutado ===\n")
-    print(run_outcome_check_agent(
+    print("=== PRUEBA REAL: leyendo desde Supabase ===\n")
+    result = run_outcome_check_from_db(
         "Exceso de arena en las pistas",
-        "Revisión del registro semanal de mantenimiento",
-        "No confirmado — sin entradas en el registro en 2 semanas",
-        "Redistribución semanal de arena según estándar oficial",
-        cycles_since_approval=2))
-
-    print("\n\n=== CASO B: ejecutado, señales convergentes (reseña + rating suben) ===\n")
-    print(run_outcome_check_agent(
-        "Exceso de arena en las pistas",
-        "Revisión del registro semanal de mantenimiento",
-        "Confirmado — registro completado cada semana",
-        "Redistribución semanal de arena según estándar oficial",
-        cycles_since_approval=3,
         new_reviews_since_approval="""Socio-Z: "Las pistas ya no tienen tanta arena, se nota la mejora.\"""",
-        rating_before="4.2", rating_after="4.4"))
-
-    print("\n\n=== CASO C: ejecutado, ninguna señal externa (pivotar) ===\n")
-    print(run_outcome_check_agent(
-        "Exceso de arena en las pistas",
-        "Revisión del registro semanal de mantenimiento",
-        "Confirmado — registro completado cada semana",
-        "Redistribución semanal de arena según estándar oficial",
-        cycles_since_approval=3,
-        new_reviews_since_approval="Ninguna reseña nueva menciona la arena",
-        rating_before="4.2", rating_after="4.2"))
+        rating_before="4.2", rating_after="4.4"
+    )
+    print(result)
