@@ -1,6 +1,9 @@
 """
 Insights Agent — reads all reviews and asks Gemini to find real,
-recurring patterns, distinguishing them from one-off noise.
+recurring patterns, distinguishing them from one-off noise, AND
+distinguishing patterns that are still active from ones the
+evidence itself shows are already resolved — so downstream agents
+don't waste effort planning action on something already fixed.
 """
 
 import os
@@ -33,15 +36,26 @@ Tu tarea:
    una sola mención — indícalas por separado como "no suficiente evidencia".
 3. Si hay evidencia contradictoria sobre el mismo tema, menciónalo
    explícitamente.
-4. En la sección de evidencia insuficiente, lista cada mención de
+4. Para cada patrón confirmado, evalúa si la propia evidencia muestra
+   que el problema ya se resolvió (por ejemplo, reseñas más recientes
+   describiendo una mejora clara tras el suceso original) o si sigue
+   activo sin resolución visible. Etiqueta cada patrón confirmado
+   como:
+   - 🟢 ACTIVO (necesita acción) — si no hay evidencia de que ya se
+     resolvió.
+   - 📁 HISTÓRICO — YA RESUELTO (no requiere acción) — si la propia
+     evidencia muestra un antes/después con una mejora clara y
+     sostenida.
+5. En la sección de evidencia insuficiente, lista cada mención de
    forma INDIVIDUAL y separada — nunca agrupes menciones distintas
    bajo una sola etiqueta, aunque parezcan relacionadas. Cada
    mención aislada merece su propia línea, citando su ID específico.
-5. Termina con una nota de limitación sobre estas reseñas públicas.
+6. Termina con una nota de limitación sobre estas reseñas públicas.
 
 Sigue EXACTAMENTE este formato para cada patrón confirmado:
 
 🔍 PATRÓN — [nombre del patrón]
+[🟢 ACTIVO / 📁 HISTÓRICO — YA RESUELTO]
 📎 Evidencia: [número] reseñas ([lista de IDs])
 🟢/🟡/🔴 Confianza: [Alto/Moderado/Bajo]
 🧭 Qué significa: [interpretación breve, 1-2 frases]
@@ -49,6 +63,7 @@ Sigue EXACTAMENTE este formato para cada patrón confirmado:
 Ejemplo de un patrón bien formado:
 
 🔍 PATRÓN — Exceso de arena en las pistas
+🟢 ACTIVO
 📎 Evidencia: 4 reseñas (REV-004, REV-008, REV-012, REV-025)
 🟢 Confianza: Alto
 🧭 Qué significa: la frecuencia actual de redistribución de arena
@@ -58,9 +73,6 @@ Ahora aplica este mismo formato a los patrones reales que encuentres."""
 
 
 def run_insights_agent(filepath: str = "data/reviews/mcp_padel_reviews_anonymized.txt"):
-    """Now accepts a filepath parameter, with the current dataset as
-    the default — so LangGraph's Supervisor can pass it different
-    data dynamically later, without needing to edit this function."""
     reviews = load_reviews(filepath)
     prompt = build_prompt(reviews)
 
