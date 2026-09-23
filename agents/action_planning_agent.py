@@ -34,8 +34,48 @@ SHARED_RULES = """Reglas:
 - Basa la solución técnica en la biblioteca de referencia si algún
   documento aplica realmente (cítalo por su nombre); si ninguno
   aplica, dilo explícitamente y usa buenas prácticas generales.
+
+- La biblioteca puede incluir un documento de fidelización/retención,
+  distinto de los documentos técnicos. Para TODO patrón, sin
+  excepción, sigue estos dos pasos EN ORDEN:
+  PASO 1 — Evalúa: ¿el documento de fidelización/retención podría
+  aportar algo útil aquí? Esto es obligatorio para todos los
+  patrones, no solo los de satisfacción general.
+  PASO 2 — Según lo que concluyas en el Paso 1, escribe una línea
+  breve mostrando tu conclusión, usando uno de estos tres casos:
+    (a) USAR COMO PRINCIPAL — el patrón es de satisfacción general
+        sin un problema concreto que resolver, así que el documento
+        de fidelización es la base de la recomendación.
+    (b) USAR COMO COMPLEMENTO — hay un problema real que resolver,
+        pero una táctica de fidelización aporta valor genuino
+        mientras se soluciona. Antes de incluirla, comprueba: ¿esta
+        táctica añadiría más presión sobre el mismo recurso o
+        limitación que causa el problema (ej. más gente en un
+        espacio ya con capacidad ajustada)? Si es así, ajusta la
+        táctica para evitarlo (ej. limitarla a una franja horaria
+        con menos presión) en vez de descartarla directamente.
+    (c) NO APLICA — el documento no aporta nada útil a este
+        problema concreto. Dilo en una frase y sigue adelante sin
+        forzarlo.
+  Esta línea de conclusión debe aparecer SIEMPRE en tu respuesta,
+  igual que ya haces con los riesgos ("Ojo con...") — nunca la
+  omitas, incluso si la conclusión es (c).
+  La fidelización NUNCA sustituye la acción correctiva real de un
+  problema — solo puede complementarla.
+
+- Antes de proponer cualquier acción, razona si podría chocar con
+  algo que ya sabes de este club a partir de la evidencia real
+  disponible — nunca una suposición inventada.
+
+- Cualquier acción que implique seguimiento individual y continuo
+  de socios debe ser genuinamente realista para un club
+  independiente de una sola sede con personal limitado — prefiere
+  medidas simples y puntuales sobre las que requieran seguimiento
+  manual constante de cada socio.
+
 - No hagas afirmaciones médicas o de seguridad a menos que estén
   directamente respaldadas por evidencia real.
+
 - Antes de la recomendación final, piensa si podría causar un
   efecto secundario no deseado (ej. reducir ventilación al sellar
   accesos, generar ruido, afectar otra parte de la experiencia).
@@ -43,6 +83,7 @@ SHARED_RULES = """Reglas:
   línea breve, y prefiere una alternativa igualmente efectiva con
   menos riesgo si existe. No inventes riesgos improbables solo
   para parecer cauteloso.
+
 - Sé realista y proporcional a la escala descrita arriba."""
 
 
@@ -228,25 +269,12 @@ def run_action_planning_from_pivot(pattern_description: str, rag_folder: str,
 
 
 if __name__ == "__main__":
-    test_pattern = """Problemas de aislamiento térmico y climatización
-Evidencia: 4 reseñas (REV-016, REV-017, REV-018, REV-027)
-Confianza: Moderado"""
+    # Standalone test entry point — normally this agent is called
+    # by graph.py with a real pattern from Insights Agent's output.
+    # Replace test_pattern below only if testing this file in isolation.
+    test_pattern = """[Pega aquí un patrón real de Insights Agent para
+probar este archivo de forma aislada]"""
 
-    print("=== PRIMERA RECOMENDACIÓN ===\n")
-    first_result = run_action_planning_agent(test_pattern)
-    print(first_result)
-
-    print("\n\n=== RECOMENDACIÓN REVISADA (feedback del propietario) ===\n")
-    feedback = "Las dos opciones son demasiado caras para nosotros ahora mismo, necesitamos algo de coste muy bajo aunque sea una solución temporal."
-    revised_result = run_action_planning_revision(
-        test_pattern, "data/rag_library", first_result, feedback
-    )
-    print(revised_result)
-
-    print("\n\n=== NUEVA RECOMENDACIÓN TRAS PIVOTAR ===\n")
-    pivot_result = run_action_planning_from_pivot(
-        test_pattern, "data/rag_library",
-        previous_action="Protocolo de ventilación natural: abrir portones cruzados en horas frescas, cerrar en horas punta.",
-        outcome_evidence="Ejecución confirmada durante 3 ciclos, sin ninguna mención relevante en reseñas nuevas ni cambio en la valoración media."
-    )
-    print(pivot_result)
+    print("=== PRUEBA AISLADA DE ACTION PLANNING AGENT ===\n")
+    result = run_action_planning_agent(test_pattern)
+    print(result)

@@ -10,7 +10,13 @@ from langgraph.graph import StateGraph, START, END
 
 from insights_agent import run_insights_agent, client
 from action_planning_agent import run_action_planning_agent, run_action_planning_revision, run_action_planning_from_pivot
-from execution_kit_agent import run_execution_kit_agent, run_execution_kit_revision
+from execution_kit_agent import (
+    run_execution_kit_agent,
+    run_execution_kit_revision,
+    extract_tracker_specs,
+    build_tracker_excel,
+    safe_filename,
+)
 from outcome_check_agent import run_outcome_check_from_db, supabase
 
 
@@ -183,10 +189,10 @@ def approval_node(state: GraphState) -> dict:
 
 def execution_kit_node(state: GraphState) -> dict:
     """Runs Execution Kit Agent once per approved recommendation,
-    with a SECOND real human gate (GATE 2 — Approve/Revise/Discard,
-    same 3 options as Gate 1) applied to the actual materials, not
-    the recommendation. Only kits that pass this gate get their
-    verification method saved to Supabase."""
+    with a SECOND real human gate (GATE 2 — Approve/Revise/Discard).
+    Only kits that pass this gate get their verification method
+    saved to Supabase, and any real tracker gets generated as an
+    actual .xlsx file, not just described in text."""
     kits = []
 
     if not state["recommendation"]:
@@ -216,6 +222,13 @@ def execution_kit_node(state: GraphState) -> dict:
         elif decision != "a":
             print("Kit descartado — no se guarda el método de verificación.")
             continue
+
+        # Generate any real tracker files the approved kit contains
+        trackers = extract_tracker_specs(final_kit)
+        for spec in trackers:
+            file_path = f"outputs/{safe_filename(spec['titulo'])}.xlsx"
+            build_tracker_excel(spec, file_path)
+            print(f"✅ Tracker Excel generado: {file_path}")
 
         verification_method = extract_verification_method(final_kit)
 

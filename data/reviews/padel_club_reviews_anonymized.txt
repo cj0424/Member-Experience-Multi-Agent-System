@@ -1,0 +1,93 @@
+=== PADEL CLUB — REVIEW DATASET (ANONIMIZADO) ===
+Fuente: reseñas públicas de Google, recopiladas y anonimizadas para
+fines de desarrollo y pruebas. Nota: nombres genéricos Socio-001 a
+Socio-024; texto parafraseado preservando el contenido factual real.
+
+Socio-001, hace 8 meses
+"Pistas magníficas, buen bar, vestuarios y aparcamiento fácil."
+
+Socio-002, hace 8 meses
+"Excelente sitio para jugar al pádel."
+
+Socio-003, hace 8 meses
+"Fui ahora con la renovación y el club está muy bien."
+
+Socio-004, hace 8 meses
+"Buenas pistas, buenas instalaciones y buenos profesores."
+
+Socio-005, hace 8 meses
+"Instalaciones estupendas, las pistas y el bar genial. Lo único es
+que no me acostumbro a las luces que hay fuera de las pistas, pero
+por lo demás todo bien."
+
+Socio-006, hace 9 meses
+"Pistas bien tapizadas e iluminadas, aunque los techos son algo
+bajos y el aparcamiento pequeño."
+
+Socio-007, hace 9 meses
+"Con la renovación, me parece uno de los mejores clubes de Madrid,
+la calidad de las pistas es de lo mejor."
+
+Socio-008, hace 9 meses
+"Ha quedado genial, la atención de todo el equipo en recepción muy
+cercana y profesional."
+
+Socio-009, hace 9 meses
+"Buen trato, buenas instalaciones, ahora más pistas y mejor
+cafetería, no paran de mejorar."
+
+Socio-010, hace 10 meses
+"Muy buenas instalaciones, y la cafetería renovada."
+
+Socio-011, hace 10 meses
+"Muy buen club, la nueva obra ha mejorado bastante."
+
+Socio-012, hace 10 meses
+"La chica de recepción muy amable. El club está muy bien, tiene
+pistas nuevas."
+
+Socio-013, hace 10 meses
+"Demasiada arena en las pistas, tengo las rodillas en carne viva.
+Para un principiante fue una gran decepción. Aparcar imposible."
+
+Socio-014, hace 10 meses
+"Obras eternas, mucho polvo, espacios sucios. La obra no ha
+mejorado el club. No pienso volver."
+
+Socio-015, hace 10 meses
+"Estaba en obras y jugamos con mucho polvo, cuando esté listo será
+un buen club."
+
+Socio-016, hace 10 meses
+"Muy mala experiencia, las pistas estaban llenas de arena y los
+baños bastante sucios. No volveré."
+
+Socio-017, hace 10 meses
+"Mala experiencia, pistas llenas de arena y precio bastante
+elevado comparado con otros clubes de la zona."
+
+Socio-018, hace 10 meses
+"La pista 12 se ve un poco oscura y resbala. De la 1 a la 8 están
+muy bien."
+
+Socio-019, hace 10 meses
+"Club recomendable para practicar pádel."
+
+Socio-020, hace 10 meses
+"Estuve en un partido de liga el sábado, el club está totalmente
+renovado, aún no acabado del todo pero va a quedar muy bien."
+
+Socio-021, hace 11 meses
+"Excelente club, no puedo decir más."
+
+Socio-022, hace 11 meses
+"Pistas en buen estado, buenos profesores en la escuela, y ahora
+están ampliando y creando nuevas zonas."
+
+Socio-023, hace 1 año
+"Le pondría 5 estrellas, pero antes se podía reservar por teléfono
+y ahora solo por Playtomic, ha perdido esa esencia."
+
+Socio-024, hace 1 año
+"Hace más frío dentro que fuera, la temperatura no es normal.
+También hay telarañas dentro de la nave nueva."
