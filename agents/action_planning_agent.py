@@ -17,7 +17,10 @@ rules only need to be edited in one place:
 - run_action_planning_from_pivot: a previous action WAS actually
   tried and verified, but Outcome Check Agent found no real result
   (Pivotar) — real-world evidence, not a preference, so it gets a
-  genuinely different approach, not a cosmetic variation.
+  genuinely different approach, not a cosmetic variation. Now
+  accepts rejected_ideas, so a previously-discarded idea never
+  silently resurfaces — a real limitation of stateless LLM calls,
+  fixed by passing the relevant history back in explicitly.
 """
 
 import os
@@ -194,9 +197,13 @@ Ahora escribe la recomendación revisada."""
 
 
 def build_from_pivot_prompt(pattern_description: str, rag_context: str,
-                              previous_action: str, outcome_evidence: str) -> str:
+                              previous_action: str, outcome_evidence: str,
+                              rejected_ideas: str = "Ninguna") -> str:
     """New recommendation when a previous action was actually
-    tried and verified, but showed no real result (Pivotar)."""
+    tried and verified, but showed no real result (Pivotar). Now
+    includes rejected_ideas, so an idea the owner already discarded
+    doesn't silently resurface — the LLM call is stateless, so this
+    history has to be passed in explicitly every time."""
     return f"""Eres un asistente que ayuda al propietario de un club de pádel
 independiente en Madrid a decidir qué hacer con un patrón real. Escribe
 como si le hablaras directamente al propietario — claro, directo y
@@ -223,8 +230,13 @@ ACCIÓN ANTERIOR YA INTENTADA:
 EVIDENCIA REAL DEL RESULTADO:
 {outcome_evidence}
 
+IDEAS YA DESCARTADAS POR EL PROPIETARIO — NUNCA LAS REPITAS NI LAS
+REFORMULES DE FORMA SIMILAR, AUNQUE PAREZCAN ENCAJAR:
+{rejected_ideas}
+
 Propón un enfoque GENUINAMENTE DISTINTO al anterior, no una
-variación cosmética de la misma idea.
+variación cosmética de la misma idea, y que tampoco coincida con
+ninguna idea ya descartada arriba.
 
 Primero, en una línea:
 "📊 Por qué el enfoque anterior no fue suficiente: [1 frase]"
@@ -258,19 +270,24 @@ def run_action_planning_revision(pattern_description: str, rag_folder: str,
 
 
 def run_action_planning_from_pivot(pattern_description: str, rag_folder: str,
-                                     previous_action: str, outcome_evidence: str):
+                                     previous_action: str, outcome_evidence: str,
+                                     rejected_ideas: str = "Ninguna"):
     """New recommendation after Outcome Check Agent returns Pivotar
-    — a previously tried, verified action showed no real result."""
+    — a previously tried, verified action showed no real result.
+    rejected_ideas carries forward anything the owner has already
+    explicitly turned down for this pattern, across separate,
+    stateless calls."""
     rag_context = load_rag_library(rag_folder)
     prompt = build_from_pivot_prompt(pattern_description, rag_context,
-                                       previous_action, outcome_evidence)
+                                       previous_action, outcome_evidence,
+                                       rejected_ideas)
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
     return response.text
 
 
 if __name__ == "__main__":
     # Standalone test entry point — normally this agent is called
-    # by graph.py with a real pattern from Insights Agent's output.
+    # by graph.py or continuity_graph.py with a real pattern.
     # Replace test_pattern below only if testing this file in isolation.
     test_pattern = """[Pega aquí un patrón real de Insights Agent para
 probar este archivo de forma aislada]"""

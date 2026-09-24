@@ -1,18 +1,26 @@
 """
-Outcome Check Agent — a continuity chain, not a report. Sequential
-gates, each fully evaluated before the next: (1) was it actually
-executed, checked against Execution Kit Agent's own verification
-method; (2) has enough time genuinely passed, reasoned freely per
-this specific action, no fixed category table; (3) only then, ALL
-available secondary evidence (relevant reviews AND rating trend)
-is synthesized together — never a single signal read in isolation.
+Outcome Check Agent — a continuity chain, not a report. Five
+sequential steps, each fully evaluated before the next:
+(1) was it actually executed, with real, tiered evidence;
+(2) has enough real time passed — reasoned freely per pattern,
+covering BOTH a first genuine sign of effect AND enough time to
+trust the problem hasn't quietly recurred, never a fixed universal
+number of cycles;
+(3) define a success criterion specific to THIS pattern, before
+looking at any effectiveness evidence;
+(4) gather all available effectiveness evidence — reviews, rating,
+and direct human confirmation about the RESULT (separate from
+Paso 1's execution evidence);
+(5) compare that evidence against the Paso 3 criterion and decide.
 
 Four possible outcomes:
-- FLAG DE IMPLEMENTACIÓN — execution not confirmed
-- CONTINUAR — too early to judge
-- CERRAR — strategy worked
-- PIVOTAR — tried in good faith, no clear result, worsened, or
-  contradictory signals (mixed evidence is never enough to close)
+- FLAG DE IMPLEMENTACIÓN — execution not confirmed, or evidence too weak
+- CONTINUAR — too early to judge, or a genuinely promising early
+  sign that hasn't yet had time to prove it's sustained
+- CERRAR — strategy worked, sustained long enough to trust it,
+  told as a clear before/after story
+- PIVOTAR — didn't work, told as a clear story of why, with a
+  specific hypothesis for the next attempt
 
 Reads/writes real pattern data via Supabase — unlike Agents 1-3,
 this agent's job spans real time gaps between check-ins, which
@@ -34,8 +42,7 @@ supabase = create_client(supabase_url, supabase_key)
 
 
 def get_pattern_from_db(pattern_name: str) -> dict:
-    """Reads a pattern's real stored data from Supabase, instead
-    of using manually-typed test values."""
+    """Reads a pattern's real stored data from Supabase."""
     result = supabase.table("patterns").select("*").eq("pattern_name", pattern_name).execute()
     if not result.data:
         raise ValueError(f"No pattern found in database named: {pattern_name}")
@@ -43,8 +50,7 @@ def get_pattern_from_db(pattern_name: str) -> dict:
 
 
 def update_pattern_in_db(pattern_name: str, updates: dict):
-    """Updates a pattern's stored data after a check runs — e.g.
-    incrementing cycles_since_approval, changing status."""
+    """Updates a pattern's stored data after a check runs."""
     supabase.table("patterns").update(updates).eq("pattern_name", pattern_name).execute()
 
 
@@ -57,85 +63,113 @@ de pádel a decidir, de forma disciplinada, qué hacer después de aprobar
 y ejecutar una acción sobre un patrón real. Tu decisión afecta
 directamente si el club sigue esperando sin necesidad, o actúa cuando
 realmente corresponde — por eso debes razonar paso a paso, sin
-saltarte ninguno.
+saltarte ninguno, y cada paso solo se evalúa si el anterior lo permite.
 
 PATRÓN: {pattern_name}
 ACCIÓN APROBADA Y EJECUTADA: {action_description}
-CICLOS TRANSCURRIDOS: {cycles_since_approval}
+CICLOS TRANSCURRIDOS DESDE LA APROBACIÓN: {cycles_since_approval}
 
-MÉTODO DE VERIFICACIÓN (del kit de ejecución ya aprobado — única
-base válida para saber si la acción se ejecutó):
+MÉTODO DE VERIFICACIÓN ACORDADO (del kit de ejecución ya aprobado):
 {verification_method}
-RESULTADO REPORTADO: {verification_result}
 
-RESEÑAS NUEVAS DESDE LA APROBACIÓN:
+RESULTADO REPORTADO SOBRE LA EJECUCIÓN (incluye el nivel de
+evidencia disponible):
+{verification_result}
+
+RESEÑAS, COMENTARIOS O CONFIRMACIONES DIRECTAS SOBRE SI EL PROBLEMA
+ORIGINAL MEJORÓ, DESDE LA APROBACIÓN:
 {new_reviews_since_approval}
 
 VALORACIÓN MEDIA — antes: {rating_before} / después: {rating_after}
 
-Sigue este proceso EN ORDEN ESTRICTO — cada paso solo se evalúa si
-el anterior lo permite:
+---
 
-PASO 1: ¿El resultado de verificación confirma que la acción se
-ejecutó? Considera tres posibilidades:
-- Confirmado claramente → continúa al Paso 2.
-- No confirmado / sin ejecutar → Decisión final: FLAG DE
-  IMPLEMENTACIÓN. No sigas más — sin ejecución real, cualquier
-  evidencia externa sería sobre otra cosa, no sobre esta acción.
-- Ambiguo o parcial (ejecución incompleta, verificación informal
-  sin registro claro) → Decisión final: FLAG DE IMPLEMENTACIÓN,
-  indicando explícitamente "verificación poco clara, requiere
-  confirmación directa" en vez de "no ejecutado".
+PASO 1 — ¿Se ejecutó realmente la acción? Evalúa el nivel de
+evidencia en el resultado reportado:
+- Nivel ALTO: un registro real, con fecha, responsable y firma (ej.
+  un tracker completado).
+- Nivel MEDIO: una observación directa y específica del propietario
+  (algo concreto que comprobó personalmente, no una impresión vaga).
+- Nivel BAJO: un relato verbal de lo que el personal dijo, sin
+  ningún registro que lo respalde.
+Un nivel ALTO o MEDIO cuenta como ejecución confirmada — continúa al
+Paso 2. Un nivel BAJO, o la ausencia total de evidencia, se trata
+como NO confirmado.
+- No confirmado, o evidencia insuficiente según lo anterior →
+  Decisión final: FLAG DE IMPLEMENTACIÓN, indicando qué tipo de
+  evidencia más sólida se necesitaría. No sigas más.
 
-PASO 2 (dado que el Paso 1 confirmó ejecución): Razona TÚ MISMO,
-según la naturaleza específica de ESTA acción — no existen
-categorías fijas. ¿Es algo que se notaría casi de inmediato, o
-necesita tiempo real de uso o condiciones específicas para mostrar
-efecto genuino? Explica tu razonamiento antes de decidir.
-- Si NO ha pasado tiempo suficiente → Decisión final: CONTINUAR.
+PASO 2 (dado que el Paso 1 confirmó ejecución con evidencia
+suficiente): Razona TÚ MISMO, según la naturaleza específica de ESTA
+acción — no existen categorías fijas ni un número universal de
+ciclos — cuánto tiempo real necesitaría para: (a) mostrar un primer
+efecto genuino, Y (b) confirmar que el problema no ha vuelto a
+aparecer de forma sostenida, no solo tras una única observación
+puntual positiva. Estas dos cosas pueden requerir tiempos distintos
+según el tipo de acción — razónalo específicamente para este caso.
+Después, compara explícitamente esos tiempos estimados contra el
+número real de ciclos transcurridos ({cycles_since_approval}).
+- Si NO ha pasado tiempo suficiente para (a) → Decisión final:
+  CONTINUAR, indicando aproximadamente cuánto tiempo más falta. No
+  sigas más.
+- Si (a) se cumple pero NO (b) → Decisión final: CONTINUAR,
+  indicando explícitamente que la señal inicial es prometedora pero
+  aún falta confirmar que se sostiene en el tiempo antes de cerrar.
   No sigas más.
-- Si SÍ → continúa al Paso 3.
+- Si ambas se cumplen → continúa al Paso 3.
 
-PASO 3 (dado que la ejecución fue confirmada y ya pasó tiempo
-suficiente): Reúne TODA la evidencia externa disponible — reseñas
-relevantes Y valoración media, nunca una sola por separado.
-Descarta explícitamente cualquier reseña que no mencione directa y
+PASO 3 (dado que Paso 1 y 2 se cumplieron): Define el criterio de
+éxito específico para ESTE patrón, antes de mirar ninguna evidencia
+de EFECTIVIDAD todavía (esto es distinto de la evidencia de
+ejecución ya evaluada en el Paso 1). Razona: dado lo que se aprobó
+hacer, ¿qué evidencia concreta demostraría realmente que el problema
+original mejoró? No apliques una regla genérica idéntica para todos
+los casos — el criterio correcto depende del tipo de acción. Indica
+este criterio en una frase clara.
+
+PASO 4: Reúne TODA la evidencia externa disponible sobre si el
+problema mejoró — reseñas relevantes, valoración media, Y
+confirmación humana directa sobre el RESULTADO específicamente (no
+sobre si se ejecutó, eso ya quedó resuelto en el Paso 1). Descarta
+explícitamente cualquier reseña que no mencione directa y
 específicamente este patrón.
 
-Razona de forma CONJUNTA: ¿las señales disponibles apuntan en la
-misma dirección, se contradicen, o no hay suficiente de ninguna?
-Una sola reseña relevante es una señal débil sola, pero más
-convincente si la valoración también mejoró en el mismo periodo.
-Ninguna señal externa disponible no es neutral — es ausencia real
-de confirmación.
+PASO 5: Compara la evidencia reunida en el Paso 4 contra el criterio
+que definiste en el Paso 3. Decide:
+- Cumple con evidencia sólida (2+ señales coincidiendo, o 1 señal
+  fuerte + confirmación humana directa y específica sobre el
+  resultado) → CERRAR
+- Una sola señal positiva débil, sin refuerzo → CONTINUAR (explica
+  por qué es aún una señal temprana, no confirmada)
+- Señales que se contradicen entre sí → PIVOTAR, explicando la
+  contradicción específica — evidencia mixta no es suficiente para
+  cerrar como resuelto.
+- Ninguna señal externa relevante, o empeoramiento → PIVOTAR
 
-Decide:
-- Señales coincidiendo en positivo, evidencia sólida (2+ reseñas
-  relevantes positivas, o 1 reseña + valoración que mejora) →
-  CERRAR
-- Una sola señal positiva débil, sin refuerzo de la otra →
-  CONTINUAR (explica por qué es aún una señal temprana, no
-  confirmada)
-- Señales que se contradicen entre sí (ej. una reseña relevante
-  positiva y otra negativa, o una reseña positiva pero la
-  valoración baja) → PIVOTAR, explicando la contradicción
-  específica — evidencia mixta no es suficiente para cerrar como
-  resuelto.
-- Ninguna señal externa relevante, o todas las señales apuntan a
-  empeoramiento → PIVOTAR
+---
 
-Formato:
+Formato de tu respuesta:
 
 🔁 CONTINUIDAD — [patrón] (ciclo {cycles_since_approval})
 
-Paso 1: [...]
-Paso 2: [tu razonamiento sobre el tiempo necesario]
-Paso 3: [síntesis conjunta de reseñas relevantes + valoración, si aplica]
+Paso 1: [nivel de evidencia de ejecución evaluado]
+Paso 2: [razonamiento sobre el tiempo — primer efecto Y sostenibilidad — comparado contra el ciclo real]
+Paso 3: [criterio de éxito definido, antes de ver evidencia de resultado]
+Paso 4: [evidencia de efectividad reunida]
+Paso 5: [comparación contra el criterio y decisión]
 
 Decisión: [🚩 FLAG DE IMPLEMENTACIÓN / 🔵 CONTINUAR / 🟢 CERRAR / 🟠 PIVOTAR]
 
-➡️ Siguiente paso concreto: [específico; si PIVOTAR, incluye una
-hipótesis concreta de por qué no funcionó]
+Si la decisión es CERRAR, añade un párrafo breve en lenguaje claro y
+natural — como si se lo contaras directamente al propietario —
+contando la historia completa: cuál era el problema original, qué se
+intentó, y por qué la evidencia sostenida en el tiempo demuestra que
+funcionó.
+
+Si la decisión es PIVOTAR, añade un párrafo igual de claro,
+explicando qué se intentó, por qué no fue suficiente según la
+evidencia real, y una hipótesis concreta de qué probar diferente la
+próxima vez.
 
 Ahora razona y decide el caso real indicado."""
 
@@ -156,10 +190,7 @@ def run_outcome_check_from_db(pattern_name: str,
                                 rating_before: str = "No disponible",
                                 rating_after: str = "No disponible"):
     """Real-use version: pulls the pattern's stored data from
-    Supabase automatically, instead of requiring every field to
-    be typed in manually. Reviews and ratings still come in as
-    parameters, since those come from a separate live source
-    (Google API, Phase 2) — not from this table."""
+    Supabase automatically."""
     pattern_data = get_pattern_from_db(pattern_name)
 
     result = run_outcome_check_agent(

@@ -2,6 +2,14 @@
 LangGraph orchestration — connects Insights, Action Planning,
 Execution Kit, and Outcome Check into one automated flow, with
 two human approval checkpoints matching the original design.
+
+One real addition: when a recommendation is revised at Gate 1, the
+owner's feedback is now seeded into the new pattern's rejected_ideas
+column at the moment of creation — so if this same pattern later
+needs a Pivotar attempt in continuity_graph.py, that real rejection
+history is already there to read and build on. A stateless LLM call
+has no memory of its own; this is what carries that memory forward
+through Supabase instead.
 """
 
 import json
@@ -140,7 +148,9 @@ def approval_node(state: GraphState) -> dict:
     """Human approval checkpoint — GATE 1: approving the
     recommendation itself. Approve saves the real pattern name and
     action to Supabase. Revise asks for feedback and generates a
-    genuinely new attempt. Discard does nothing."""
+    genuinely new attempt — the feedback is also seeded into
+    rejected_ideas at creation, so it's available for any future
+    Pivotar attempt on this same pattern. Discard does nothing."""
     approved_recommendations = []
 
     if not state["recommendation"]:
@@ -174,7 +184,8 @@ def approval_node(state: GraphState) -> dict:
                 supabase.table("patterns").insert({
                     "pattern_name": real_name,
                     "approved_action": revised,
-                    "status": "open"
+                    "status": "open",
+                    "rejected_ideas": f"- {feedback}"
                 }).execute()
                 approved_recommendations.append({"pattern_name": real_name, "text": revised})
                 print("✅ Versión revisada aprobada y guardada.")
