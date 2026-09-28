@@ -25,12 +25,17 @@ Four possible outcomes:
 Reads/writes real pattern data via Supabase — unlike Agents 1-3,
 this agent's job spans real time gaps between check-ins, which
 in-memory data flow alone can't handle.
+
+Also receives the club profile from the shared RAG library (rag.py),
+so it judges evidence, responsibilities and timing against how this
+club actually works (e.g. who can realistically verify what, and when).
 """
 
 import os
 from dotenv import load_dotenv
 from google import genai
 from supabase import create_client
+from rag import load_club_profile
 
 load_dotenv()
 
@@ -57,13 +62,20 @@ def update_pattern_in_db(pattern_name: str, updates: dict):
 def build_prompt(pattern_name: str, verification_method: str, verification_result: str,
                   action_description: str, cycles_since_approval: int,
                   new_reviews_since_approval: str = "Ninguna",
-                  rating_before: str = "No disponible", rating_after: str = "No disponible") -> str:
+                  rating_before: str = "No disponible", rating_after: str = "No disponible",
+                  club_profile: str = "No disponible.") -> str:
     return f"""Eres el agente de continuidad de un sistema que ayuda a un club
 de pádel a decidir, de forma disciplinada, qué hacer después de aprobar
 y ejecutar una acción sobre un patrón real. Tu decisión afecta
 directamente si el club sigue esperando sin necesidad, o actúa cuando
 realmente corresponde — por eso debes razonar paso a paso, sin
 saltarte ninguno, y cada paso solo se evalúa si el anterior lo permite.
+
+Escribe en español de España, claro y directo, dirigiéndote al
+propietario con el tratamiento que indica el PERFIL DEL CLUB (tú o
+usted). Frases cortas, sin gerundios encadenados ni lenguaje
+administrativo o de consultoría, y sin tecnicismos innecesarios (por
+ejemplo, "comunicado" o "indicado" en vez de "reportado").
 
 PATRÓN: {pattern_name}
 ACCIÓN APROBADA Y EJECUTADA: {action_description}
@@ -72,7 +84,7 @@ CICLOS TRANSCURRIDOS DESDE LA APROBACIÓN: {cycles_since_approval}
 MÉTODO DE VERIFICACIÓN ACORDADO (del kit de ejecución ya aprobado):
 {verification_method}
 
-RESULTADO REPORTADO SOBRE LA EJECUCIÓN (incluye el nivel de
+LO QUE EL PROPIETARIO HA INDICADO SOBRE LA EJECUCIÓN (incluye el nivel de
 evidencia disponible):
 {verification_result}
 
@@ -82,10 +94,15 @@ ORIGINAL MEJORÓ, DESDE LA APROBACIÓN:
 
 VALORACIÓN MEDIA — antes: {rating_before} / después: {rating_after}
 
+PERFIL DEL CLUB (contexto interno: úsalo para valorar si la evidencia,
+los responsables y los plazos son realistas para este club — por
+ejemplo, quién puede comprobar algo y en qué turno. No lo cites):
+{club_profile}
+
 ---
 
 PASO 1 — ¿Se ejecutó realmente la acción? Evalúa el nivel de
-evidencia en el resultado reportado:
+evidencia en lo que ha indicado el propietario:
 - Nivel ALTO: un registro real, con fecha, responsable y firma (ej.
   un tracker completado).
 - Nivel MEDIO: una observación directa y específica del propietario
@@ -124,8 +141,11 @@ de EFECTIVIDAD todavía (esto es distinto de la evidencia de
 ejecución ya evaluada en el Paso 1). Razona: dado lo que se aprobó
 hacer, ¿qué evidencia concreta demostraría realmente que el problema
 original mejoró? No apliques una regla genérica idéntica para todos
-los casos — el criterio correcto depende del tipo de acción. Indica
-este criterio en una frase clara.
+los casos — el criterio correcto depende del tipo de acción. El
+criterio debe ser REALISTA y proporcional: una mejora clara y
+sostenida (por ejemplo, "las quejas bajan claramente"), nunca una
+perfección absoluta ("cero quejas", "ausencia total"). Indica este
+criterio en una frase clara.
 
 PASO 4: Reúne TODA la evidencia externa disponible sobre si el
 problema mejoró — reseñas relevantes, valoración media, Y
@@ -141,10 +161,19 @@ que definiste en el Paso 3. Decide:
   resultado) → CERRAR
 - Una sola señal positiva débil, sin refuerzo → CONTINUAR (explica
   por qué es aún una señal temprana, no confirmada)
-- Señales que se contradicen entre sí → PIVOTAR, explicando la
-  contradicción específica — evidencia mixta no es suficiente para
-  cerrar como resuelto.
-- Ninguna señal externa relevante, o empeoramiento → PIVOTAR
+- MEJORA PARCIAL: la mayoría de la evidencia muestra mejora, pero queda
+  un problema residual o puntual (por ejemplo, un comentario aislado
+  sobre un detalle) → CONTINUAR, proponiendo un AJUSTE concreto y
+  pequeño dentro del mismo plan. Un comentario aislado no pesa lo
+  mismo que varias señales coincidentes: no lo trates como una
+  contradicción.
+- Contradicción REAL: señales de peso parecido que apuntan en
+  direcciones opuestas sobre el problema principal (por ejemplo, el
+  personal dice que mejoró pero varios socios dicen que sigue igual
+  o peor) → PIVOTAR, explicando la contradicción específica.
+- Ninguna señal externa relevante de mejora, o empeoramiento → PIVOTAR
+Reserva PIVOTAR para cuando el enfoque en sí no funciona, no para
+cuando funciona pero necesita un retoque.
 
 ---
 
@@ -160,11 +189,20 @@ Paso 5: [comparación contra el criterio y decisión]
 
 Decisión: [🚩 FLAG DE IMPLEMENTACIÓN / 🔵 CONTINUAR / 🟢 CERRAR / 🟠 PIVOTAR]
 
+Negritas: en cada paso, pon en **negrita** solo la conclusión clave de
+ese paso (3-6 palabras); en el párrafo final, pon en negrita la razón
+principal. Como máximo una negrita por paso, y nunca una frase completa.
+No pongas en negrita la línea "Decisión:".
+
 Si la decisión es CERRAR, añade un párrafo breve en lenguaje claro y
 natural — como si se lo contaras directamente al propietario —
 contando la historia completa: cuál era el problema original, qué se
 intentó, y por qué la evidencia sostenida en el tiempo demuestra que
 funcionó.
+
+Si la decisión es CONTINUAR por MEJORA PARCIAL, añade un párrafo
+breve con el ajuste concreto que recomiendas mantener o probar hasta
+el siguiente seguimiento.
 
 Si la decisión es PIVOTAR, añade un párrafo igual de claro,
 explicando qué se intentó, por qué no fue suficiente según la
@@ -180,7 +218,8 @@ def run_outcome_check_agent(pattern_name: str, verification_method: str, verific
                               rating_before: str = "No disponible", rating_after: str = "No disponible"):
     prompt = build_prompt(pattern_name, verification_method, verification_result,
                            action_description, cycles_since_approval,
-                           new_reviews_since_approval, rating_before, rating_after)
+                           new_reviews_since_approval, rating_before, rating_after,
+                           club_profile=load_club_profile())
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
     return response.text
 
@@ -205,6 +244,24 @@ def run_outcome_check_from_db(pattern_name: str,
     )
 
     return result
+
+
+def run_outcome_check_for(pattern_data: dict,
+                          new_reviews_since_approval: str = "Ninguna",
+                          rating_before: str = "No disponible",
+                          rating_after: str = "No disponible"):
+    """Same check, but using the pattern row the caller already has
+    (read by id), so it never depends on matching the pattern's name."""
+    return run_outcome_check_agent(
+        pattern_name=pattern_data["pattern_name"],
+        verification_method=pattern_data.get("verification_method") or "No disponible",
+        verification_result=pattern_data.get("verification_result") or "No confirmado todavía",
+        action_description=pattern_data.get("approved_action") or "",
+        cycles_since_approval=pattern_data.get("cycles_since_approval") or 0,
+        new_reviews_since_approval=new_reviews_since_approval,
+        rating_before=rating_before,
+        rating_after=rating_after,
+    )
 
 
 if __name__ == "__main__":

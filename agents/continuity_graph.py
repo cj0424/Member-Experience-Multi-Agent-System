@@ -1,429 +1,321 @@
 """
-Continuity Graph — Agent 4's real, connected workflow. Separate
-from graph.py because this represents a genuinely different
-real-world trigger: checking on patterns that were already
-approved and executed a while ago, not discovering new ones.
-Shares Supabase and reuses Action Planning / Execution Kit
-functions when Pivotar requires a genuinely new attempt.
+continuity_graph.py — the follow-up graph (Seguimiento page).
 
-Two real, structural additions in this version:
-- rejected_ideas: carried from Supabase into every Pivotar call, and
-  appended to whenever the owner revises a recommendation with "don't
-  suggest X again" — a real fix for stateless LLM calls having no
-  memory of what was already turned down.
-- pattern_history: an insert-only audit trail, one real row per
-  check-in cycle, so the system's actual progression over time is
-  visible — not just the latest overwritten snapshot.
+For every pattern whose kit is already approved:
+  ⏸ Gate 3 — the owner reports, with tiered evidence, whether the action
+  was actually carried out, plus any comments/reviews about the result
+  → Outcome Check Agent decides: FLAG / CONTINUAR / CERRAR / PIVOTAR
+  → every check-in is saved to pattern_history (with its full reasoning)
+
+Then, for every PIVOTAR that isn't escalated:
+  Action Planning (from pivot) → ⏸ owner approves / revises / discards
+  the new plan. An approved new plan starts a new attempt: its old kit
+  and verification method are cleared, so it appears again as "pendiente
+  de kit" on Kits de Ejecución — the new plan always gets its own kit and
+  is judged against its own checklist.
+
+Fixes compared with the Phase 1 version:
+- every read/write uses the pattern's id, never its name
+- the decision is read only from the "Decisión:" line (a stray word like
+  "PIVOTAR" inside the reasoning can't trigger a pivot anymore)
+- after a Pivotar is approved, the old kit is cleared (db.start_new_attempt)
+- discarding a pivot plan is saved: the pattern is escalated to the owner
+- every event carries its attempt number, so Historial can show
+  "attempt 2, cycle 1" instead of cycle numbers that restart
+- no input(): human steps use interrupt(), like graph.py
 """
 
-from typing import TypedDict, Optional
-from langgraph.graph import StateGraph, START, END
+import io
+import re
+from typing import TypedDict
 
 import openpyxl
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt
+from langgraph.checkpoint.memory import MemorySaver
 
-from outcome_check_agent import run_outcome_check_from_db, supabase
+import db
+from graph import narrate, feedback_with_history, existing_plans_context, new_thread, run_until_pause, resume
+from outcome_check_agent import run_outcome_check_for
 from action_planning_agent import run_action_planning_from_pivot, run_action_planning_revision
-from execution_kit_agent import (
-    run_execution_kit_agent,
-    run_execution_kit_revision,
-    extract_tracker_specs,
-    build_tracker_excel,
-    safe_filename,
-)
+
+RAG_FOLDER = "data/rag_library"
+MAX_PIVOTS = 2
+
+EVIDENCE_TIERS = {
+    1: "Evidencia ALTA — registro firmado",
+    2: "Evidencia MEDIA — observación directa del propietario",
+    3: "Evidencia BAJA — relato verbal, sin registro",
+}
 
 
-class ContinuityState(TypedDict):
-    """Shared state. confirmed_patterns carries the real Supabase
-    row plus fresh, human-provided, tiered evidence collected this
-    run — never stale or placeholder data."""
-    confirmed_patterns: Optional[list[dict]]
-    outcome_results: Optional[list[dict]]
-    new_recommendations: Optional[list[dict]]
+# ---------------------------------------------------------------------------
+# Helpers (also used by the Seguimiento page)
+# ---------------------------------------------------------------------------
+
+def summarize_tracker(file_bytes: bytes) -> str:
+    """Reads a filled-in .xlsx tracker (uploaded by the owner) and
+    summarizes its real rows as evidence."""
+    try:
+        ws = openpyxl.load_workbook(io.BytesIO(file_bytes)).active
+        rows = [
+            " | ".join(str(c) for c in row if c is not None)
+            for row in ws.iter_rows(min_row=5, values_only=True)
+            if any(c not in (None, "") for c in row)
+        ]
+        if not rows:
+            return "El archivo no tiene filas completadas todavía."
+        return f"{len(rows)} entradas completadas en el registro:\n" + "\n".join(rows[-10:])
+    except Exception as e:
+        return f"No se pudo leer el archivo: {e}"
 
 
 def extract_decision(outcome_text: str) -> str:
-    """Reads only the final 'Decisión:' line, not the whole text —
-    avoids any stray earlier mention of a different outcome word
-    inside Agent 4's own reasoning being misread as the real
-    decision."""
-    for line in outcome_text.split("\n"):
-        if line.strip().startswith("Decisión:"):
-            if "CERRAR" in line:
+    """Reads ONLY the 'Decisión:' line (bold/heading markers allowed)."""
+    for raw in outcome_text.split("\n"):
+        line = re.sub(r"[*#_]", "", raw).strip()
+        m = re.match(r"Decisi[oó]n\s*(?:final)?\s*:\s*(.*)", line, re.I)
+        if m:
+            value = m.group(1).upper()
+            if "CERRAR" in value:
                 return "CERRAR"
-            elif "PIVOTAR" in line:
+            if "PIVOTAR" in value:
                 return "PIVOTAR"
-            elif "FLAG DE IMPLEMENTACIÓN" in line:
+            if "FLAG" in value:
                 return "FLAG"
-            else:
+            if "CONTINUAR" in value:
                 return "CONTINUAR"
     return "DESCONOCIDO"
 
 
-def read_real_tracker_evidence(file_path: str) -> str:
-    """Opens a real, filled-in .xlsx tracker and summarizes its
-    actual rows as genuine evidence — not a description of the
-    file, the file's real content."""
-    try:
-        wb = openpyxl.load_workbook(file_path)
-        ws = wb.active
-        rows = []
-        for row in ws.iter_rows(min_row=5, values_only=True):
-            if any(cell not in (None, "") for cell in row):
-                rows.append(" | ".join(str(c) for c in row if c is not None))
+# ---------------------------------------------------------------------------
+# State
+# ---------------------------------------------------------------------------
 
-        if not rows:
-            return "El archivo existe pero no tiene filas completadas todavía."
-
-        summary = f"{len(rows)} entradas completadas en el registro:\n"
-        summary += "\n".join(rows[-10:])
-        return summary
-
-    except FileNotFoundError:
-        return f"⚠️ No se encontró el archivo en '{file_path}'."
-    except Exception as e:
-        return f"⚠️ No se pudo leer el archivo: {e}"
+class ContinuityState(TypedDict, total=False):
+    only_ids: list[int]     # optional: check only these patterns
+    patterns: list[dict]    # patterns to check in this run
+    index: int
+    results: list[dict]     # one per check-in
+    pivots: list[dict]      # new plans waiting for approval
+    pivot_index: int
+    pivot_results: list[dict]
 
 
-def confirm_execution_node(state: ContinuityState) -> dict:
-    """GATE 3 — the real human-in-the-loop checkpoint. For every
-    pattern due for review, collects REAL, TIERED evidence of
-    execution (a signed tracker, a direct personal observation, or
-    a verbal relay) — never a bare yes/no — plus separately, any
-    real evidence about whether the RESULT actually improved."""
-    result = supabase.table("patterns").select("*").eq("status", "open").execute()
-    due_patterns = result.data
+# ---------------------------------------------------------------------------
+# Nodes
+# ---------------------------------------------------------------------------
 
-    if not due_patterns:
-        print("\nNo hay patrones pendientes de revisión en este momento.")
-        return {"confirmed_patterns": []}
-
-    print(f"=== {len(due_patterns)} PATRONES PENDIENTES DE CONFIRMACIÓN ===\n")
-
-    confirmed = []
-
-    for pattern in due_patterns:
-        pattern_name = pattern["pattern_name"]
-        verification_method = pattern.get("verification_method")
-
-        print(f"\n--- {pattern_name} ---")
-
-        if not verification_method:
-            print("⚠️ Este patrón no tiene un método de verificación registrado "
-                  "(no pasó por el kit de ejecución) — no se puede confirmar "
-                  "ejecución real todavía.")
-            confirmed.append({
-                "pattern_name": pattern_name,
-                "pattern_data": pattern,
-                "feedback_text": "Ninguna",
-                "rating_before": "No disponible",
-                "rating_after": "No disponible",
-            })
-            continue
-
-        print(f"Método de verificación acordado: {verification_method}")
-        done = input("¿Se ha confirmado que esta acción se ejecutó? (s/n): ").strip().lower()
-
-        if done != "s":
-            supabase.table("patterns").update({
-                "verification_result": "No confirmado todavía"
-            }).eq("pattern_name", pattern_name).execute()
-            pattern["verification_result"] = "No confirmado todavía"
-            confirmed.append({
-                "pattern_name": pattern_name,
-                "pattern_data": pattern,
-                "feedback_text": "Ninguna",
-                "rating_before": "No disponible",
-                "rating_after": "No disponible",
-            })
-            continue
-
-        print("\n¿Qué tipo de evidencia real tienes de que se hizo? (de más a menos sólida)")
-        print("1 = Un registro/tracker real, con fecha, responsable y firma")
-        print("2 = Lo comprobé yo mismo directamente (observación personal)")
-        print("3 = El personal me lo confirmó verbalmente, sin registro escrito")
-        evidence_tier = input("Elige 1, 2 o 3: ").strip()
-
-        if evidence_tier == "1":
-            file_path = input("Ruta del archivo (ej. outputs/Registro_Semanal.xlsx): ").strip()
-            evidence_text = "[Evidencia ALTA — registro firmado] " + read_real_tracker_evidence(file_path)
-        elif evidence_tier == "2":
-            detail = input("¿Qué comprobaste exactamente y cuándo?: ").strip()
-            evidence_text = f"[Evidencia MEDIA — observación directa del propietario] {detail}"
-        else:
-            staff_name = input("¿Quién del personal te lo confirmó?: ").strip()
-            detail = input("¿Qué te confirmó exactamente?: ").strip()
-            evidence_text = f"[Evidencia BAJA — relato verbal, sin registro] {staff_name} dijo: {detail}"
-
-        verification_result = f"Confirmado — {evidence_text}"
-        new_cycles = pattern.get("cycles_since_approval", 0) + 1
-
-        feedback_text = input("\n¿Alguna reseña, respuesta de encuesta, o comentario "
-                               "directo sobre si el PROBLEMA ORIGINAL mejoró, desde "
-                               "la aprobación? Si no hay ninguno, pulsa Enter: ").strip()
-        rating_before = input("Valoración media ANTES (si la conoces, si no pulsa "
-                               "Enter): ").strip() or "No disponible"
-        rating_after = input("Valoración media AHORA (si la conoces, si no pulsa "
-                              "Enter): ").strip() or "No disponible"
-
-        supabase.table("patterns").update({
-            "verification_result": verification_result,
-            "cycles_since_approval": new_cycles,
-        }).eq("pattern_name", pattern_name).execute()
-
-        pattern["verification_result"] = verification_result
-        pattern["cycles_since_approval"] = new_cycles
-
-        confirmed.append({
-            "pattern_name": pattern_name,
-            "pattern_data": pattern,
-            "feedback_text": feedback_text if feedback_text else "Ninguna",
-            "rating_before": rating_before,
-            "rating_after": rating_after,
-        })
-
-    return {"confirmed_patterns": confirmed}
+def load_node(state: ContinuityState) -> dict:
+    narrate("🗂️ Leyendo los patrones en seguimiento...")
+    patterns = db.get_patterns_in_followup()
+    if state.get("only_ids"):
+        patterns = [p for p in patterns if p["id"] in state["only_ids"]]
+    narrate(f"✅ {len(patterns)} patrón(es) con kit aprobado, listos para revisar")
+    return {"patterns": patterns, "index": 0, "results": [],
+            "pivots": [], "pivot_index": 0, "pivot_results": []}
 
 
-def outcome_check_node(state: ContinuityState) -> dict:
-    """Runs Agent 4 using the FRESH, real, tiered evidence just
-    collected. Writes a real, permanent row to pattern_history for
-    every single check-in (never overwritten — this is the genuine
-    audit trail), updates patterns.last_decision so the current
-    row always shows the real latest outcome, and when CERRAR
-    fires, closes the pattern permanently — it exits the active
-    check-in loop, matching real practice: a validated fix is
-    closed, not re-litigated indefinitely."""
-    confirmed_patterns = state.get("confirmed_patterns", [])
-
-    if not confirmed_patterns:
-        return {"outcome_results": []}
-
-    print(f"\n=== EVALUANDO {len(confirmed_patterns)} PATRONES CON AGENTE 4 ===\n")
-
-    outcome_results = []
-    for item in confirmed_patterns:
-        pattern_name = item["pattern_name"]
-        print(f"\n--- Revisando: {pattern_name} ---\n")
-
-        outcome_text = run_outcome_check_from_db(
-            pattern_name,
-            new_reviews_since_approval=item["feedback_text"],
-            rating_before=item["rating_before"],
-            rating_after=item["rating_after"],
-        )
-        print(outcome_text)
-
-        decision = extract_decision(outcome_text)
-
-        supabase.table("patterns").update({"last_decision": decision}).eq(
-            "pattern_name", pattern_name
-        ).execute()
-
-        if decision == "FLAG":
-            print(f"\n🚩 ATENCIÓN: '{pattern_name}' requiere confirmación de ejecución antes de poder evaluarse.")
-        elif decision == "CERRAR":
-            print(f"\n✅ '{pattern_name}' se marca como resuelto y sale del ciclo activo de revisión.")
-            supabase.table("patterns").update({"status": "closed"}).eq(
-                "pattern_name", pattern_name
-            ).execute()
-
-        supabase.table("pattern_history").insert({
-            "pattern_name": pattern_name,
-            "cycle": item["pattern_data"].get("cycles_since_approval", 0),
-            "decision": decision,
-            "evidence_summary": item["feedback_text"],
-            "narrative": outcome_text,
-        }).execute()
-
-        outcome_results.append({
-            "pattern_name": pattern_name,
-            "pattern_data": item["pattern_data"],
-            "outcome_text": outcome_text
-        })
-
-    return {"outcome_results": outcome_results}
-
-
-def route_after_outcome(state: ContinuityState) -> str:
-    """Deterministic router — reads Agent 4's own explicit decision.
-    For every PIVOTAR, checks pivot_count: if already failed twice,
-    escalate for direct human review instead of looping again."""
-    needs_new_plan = False
-
-    for item in state["outcome_results"]:
-        if "PIVOTAR" in item["outcome_text"]:
-            current_count = item["pattern_data"].get("pivot_count", 0)
-
-            if current_count >= 2:
-                print(f"\n⚠️ ESCALADO: '{item['pattern_name']}' ha fallado 2 veces "
-                      f"seguidas tras intentos reales. Esto requiere revisión "
-                      f"directa del propietario, no otro intento automático.")
-                supabase.table("patterns").update({"status": "escalated"}).eq(
-                    "pattern_name", item["pattern_name"]
-                ).execute()
-            else:
-                supabase.table("patterns").update({"pivot_count": current_count + 1}).eq(
-                    "pattern_name", item["pattern_name"]
-                ).execute()
-                needs_new_plan = True
-
-    return "action_planning_from_pivot" if needs_new_plan else END
-
-
-def action_planning_from_pivot_node(state: ContinuityState) -> dict:
-    """For every PIVOTAR (not yet escalated), generates a genuinely
-    new recommendation using the real outcome evidence AND the
-    pattern's real rejected_ideas history, so a previously-discarded
-    idea doesn't silently resurface."""
-    new_recommendations = []
-
-    for item in state["outcome_results"]:
-        if "PIVOTAR" not in item["outcome_text"]:
-            continue
-
-        current_count = item["pattern_data"].get("pivot_count", 0)
-        if current_count >= 2:
-            continue  # already escalated in route_after_outcome, skip
-
-        pattern_name = item["pattern_name"]
-        previous_action = item["pattern_data"].get("approved_action", "")
-        rejected_ideas = item["pattern_data"].get("rejected_ideas") or "Ninguna"
-
-        print(f"\n=== GENERANDO NUEVA RECOMENDACIÓN (PIVOTAR): {pattern_name} ===\n")
-        new_rec = run_action_planning_from_pivot(
-            pattern_name,
-            "data/rag_library",
-            previous_action,
-            item["outcome_text"],
-            rejected_ideas
-        )
-        print(new_rec)
-
-        new_recommendations.append({"pattern_name": pattern_name, "text": new_rec})
-
-    return {"new_recommendations": new_recommendations}
-
-
-def approval_node(state: ContinuityState) -> dict:
-    """GATE 1, reused here for pivoted recommendations — real
-    Approve/Revise/Discard. On Revise, the owner's feedback is
-    appended to the pattern's real, permanent rejected_ideas record
-    in Supabase, so it carries forward into any future Pivotar
-    attempt for this same pattern."""
-    approved = []
-
-    if not state["new_recommendations"]:
-        return {"new_recommendations": []}
-
-    for i, item in enumerate(state["new_recommendations"], start=1):
-        pattern_name = item["pattern_name"]
-        rec = item["text"]
-
-        print(f"\n--- Nueva recomendación {i} de {len(state['new_recommendations'])}: {pattern_name} (pendiente de aprobación) ---\n")
-        print(rec)
-        decision = input("\n¿Aprobar (a), pedir cambios (r), o descartar (d)?: ").strip().lower()
-
-        if decision == "a":
-            supabase.table("patterns").update({
-                "approved_action": rec,
-                "status": "open",
-                "cycles_since_approval": 0
-            }).eq("pattern_name", pattern_name).execute()
-            approved.append(item)
-            print("✅ Aprobado y actualizado en Supabase.")
-
-        elif decision == "r":
-            feedback = input("¿Qué cambiarías?: ").strip()
-
-            existing = supabase.table("patterns").select("rejected_ideas").eq(
-                "pattern_name", pattern_name
-            ).execute().data[0].get("rejected_ideas") or ""
-            updated_rejected = f"{existing}\n- {feedback}".strip()
-            supabase.table("patterns").update({"rejected_ideas": updated_rejected}).eq(
-                "pattern_name", pattern_name
-            ).execute()
-
-            revised = run_action_planning_revision(pattern_name, "data/rag_library", rec, feedback)
-            print("\n--- Recomendación revisada ---\n")
-            print(revised)
-            confirm = input("\n¿Aprobar esta versión revisada? (a/d): ").strip().lower()
-            if confirm == "a":
-                supabase.table("patterns").update({
-                    "approved_action": revised,
-                    "status": "open",
-                    "cycles_since_approval": 0
-                }).eq("pattern_name", pattern_name).execute()
-                approved.append({"pattern_name": pattern_name, "text": revised})
-                print("✅ Versión revisada aprobada y actualizada en Supabase.")
-            else:
-                print("Descartado.")
-
-        else:
-            print("Descartado — el patrón queda marcado para revisión manual.")
-
-    return {"new_recommendations": approved}
-
-
-def execution_kit_node(state: ContinuityState) -> dict:
-    """GATE 2, reused here exactly as in graph.py."""
-    if not state["new_recommendations"]:
+def checkin_node(state: ContinuityState) -> dict:
+    """⏸ GATE 3 — one pattern per pass. The owner reports execution
+    evidence and any feedback on the result; then Outcome Check decides."""
+    patterns, i = state["patterns"], state["index"]
+    if i >= len(patterns):
         return {}
+    p = patterns[i]
+    checkin_number = db.count_checkins(p["id"], p.get("attempt") or 1) + 1
 
-    for item in state["new_recommendations"]:
-        pattern_name = item["pattern_name"]
-        approved_action = item["text"]
+    answer = interrupt({
+        "type": "checkin",
+        "index": i,
+        "total": len(patterns),
+        "pattern_id": p["id"],
+        "pattern_name": p["pattern_name"],
+        "approved_action": p.get("approved_action") or "",
+        "verification_method": p.get("verification_method") or "",
+        "attempt": p.get("attempt") or 1,
+        "cycle": (p.get("cycles_since_approval") or 0) + 1,
+        "checkin_number": checkin_number,
+    })
 
-        print(f"\n=== GENERANDO KIT DE EJECUCIÓN: {pattern_name} ===\n")
-        kit = run_execution_kit_agent(approved_action)
-        print(kit)
+    results = list(state.get("results", []))
+    if answer.get("action") == "skip":
+        results.append({"pattern_id": p["id"], "pattern_name": p["pattern_name"], "decision": "OMITIDO"})
+        return {"index": i + 1, "results": results}
 
-        decision = input(f"\n¿Aprobar (a), pedir cambios (r), o descartar (d) este kit para '{pattern_name}'?: ").strip().lower()
+    # 1. Execution evidence
+    if answer.get("executed"):
+        tier = int(answer.get("tier") or 3)
+        verification_result = f"Confirmado — [{EVIDENCE_TIERS[tier]}] {answer.get('evidence_text', '').strip()}"
+        cycles = (p.get("cycles_since_approval") or 0) + 1
+    else:
+        verification_result = "No confirmado todavía"
+        cycles = p.get("cycles_since_approval") or 0
 
-        final_kit = kit
-        if decision == "r":
-            feedback = input("¿Qué cambiarías?: ").strip()
-            final_kit = run_execution_kit_revision(approved_action, kit, feedback)
-            print("\n--- Kit revisado ---\n")
-            print(final_kit)
-            confirm = input("\n¿Aprobar este kit revisado? (a/d): ").strip().lower()
-            if confirm != "a":
-                print("Kit descartado.")
-                continue
-        elif decision != "a":
-            print("Kit descartado.")
-            continue
+    db.update_pattern(p["id"], {"verification_result": verification_result,
+                                "cycles_since_approval": cycles})
+    p = {**p, "verification_result": verification_result, "cycles_since_approval": cycles}
 
-        trackers = extract_tracker_specs(final_kit)
-        for spec in trackers:
-            file_path = f"outputs/{safe_filename(spec['titulo'])}.xlsx"
-            build_tracker_excel(spec, file_path)
-            print(f"✅ Tracker Excel generado: {file_path}")
+    # 2. Outcome Check
+    narrate(f"🔁 Evaluando resultados: {p['pattern_name']}...")
+    feedback = (answer.get("feedback") or "").strip() or "Ninguna"
+    outcome = run_outcome_check_for(
+        p, new_reviews_since_approval=feedback,
+        rating_before=answer.get("rating_before") or "No disponible",
+        rating_after=answer.get("rating_after") or "No disponible",
+    )
+    decision = extract_decision(outcome)
+    attempt = p.get("attempt") or 1
 
-        print("✅ Kit aprobado.")
+    updates = {"last_decision": decision}
+    pivots = list(state.get("pivots", []))
+    escalated = False
 
-    return {}
+    if decision == "CERRAR":
+        updates["status"] = "closed"
+    elif decision == "PIVOTAR":
+        pivot_count = p.get("pivot_count") or 0
+        if pivot_count >= MAX_PIVOTS:
+            updates["status"] = "escalated"
+            escalated = True
+        else:
+            updates["pivot_count"] = pivot_count + 1
+
+    db.update_pattern(p["id"], updates)
+    db.log_event(
+        p["id"], p["pattern_name"], "check_in",
+        narrative=outcome, decision=decision,
+        evidence_summary=f"{verification_result}\nComentarios sobre el resultado: {feedback}",
+        attempt=attempt, cycle=cycles,
+    )
+
+    # 3. Pivot → new plan, with memory of what was tried and rejected
+    if decision == "PIVOTAR" and not escalated:
+        narrate(f"✍️ Preparando un enfoque distinto para: {p['pattern_name']}...")
+        others = [k for k in db.get_all_patterns() if k["id"] != p["id"]]
+        description = (p.get("pattern_description") or p["pattern_name"]) + existing_plans_context(others, [])
+        text = run_action_planning_from_pivot(
+            description, RAG_FOLDER, p.get("approved_action") or "", outcome,
+            p.get("rejected_ideas") or "Ninguna",
+        )
+        pivots.append({"pattern_id": p["id"], "name": p["pattern_name"], "description": description,
+                       "previous_action": p.get("approved_action") or "", "text": text})
+
+    results.append({"pattern_id": p["id"], "pattern_name": p["pattern_name"],
+                    "decision": "ESCALADO" if escalated else decision,
+                    "narrative": outcome, "attempt": attempt, "cycle": cycles,
+                    "checkin_number": checkin_number})
+    return {"index": i + 1, "results": results, "pivots": pivots}
 
 
-graph_builder = StateGraph(ContinuityState)
+def pivot_review_node(state: ContinuityState) -> dict:
+    """⏸ Approve / revise / discard a new plan after a Pivotar."""
+    pivots, i = state["pivots"], state["pivot_index"]
+    if i >= len(pivots):
+        return {}
+    item = pivots[i]
 
-graph_builder.add_node("confirm_execution", confirm_execution_node)
-graph_builder.add_node("outcome_check", outcome_check_node)
-graph_builder.add_node("action_planning_from_pivot", action_planning_from_pivot_node)
-graph_builder.add_node("approval", approval_node)
-graph_builder.add_node("execution_kit", execution_kit_node)
+    decision = interrupt({
+        "type": "pivot",
+        "index": i,
+        "total": len(pivots),
+        "kind": "pivot",
+        "pattern_id": item["pattern_id"],
+        "pattern_name": item["name"],
+        "text": item["text"],
+    })
+    action = decision.get("action")
+    results = list(state.get("pivot_results", []))
 
-graph_builder.add_edge(START, "confirm_execution")
-graph_builder.add_edge("confirm_execution", "outcome_check")
-graph_builder.add_conditional_edges("outcome_check", route_after_outcome, {
-    "action_planning_from_pivot": "action_planning_from_pivot",
-    END: END
-})
-graph_builder.add_edge("action_planning_from_pivot", "approval")
-graph_builder.add_edge("approval", "execution_kit")
-graph_builder.add_edge("execution_kit", END)
+    if action == "revise":
+        feedback = decision.get("feedback", "").strip()
+        revised = run_action_planning_revision(
+            item["description"], RAG_FOLDER, item["text"],
+            feedback_with_history(feedback, item.get("revisions", [])),
+        )
+        new_pivots = list(pivots)
+        new_pivots[i] = {**item, "text": revised,
+                         "revisions": item.get("revisions", []) + [{"text": item["text"], "feedback": feedback}]}
+        return {"pivots": new_pivots}
 
-continuity_graph = graph_builder.compile()
+    pid = item["pattern_id"]
+    current_attempt = (db.get_pattern(pid) or {}).get("attempt") or 1
+    for rev in item.get("revisions", []):
+        db.append_rejected_idea(pid, db.rejected_entry(rev["text"], rev["feedback"]))
+        db.log_event(pid, item["name"], "plan_revisado", narrative=rev["text"],
+                     evidence_summary=f"Motivo del propietario: {rev['feedback']}", attempt=current_attempt)
 
+    if action == "approve":
+        new_attempt = db.start_new_attempt(pid, item["text"])
+        db.log_event(pid, item["name"], "plan_aprobado", narrative=item["text"], attempt=new_attempt,
+                     evidence_summary="Nuevo enfoque tras PIVOTAR")
+        results.append({"pattern_name": item["name"], "outcome": "approved"})
+    else:
+        db.append_rejected_idea(pid, db.rejected_entry(item["text"], "el propietario descartó el nuevo enfoque"))
+        db.update_pattern(pid, {"status": "escalated"})
+        db.log_event(pid, item["name"], "descartado", narrative=item["text"], attempt=current_attempt,
+                     evidence_summary="Nuevo enfoque descartado: el patrón pasa a revisión directa del propietario")
+        results.append({"pattern_name": item["name"], "outcome": "discarded"})
+
+    return {"pivot_index": i + 1, "pivot_results": results}
+
+
+def after_checkin(state: ContinuityState) -> str:
+    if state["index"] < len(state["patterns"]):
+        return "checkin"
+    return "pivot_review" if state.get("pivots") else END
+
+
+def after_pivot(state: ContinuityState) -> str:
+    return "pivot_review" if state["pivot_index"] < len(state["pivots"]) else END
+
+
+_builder = StateGraph(ContinuityState)
+_builder.add_node("load", load_node)
+_builder.add_node("checkin", checkin_node)
+_builder.add_node("pivot_review", pivot_review_node)
+_builder.add_edge(START, "load")
+_builder.add_conditional_edges("load", lambda s: "checkin" if s["patterns"] else END,
+                               {"checkin": "checkin", END: END})
+_builder.add_conditional_edges("checkin", after_checkin,
+                               {"checkin": "checkin", "pivot_review": "pivot_review", END: END})
+_builder.add_conditional_edges("pivot_review", after_pivot, {"pivot_review": "pivot_review", END: END})
+
+continuity_graph = _builder.compile(checkpointer=MemorySaver())
+
+
+# ---------------------------------------------------------------------------
+# Terminal runner — for testing only; the owner uses Streamlit
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    continuity_graph.invoke({})
+    config = new_thread()
+    pending = run_until_pause(continuity_graph, {}, config)
+    while pending:
+        print(f"\n--- {pending['pattern_name']} ({pending['index'] + 1} de {pending['total']}) ---")
+        if pending["type"] == "checkin":
+            print(f"Cómo verificar: {pending['verification_method']}")
+            done = input("¿Se ejecutó? (s/n, o 'o' para omitir): ").strip().lower()
+            if done == "o":
+                answer = {"action": "skip"}
+            else:
+                answer = {"executed": done == "s"}
+                if done == "s":
+                    answer["tier"] = int(input("Evidencia: 1=registro firmado, 2=lo comprobé yo, 3=me lo dijeron: ") or 3)
+                    answer["evidence_text"] = input("¿Qué evidencia exactamente?: ")
+                answer["feedback"] = input("Comentarios o reseñas sobre el resultado (Enter si ninguno): ")
+                answer["rating_before"] = input("Valoración ANTES (Enter si no): ")
+                answer["rating_after"] = input("Valoración AHORA (Enter si no): ")
+        else:
+            print(pending["text"])
+            choice = input("¿Aprobar (a), pedir cambios (r), o descartar (d)?: ").strip().lower()
+            answer = {"action": {"a": "approve", "r": "revise"}.get(choice, "discard")}
+            if choice == "r":
+                answer["feedback"] = input("¿Qué cambiarías?: ")
+        pending = run_until_pause(continuity_graph, resume(answer), config)
+
+    values = continuity_graph.get_state(config).values
+    for r in values.get("results", []):
+        print(f"🔁 {r['pattern_name']}: {r['decision']}")
+    for r in values.get("pivot_results", []):
+        print(f"{'✅' if r['outcome'] == 'approved' else '❌'} Nuevo enfoque — {r['pattern_name']}")

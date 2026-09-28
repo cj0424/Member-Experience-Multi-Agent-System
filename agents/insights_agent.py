@@ -6,6 +6,12 @@ resolved, and treats Google Reviews and the post-visit QR survey
 as genuinely independent sources, applying stronger confidence
 when a pattern is corroborated across BOTH, since different
 collection methods carry different biases.
+
+Memory: Gemini doesn't remember earlier runs, so the graph passes
+in every pattern already registered in Supabase (known_patterns).
+The agent then marks each confirmed pattern as NUEVO, YA
+REGISTRADO or REAPARECE, instead of rediscovering the same
+problem under a new name.
 """
 
 import os
@@ -18,10 +24,12 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def build_prompt(reviews: list[dict], survey_responses: list[dict]) -> str:
+def build_prompt(reviews: list[dict], survey_responses: list[dict],
+                 known_patterns: str = "Ninguno todavía.") -> str:
     """Combines both sources into one prompt, each clearly labeled
     so Gemini can reason about them as genuinely distinct sources,
-    not one merged pool."""
+    not one merged pool — plus the patterns the system already
+    knows about."""
     review_block = "\n\n".join(
         f"[{r['id']}] {r['header']}\n{r['text']}" for r in reviews
     )
@@ -37,6 +45,9 @@ FUENTE 1 — RESEÑAS PÚBLICAS DE GOOGLE:
 
 FUENTE 2 — RESPUESTAS A ENCUESTA POST-SESIÓN (vía QR code):
 {survey_block}
+
+PATRONES YA REGISTRADOS EN EL SISTEMA (de análisis anteriores):
+{known_patterns}
 
 Tu tarea:
 1. Clasifica cada mención relevante en una categoría (por ejemplo: arena/
@@ -80,12 +91,26 @@ Tu tarea:
    bajo una sola etiqueta, aunque parezcan relacionadas. Cada
    mención aislada merece su propia línea, citando su ID específico
    y su fuente.
-7. Termina con una nota de limitación sobre estas dos fuentes.
+7. REGISTRO — compara cada patrón confirmado con la lista de patrones
+   ya registrados. Es el MISMO patrón si trata del mismo problema o
+   la misma fortaleza, aunque las palabras sean distintas (ej. "bar
+   renovado" y "valoración de la cafetería tras la reforma" son el
+   mismo). Marca cada patrón con:
+   - NUEVO — si no se parece a ninguno de la lista.
+   - YA REGISTRADO — #id — si coincide con uno de la lista. Usa
+     entonces EXACTAMENTE el nombre registrado, no uno nuevo.
+   - REAPARECE — #id — solo si coincide con uno CERRADO y la
+     evidencia muestra que vuelve a estar activo.
+   Si un patrón nuevo junta varios temas, y uno de ellos ya está
+   registrado, sepáralo: no mezcles un tema registrado dentro de un
+   patrón nuevo.
+8. Termina con una nota de limitación sobre estas dos fuentes.
 
 Sigue EXACTAMENTE este formato para cada patrón confirmado:
 
 🔍 PATRÓN — [nombre del patrón]
 [🟢 ACTIVO / 📁 HISTÓRICO — YA RESUELTO]
+🔗 Registro: [NUEVO / YA REGISTRADO — #id / REAPARECE — #id]
 📎 Evidencia: [número] menciones ([lista de IDs]) — [fuente(s): reseñas / encuesta / ambas]
 🟢/🟡/🔴 Confianza: [Alto/Moderado/Bajo]
 🧭 Qué significa: [interpretación breve, 1-2 frases]
@@ -94,6 +119,7 @@ Ejemplo de un patrón bien formado, con evidencia cruzada:
 
 🔍 PATRÓN — Exceso de arena en las pistas
 🟢 ACTIVO
+🔗 Registro: NUEVO
 📎 Evidencia: 4 reseñas (REV-004, REV-008) + 3 respuestas de encuesta (ENC-002, ENC-008, ENC-017) — fuentes: reseñas Y encuesta
 🟢 Confianza: Alto
 🧭 Qué significa: el problema está confirmado de forma independiente por dos fuentes distintas, lo que descarta que sea solo una percepción de quienes escriben reseñas públicas.
@@ -103,11 +129,12 @@ Ahora aplica este mismo formato a los patrones reales que encuentres."""
 
 def run_insights_agent(
     review_filepath: str = "data/reviews/padel_club_reviews_anonymized.txt",
-    survey_filepath: str = "data/reviews/padel_club_survey_sept_week3.txt"
+    survey_filepath: str = "data/reviews/padel_club_survey_sept_week3.txt",
+    known_patterns: str = "Ninguno todavía."
 ):
     reviews = load_reviews(review_filepath)
-    survey_responses = load_reviews(survey_filepath)
-    prompt = build_prompt(reviews, survey_responses)
+    survey_responses = load_reviews(survey_filepath, prefix="ENC")
+    prompt = build_prompt(reviews, survey_responses, known_patterns)
 
     response = client.models.generate_content(
         model="gemini-3.7-flash",

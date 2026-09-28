@@ -21,12 +21,16 @@ rules only need to be edited in one place:
   accepts rejected_ideas, so a previously-discarded idea never
   silently resurfaces — a real limitation of stateless LLM calls,
   fixed by passing the relevant history back in explicitly.
+
+Every prompt receives the shared RAG library (rag.py): the technical
+references it can cite, plus the club profile — how this club actually
+works — so recommendations fit the club, not a generic one.
 """
 
 import os
-import glob
 from dotenv import load_dotenv
 from google import genai
+from rag import load_rag_library, load_club_profile
 
 load_dotenv()
 
@@ -87,28 +91,29 @@ SHARED_RULES = """Reglas:
   menos riesgo si existe. No inventes riesgos improbables solo
   para parecer cauteloso.
 
-- Sé realista y proporcional a la escala descrita arriba."""
+- Sé realista y proporcional a la escala descrita arriba.
+
+- Escribe en español de España (por ejemplo, "comunicar" o "indicar"
+  en vez de "reportar"), dirigiéndote al propietario con el
+  tratamiento que indica el PERFIL DEL CLUB (tú o usted).
+
+- Usa el PERFIL DEL CLUB para que la recomendación encaje con cómo
+  funciona de verdad este club (personal y turnos, normas, canales,
+  herramientas, presupuesto y quién aprueba qué). No lo cites como
+  Fuente. Lo marcado "por confirmar" no lo des por hecho.
+
+- En cada bullet, pon en **negrita** solo la acción clave (3-6
+  palabras). En la parte 3, pon en **negrita** la ventaja principal.
+  Nunca pongas en negrita una frase completa."""
 
 
 CLOSING_FORMAT = """Termina con:
-⏱️ Esfuerzo: [Bajo/Medio/Alto]
-📚 Fuente: [documento citado, o "buenas prácticas generales"]
-🟢/🟡/🔴 Confianza: [Alto/Moderado/Bajo]"""
+⏱️ **Esfuerzo:** [Bajo/Medio/Alto]
+📚 **Fuente:** [documento citado, o "buenas prácticas generales"]
+🟢/🟡/🔴 **Confianza:** [Alto/Moderado/Bajo]"""
 
 
-def load_rag_library(folder_path: str) -> str:
-    """Reads every document in the RAG library folder, labeled by
-    source file, so Gemini judges relevance itself."""
-    combined = []
-    for filepath in sorted(glob.glob(f"{folder_path}/*.txt")):
-        filename = os.path.basename(filepath)
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-        combined.append(f"--- FUENTE: {filename} ---\n{content}")
-    return "\n\n".join(combined)
-
-
-def build_prompt(pattern_description: str, rag_context: str) -> str:
+def build_prompt(pattern_description: str, rag_context: str, club_profile: str) -> str:
     """First-pass recommendation for a brand-new pattern. No
     hardcoded topic — applies the same template to any pattern."""
     return f"""Eres un asistente que ayuda al propietario de un club de pádel
@@ -122,6 +127,9 @@ PATRÓN CONFIRMADO:
 
 BIBLIOTECA DE DOCUMENTOS DE REFERENCIA:
 {rag_context}
+
+PERFIL DEL CLUB (contexto interno, no citable como Fuente):
+{club_profile}
 
 SUPUESTOS DE ESCALA (genéricos, no son datos reales de este club
 específico — úsalos solo para calibrar la proporción de tu
@@ -149,7 +157,7 @@ problema", "Qué se puede hacer", "Por qué vale la pena"):
 Ahora escribe la recomendación real para el patrón indicado."""
 
 
-def build_revision_prompt(pattern_description: str, rag_context: str,
+def build_revision_prompt(pattern_description: str, rag_context: str, club_profile: str,
                            previous_recommendation: str, owner_feedback: str) -> str:
     """Revision when the owner rejects a proposal BEFORE trying it
     (a stated preference, e.g. cost)."""
@@ -166,6 +174,9 @@ PATRÓN CONFIRMADO:
 
 BIBLIOTECA DE DOCUMENTOS DE REFERENCIA:
 {rag_context}
+
+PERFIL DEL CLUB (contexto interno, no citable como Fuente):
+{club_profile}
 
 SUPUESTOS DE ESCALA (genéricos, no son datos reales de este club
 específico): un club de pádel independiente de tamaño medio en Madrid
@@ -196,7 +207,7 @@ Después, estructura tu recomendación revisada en TRES partes claras
 Ahora escribe la recomendación revisada."""
 
 
-def build_from_pivot_prompt(pattern_description: str, rag_context: str,
+def build_from_pivot_prompt(pattern_description: str, rag_context: str, club_profile: str,
                               previous_action: str, outcome_evidence: str,
                               rejected_ideas: str = "Ninguna") -> str:
     """New recommendation when a previous action was actually
@@ -218,6 +229,9 @@ PATRÓN: {pattern_description}
 
 BIBLIOTECA DE DOCUMENTOS DE REFERENCIA:
 {rag_context}
+
+PERFIL DEL CLUB (contexto interno, no citable como Fuente):
+{club_profile}
 
 SUPUESTOS DE ESCALA (genéricos, no son datos reales de este club
 específico): un club de pádel independiente de tamaño medio en Madrid
@@ -254,7 +268,7 @@ Ahora escribe la recomendación real para esta situación."""
 def run_action_planning_agent(pattern_description: str, rag_folder: str = "data/rag_library"):
     """First-pass recommendation for a brand-new confirmed pattern."""
     rag_context = load_rag_library(rag_folder)
-    prompt = build_prompt(pattern_description, rag_context)
+    prompt = build_prompt(pattern_description, rag_context, load_club_profile(rag_folder))
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
     return response.text
 
@@ -263,7 +277,7 @@ def run_action_planning_revision(pattern_description: str, rag_folder: str,
                                    previous_recommendation: str, owner_feedback: str):
     """Revision when the owner rejects a proposal before trying it."""
     rag_context = load_rag_library(rag_folder)
-    prompt = build_revision_prompt(pattern_description, rag_context,
+    prompt = build_revision_prompt(pattern_description, rag_context, load_club_profile(rag_folder),
                                      previous_recommendation, owner_feedback)
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
     return response.text
@@ -278,7 +292,7 @@ def run_action_planning_from_pivot(pattern_description: str, rag_folder: str,
     explicitly turned down for this pattern, across separate,
     stateless calls."""
     rag_context = load_rag_library(rag_folder)
-    prompt = build_from_pivot_prompt(pattern_description, rag_context,
+    prompt = build_from_pivot_prompt(pattern_description, rag_context, load_club_profile(rag_folder),
                                        previous_action, outcome_evidence,
                                        rejected_ideas)
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)

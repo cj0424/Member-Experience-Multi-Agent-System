@@ -18,19 +18,24 @@ LIMITATIONS (by design):
 - Cannot make the decision — that already happened in Action
   Planning's approval step.
 - Cannot verify anything got done — that's Outcome Check's job.
+
+Every prompt receives the shared RAG library (rag.py): the club profile
+(staff, shifts, channels, tools, rules), so each piece fits how this club
+actually works, plus the technical references for pieces that need them
+(e.g. a maintenance protocol).
 """
 
 import os
 import json
 from dotenv import load_dotenv
 from google import genai
+from rag import load_rag_library, load_club_profile
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
 
 SHARED_QUALITY_RULES = """Antes de incluir CUALQUIER pieza, aplica esta prueba estricta:
 ¿esto le da al lector algo que genuinamente NO sabría o NO tendría
@@ -88,7 +93,23 @@ FORMATO DE SALIDA — dos tipos, según lo que la pieza realmente sea:
 - ANTES de generar cualquier pieza nueva, revisa las piezas que ya
   escribiste en este mismo kit — si la nueva pieza repetiría
   información ya cubierta en otra, NO la generes por separado;
-  intégrala en la pieza existente o descártala."""
+  intégrala en la pieza existente o descártala.
+- Escribe cada texto listo para enviar en líneas que empiecen con ">".
+- Pon en **negrita** solo la acción clave de cada instrucción (3-6
+  palabras), y como máximo 3 negritas por pieza. Nunca pongas en
+  negrita una frase completa.
+- Las líneas "Ojo con" de la recomendación son ADVERTENCIAS, no
+  acciones aprobadas: tenlas en cuenta al redactar, pero nunca las
+  conviertas en una pieza propia.
+- Usa el PERFIL DEL CLUB para ajustar cada pieza a cómo funciona
+  realmente este club (personal y turnos, canales, herramientas,
+  normas, quién aprueba qué). Lo marcado "por confirmar" no lo des por
+  hecho: indícalo como algo a comprobar.
+- Usa la BIBLIOTECA DE REFERENCIA solo si una pieza la necesita (por
+  ejemplo, un protocolo técnico de mantenimiento).
+- Escribe en español de España, tanto en los mensajes a socios como
+  en las instrucciones al personal. Usa con el propietario y con los
+  socios el tratamiento que indica el PERFIL DEL CLUB (tú o usted)."""
 
 
 def build_prompt(approved_recommendation: str) -> str:
@@ -98,6 +119,12 @@ para usar.
 
 RECOMENDACIÓN APROBADA:
 {approved_recommendation}
+
+PERFIL DEL CLUB:
+{load_club_profile()}
+
+BIBLIOTECA DE REFERENCIA:
+{load_rag_library()}
 
 Antes de redactar nada, analiza la recomendación y pregúntate:
 - ¿Hay algo que comunicar a alguien? Redacta el texto exacto.
@@ -133,6 +160,12 @@ Ya generaste un kit, pero el propietario ha pedido cambios.
 
 RECOMENDACIÓN APROBADA:
 {approved_recommendation}
+
+PERFIL DEL CLUB:
+{load_club_profile()}
+
+BIBLIOTECA DE REFERENCIA:
+{load_rag_library()}
 
 KIT ANTERIOR:
 {previous_kit}
