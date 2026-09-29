@@ -88,8 +88,10 @@ LO QUE EL PROPIETARIO HA INDICADO SOBRE LA EJECUCIÓN (incluye el nivel de
 evidencia disponible):
 {verification_result}
 
-RESEÑAS, COMENTARIOS O CONFIRMACIONES DIRECTAS SOBRE SI EL PROBLEMA
-ORIGINAL MEJORÓ, DESDE LA APROBACIÓN:
+EVIDENCIA SOBRE SI EL PROBLEMA ORIGINAL MEJORÓ, DESDE LA DETECCIÓN
+(primero, lo que dicen automáticamente las cuatro fuentes del club:
+encuesta, incidencias, notas del personal y Google, con recuentos antes y
+después; después, lo que indica el propietario):
 {new_reviews_since_approval}
 
 VALORACIÓN MEDIA — antes: {rating_before} / después: {rating_after}
@@ -148,11 +150,14 @@ perfección absoluta ("cero quejas", "ausencia total"). Indica este
 criterio en una frase clara.
 
 PASO 4: Reúne TODA la evidencia externa disponible sobre si el
-problema mejoró — reseñas relevantes, valoración media, Y
-confirmación humana directa sobre el RESULTADO específicamente (no
-sobre si se ejecutó, eso ya quedó resuelto en el Paso 1). Descarta
-explícitamente cualquier reseña que no mencione directa y
-específicamente este patrón.
+problema mejoró — las menciones de las cuatro fuentes (compara las
+quejas de ANTES con las de DESPUÉS, teniendo en cuenta cuántas semanas
+se han analizado), la valoración media, Y la confirmación humana directa
+sobre el RESULTADO específicamente (no sobre si se ejecutó, eso ya quedó
+resuelto en el Paso 1). Descarta explícitamente cualquier mención que no
+trate directa y específicamente de este patrón. Si no hay semanas
+analizadas después de la detección, o no hay ninguna mención, eso NO es
+evidencia de mejora: es falta de datos.
 
 PASO 5: Compara la evidencia reunida en el Paso 4 contra el criterio
 que definiste en el Paso 3. Decide:
@@ -171,7 +176,10 @@ que definiste en el Paso 3. Decide:
   direcciones opuestas sobre el problema principal (por ejemplo, el
   personal dice que mejoró pero varios socios dicen que sigue igual
   o peor) → PIVOTAR, explicando la contradicción específica.
-- Ninguna señal externa relevante de mejora, o empeoramiento → PIVOTAR
+- Cero menciones desde la detección y sin confirmación directa del
+  propietario sobre el resultado → CONTINUAR (faltan datos), nunca CERRAR.
+- Hay semanas analizadas y las quejas siguen igual o aumentan, sin
+  ninguna señal relevante de mejora, o empeoramiento → PIVOTAR
 Reserva PIVOTAR para cuando el enfoque en sí no funciona, no para
 cuando funciona pero necesita un retoque.
 
@@ -271,4 +279,4 @@ if __name__ == "__main__":
         new_reviews_since_approval="""Socio-Z: "Las pistas ya no tienen tanta arena, se nota la mejora.\"""",
         rating_before="4.2", rating_after="4.4"
     )
-    print(result)
+    print(result)

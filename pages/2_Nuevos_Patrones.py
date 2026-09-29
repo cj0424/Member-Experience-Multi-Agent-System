@@ -17,7 +17,7 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
-from graph import discovery_graph, new_thread, run_until_pause, resume
+from graph import discovery_graph, new_thread, run_until_pause, resume, upcoming_week, week_label
 
 st.set_page_config(page_title="Nuevos Patrones — Club de Pádel", layout="wide")
 
@@ -791,14 +791,19 @@ for key, default in {"np_stage": "start", "np_config": None, "np_pending": None}
 
 st.title("🔍 Nuevos Patrones")
 render_journey(1)
-agent_line("Insights Agent (analiza reseñas y encuestas) · Action Planning Agent (propone el plan)")
-st.caption("Analiza reseñas y encuestas, genera recomendaciones, y apruébalas antes de ejecutarlas.")
+agent_line("Insights Agent (analiza las 4 fuentes del club) · Action Planning Agent (propone el plan)")
+st.caption("Analiza la semana (encuesta, incidencias, notas del personal y reseñas de Google), "
+           "genera recomendaciones, y apruébalas antes de ejecutarlas.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(
-        "**Qué hace el sistema:** lee las reseñas de Google y la encuesta, compara lo que "
-        "encuentra con los patrones que ya conoce, y propone un plan solo para lo nuevo "
-        "(o para un problema cerrado que vuelve a aparecer).\n\n"
+        "**Qué hace el sistema:** lee la semana siguiente sin analizar: la encuesta de los socios, "
+        "el registro de incidencias de recepción, las notas del personal y las reseñas de Google. "
+        "Un tema solo es un patrón si se repite en días distintos y lo confirman 3 menciones o "
+        "2 fuentes distintas en los últimos 28 días. Lo compara con los patrones que ya conoce y "
+        "propone un plan solo para lo nuevo (o para un problema cerrado que vuelve a aparecer).\n\n"
+        "**También verás:** alertas de seguridad (se avisan sin esperar), fortalezas del club y "
+        "temas *a vigilar* que aún no llegan a patrón.\n\n"
         "**Qué decides tú:** para cada plan, *Aprobar*, *Pedir cambios* o *Descartar*. "
         "Todo queda guardado, también lo que descartas, para que no se vuelva a proponer.\n\n"
         "**Después:** los planes aprobados pasan a **Kits de Ejecución**."
@@ -806,6 +811,12 @@ with st.expander("¿Qué pasa en esta página?"):
 
 
 if st.session_state.np_stage == "start":
+    week = upcoming_week()
+    if week:
+        st.markdown(f'<div class="section-title">📅 Semana que se analizará: {html.escape(week["label"])}</div>',
+                    unsafe_allow_html=True)
+    else:
+        st.warning("No encuentro datos de ninguna semana en la carpeta data/.")
     if st.button("🔎 Ejecutar análisis", type="primary"):
         st.session_state.np_config = new_thread()
         pending = run_graph({}, "Analizando reseñas y encuestas...", "np_status")
@@ -832,6 +843,9 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
 
     with st.container(key="rec_card"):
         st.markdown(f'<div class="rec-pattern-name">{html.escape(current["pattern_name"])}</div>', unsafe_allow_html=True)
+        if current.get("priority"):
+            st.caption(f"⚡ Prioridad {current['priority']} · Confianza {current.get('confidence') or '—'}"
+                       + (f" · Evidencia: {current['evidence_ids']}" if current.get("evidence_ids") else ""))
         if current["kind"] == "reaparece":
             st.markdown(
                 '<div class="reappear-note">🔄 Este patrón ya se había cerrado como resuelto, '
@@ -888,13 +902,25 @@ elif st.session_state.np_stage == "done":
     skipped = values.get("skipped", [])
     not_detected = values.get("not_detected", [])
 
-    st.success("✅ Análisis completado.")
+    evidence = values.get("evidence") or {}
+
+    st.success("✅ Análisis completado"
+               + (f" · semana {week_label(values['period_start'])}" if values.get("period_start") else "."))
+
+    for a in evidence.get("alerts", []):
+        st.error(f"⚠️ **Alerta de seguridad — {a['label']}**: avisa sin esperar. "
+                 f"Evidencia: {', '.join(a['evidence_ids'])}")
 
     approved = [r for r in results if r["outcome"] == "approved"]
     discarded = [r for r in results if r["outcome"] == "discarded"]
 
     if not results:
-        st.markdown('<div class="section-title">No hay patrones nuevos en este análisis.</div>', unsafe_allow_html=True)
+        if evidence and not evidence.get("patterns"):
+            st.markdown('<div class="section-title">🌤️ Semana tranquila: no hay evidencia suficiente '
+                        'para un patrón nuevo.</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="section-title">No hay patrones nuevos en este análisis.</div>',
+                        unsafe_allow_html=True)
     if approved:
         st.markdown(f'<div class="section-title">{len(approved)} aprobada(s)</div>', unsafe_allow_html=True)
         for r in approved:
@@ -917,6 +943,24 @@ elif st.session_state.np_stage == "done":
         st.markdown('<div class="section-title">Lo que el sistema ya conocía</div>'
                     f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
 
+    if evidence.get("strengths"):
+        rows = "".join(
+            f'<div class="known-row"><span class="known-name">💪 {html.escape(x["label"])}</span>'
+            f'<span class="known-reason">{x["mentions"]} menciones</span></div>'
+            for x in evidence["strengths"]
+        )
+        st.markdown('<div class="section-title">Fortalezas del club</div>'
+                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+
+    if evidence.get("a_vigilar"):
+        rows = "".join(
+            f'<div class="known-row"><span class="known-name">👀 {html.escape(x["label"])}</span>'
+            f'<span class="known-reason">{x["mentions"]} mención(es) · aún no es patrón</span></div>'
+            for x in evidence["a_vigilar"]
+        )
+        st.markdown('<div class="section-title">A vigilar</div>'
+                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+
     if values.get("insights_text"):
         with st.expander("🔎 Ver análisis completo de Insights"):
             st.markdown(values["insights_text"])
@@ -932,4 +976,4 @@ elif st.session_state.np_stage == "done":
         if st.button("← Analizar de nuevo", type="secondary"):
             st.session_state.np_stage = "start"
             st.session_state.np_pending = None
-            st.rerun()
+            st.rerun()

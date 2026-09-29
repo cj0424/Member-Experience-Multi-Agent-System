@@ -23,6 +23,12 @@ Fixes compared with the Phase 1 version:
 - every event carries its attempt number, so Historial can show
   "attempt 2, cycle 1" instead of cycle numbers that restart
 - no input(): human steps use interrupt(), like graph.py
+
+Phase 3: every check-in automatically attaches what the four sources
+(survey, incident log, staff notes, Google) said about this pattern's
+topic since it was detected (db.source_evidence_summary). The owner sees
+it before answering, and Outcome Check receives it together with the
+owner's own comments. No mentions is not treated as proof it's fixed.
 """
 
 import io
@@ -124,6 +130,10 @@ def checkin_node(state: ContinuityState) -> dict:
         return {}
     p = patterns[i]
     checkin_number = db.count_checkins(p["id"], p.get("attempt") or 1) + 1
+    try:
+        source_evidence = db.source_evidence_summary(p)
+    except Exception as e:  # noqa: BLE001 - never block a check-in
+        source_evidence = f"No se pudieron leer las fuentes: {e}"
 
     answer = interrupt({
         "type": "checkin",
@@ -136,6 +146,7 @@ def checkin_node(state: ContinuityState) -> dict:
         "attempt": p.get("attempt") or 1,
         "cycle": (p.get("cycles_since_approval") or 0) + 1,
         "checkin_number": checkin_number,
+        "source_evidence": source_evidence,
     })
 
     results = list(state.get("results", []))
@@ -159,8 +170,10 @@ def checkin_node(state: ContinuityState) -> dict:
     # 2. Outcome Check
     narrate(f"🔁 Evaluando resultados: {p['pattern_name']}...")
     feedback = (answer.get("feedback") or "").strip() or "Ninguna"
+    combined = (f"EVIDENCIA AUTOMÁTICA DE LAS FUENTES (encuesta, incidencias, personal, Google):\n"
+                f"{source_evidence}\n\nLO QUE INDICA EL PROPIETARIO SOBRE EL RESULTADO:\n{feedback}")
     outcome = run_outcome_check_for(
-        p, new_reviews_since_approval=feedback,
+        p, new_reviews_since_approval=combined,
         rating_before=answer.get("rating_before") or "No disponible",
         rating_after=answer.get("rating_after") or "No disponible",
     )
@@ -185,7 +198,8 @@ def checkin_node(state: ContinuityState) -> dict:
     db.log_event(
         p["id"], p["pattern_name"], "check_in",
         narrative=outcome, decision=decision,
-        evidence_summary=f"{verification_result}\nComentarios sobre el resultado: {feedback}",
+        evidence_summary=(f"{verification_result}\nComentarios sobre el resultado: {feedback}"
+                          f"\nFuentes desde la detección:\n{source_evidence}"),
         attempt=attempt, cycle=cycles,
     )
 
@@ -318,4 +332,4 @@ if __name__ == "__main__":
     for r in values.get("results", []):
         print(f"🔁 {r['pattern_name']}: {r['decision']}")
     for r in values.get("pivot_results", []):
-        print(f"{'✅' if r['outcome'] == 'approved' else '❌'} Nuevo enfoque — {r['pattern_name']}")
+        print(f"{'✅' if r['outcome'] == 'approved' else '❌'} Nuevo enfoque — {r['pattern_name']}")

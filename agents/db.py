@@ -15,10 +15,16 @@ Pattern lifecycle (patterns.status):
 - escalated  → failed twice after real attempts; needs the owner.
 - discarded  → owner rejected the recommendation at Gate 1. Kept so
                Insights never proposes it again as "new".
+
+Phase 3: each pattern also stores its topic (from evidence/rules.py), its
+priority and confidence, its evidence IDs, and the last day of the week in
+which it was detected (detected_period_end). The topic is how a pattern is
+recognised again; the date is where check-ins start counting new evidence.
 """
 
 import os
 import re
+from datetime import date, timedelta
 from dotenv import load_dotenv
 from supabase import create_client
 
@@ -68,13 +74,24 @@ def get_patterns_pending_kit() -> list[dict]:
 
 
 def format_known_patterns(patterns: list[dict]) -> str:
-    """What the Insights Agent is told the system already knows."""
+    """What the system already knows, in one line per pattern."""
     if not patterns:
         return "Ninguno todavía."
     return "\n".join(
-        f"#{p['id']} — {p['pattern_name']} — {STATUS_LABELS.get(p.get('status'), p.get('status'))}"
+        f"#{p['id']} — {p['pattern_name']}"
+        + (f" [{p['topic']}]" if p.get("topic") else "")
+        + f" — {STATUS_LABELS.get(p.get('status'), p.get('status'))}"
         for p in patterns
     )
+
+
+# Extra fields saved with each pattern (Phase 3). See sql/phase3_patterns_columns.sql
+PATTERN_META_FIELDS = ("topic", "priority", "priority_score", "confidence",
+                       "evidence_ids", "detected_period_end")
+
+
+def _meta(meta: dict | None) -> dict:
+    return {k: v for k, v in (meta or {}).items() if k in PATTERN_META_FIELDS}
 
 
 SECTION_WORDS = r"(problema|situaci[oó]n|oportunidad|momento|punto fuerte|qu[eé] se puede|qu[eé] podemos|opciones|por qu[eé]|vale la pena)"
@@ -158,7 +175,7 @@ def drop_kept_ideas(rejected_text: str | None, approved_text: str) -> str | None
 # ---------------------------------------------------------------------------
 
 def create_pattern(name: str, description: str, approved_action: str,
-                   rejected_ideas: str | None = None) -> dict:
+                   rejected_ideas: str | None = None, meta: dict | None = None) -> dict:
     rejected_ideas = drop_kept_ideas(rejected_ideas, approved_action)
     row = supabase.table("patterns").insert({
         "pattern_name": name,
@@ -169,12 +186,13 @@ def create_pattern(name: str, description: str, approved_action: str,
         "cycles_since_approval": 0,
         "pivot_count": 0,
         "rejected_ideas": rejected_ideas,
+        **_meta(meta),
     }).execute().data
     return row[0] if row else {}
 
 
 def record_discarded_pattern(name: str, description: str, recommendation_text: str,
-                             rejected_ideas: str | None = None) -> dict:
+                             rejected_ideas: str | None = None, meta: dict | None = None) -> dict:
     """A discard is remembered, so the same pattern doesn't come back
     as 'new' on the next Insights run."""
     note = f"- Descartado: {summarize_recommendation(recommendation_text)} (motivo: el propietario descartó la recomendación)"
@@ -184,6 +202,7 @@ def record_discarded_pattern(name: str, description: str, recommendation_text: s
         "pattern_description": description,
         "status": "discarded",
         "rejected_ideas": all_rejected,
+        **_meta(meta),
     }).execute().data
     return row[0] if row else {}
 
@@ -204,7 +223,7 @@ def append_rejected_idea(pattern_id: int, idea: str):
 
 
 def start_new_attempt(pattern_id: int, approved_action: str, description: str | None = None,
-                      reset_pivots: bool = False) -> int:
+                      reset_pivots: bool = False, meta: dict | None = None) -> int:
     """Used when a closed pattern reappears, or after a Pivotar is
     approved: the new plan replaces the old one, and everything tied
     to the OLD plan (its kit, its verification method) is cleared, so
@@ -225,6 +244,7 @@ def start_new_attempt(pattern_id: int, approved_action: str, description: str | 
     }
     if description:
         updates["pattern_description"] = description
+    updates.update(_meta(meta))
     if reset_pivots:
         updates["pivot_count"] = 0
     supabase.table("patterns").update(updates).eq("id", pattern_id).execute()
@@ -375,3 +395,79 @@ def get_journey_counts() -> dict:
         "escalated": len(escalated),
         "days_since_analysis": _days_since(runs[0]["created_at"]) if runs else None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Evidence from the four sources (Phase 3) — used by the check-ins, so
+# Outcome Check sees what members, staff and Google said since the plan.
+# Tables: evidence_items + evidence_tags (sql/phase3_evidence_sources.sql)
+# ---------------------------------------------------------------------------
+
+SOURCE_LABELS = {"survey": "encuesta", "incident": "incidencias", "staff": "personal", "google": "Google"}
+
+
+def get_topic_evidence(topic: str, date_from: date, date_to: date | None = None) -> list[dict]:
+    """Every tagged mention of a topic between two dates (inclusive), with its text.
+    Google entries have no stored text (Google's terms), only their tag."""
+    tags = supabase.table("evidence_tags").select("*").eq("topic", topic).execute().data or []
+    if not tags:
+        return []
+    ids = list({t["evidence_id"] for t in tags})
+    items = {}
+    for i in range(0, len(ids), 200):
+        q = (supabase.table("evidence_items").select("id,source,event_date,body")
+             .in_("id", ids[i:i + 200]).gte("event_date", date_from.isoformat()))
+        if date_to:
+            q = q.lte("event_date", date_to.isoformat())
+        items.update({r["id"]: r for r in (q.execute().data or [])})
+    out = []
+    for t in tags:
+        it = items.get(t["evidence_id"])
+        if it:
+            out.append({"id": it["id"], "source": it["source"], "event_date": it["event_date"],
+                        "polarity": t["polarity"], "detail": t.get("detail"), "safety": t.get("safety"),
+                        "text": it.get("body")})
+    return sorted(out, key=lambda m: (m["event_date"], m["id"]))
+
+
+def get_analysed_weeks_after(day: date) -> list[str]:
+    """Mondays of the weeks analysed after a given day (from the survey runs)."""
+    rows = (supabase.table("source_runs").select("period_start")
+            .eq("source", "survey").gt("period_start", day.isoformat()).execute().data or [])
+    return sorted({r["period_start"] for r in rows})
+
+
+def source_evidence_summary(pattern: dict) -> str:
+    """Plain-text summary for a check-in: mentions of this pattern's topic in the
+    28 days up to its detection, and every mention since, from all four sources."""
+    topic, detected = pattern.get("topic"), pattern.get("detected_period_end")
+    if not topic or not detected:
+        return "No disponible: este patrón se creó antes de las fuentes múltiples."
+    detected = date.fromisoformat(str(detected)[:10])
+    before = get_topic_evidence(topic, detected - timedelta(days=27), detected)
+    after = get_topic_evidence(topic, detected + timedelta(days=1))
+    weeks = get_analysed_weeks_after(detected)
+
+    def count(ms, pol):
+        return sum(1 for m in ms if m["polarity"] == pol)
+
+    def line(m):
+        d = date.fromisoformat(m["event_date"][:10]).strftime("%d/%m")
+        kind = "queja" if m["polarity"] == "queja" else "elogio"
+        detail = f" [{m['detail']}]" if m.get("detail") else ""
+        text = re.sub(r"\s+", " ", m["text"] or "texto de Google no guardado").strip()[:160]
+        return f"- {m['id']} ({SOURCE_LABELS.get(m['source'], m['source'])}, {d}) {kind}{detail}: {text}"
+
+    lines = [
+        f"Semanas analizadas desde que se detectó (hasta el {detected:%d/%m}): {len(weeks)}",
+        f"Antes (28 días hasta la detección): {count(before, 'queja')} quejas, {count(before, 'elogio')} elogios",
+        f"Desde entonces: {count(after, 'queja')} quejas, {count(after, 'elogio')} elogios",
+    ]
+    if after:
+        lines += ["Menciones desde la detección:"] + [line(m) for m in after]
+    elif weeks:
+        lines.append("Ninguna mención desde la detección. Ojo: no haber menciones no demuestra "
+                     "por sí solo que esté resuelto.")
+    else:
+        lines.append("Todavía no se ha analizado ninguna semana posterior: no hay datos nuevos.")
+    return "\n".join(lines)

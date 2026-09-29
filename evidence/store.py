@@ -97,3 +97,19 @@ def load_tags_for(client, ids):
     for chunk in _chunks(list(ids)):
         rows += client.table("evidence_tags").select("*").in_("evidence_id", chunk).execute().data
     return rows
+
+
+def last_analysed_period_start(client):
+    """Monday of the most recent week whose survey was read (None if never)."""
+    res = (client.table("source_runs").select("period_start")
+           .eq("source", "survey").order("period_start", desc=True).limit(1).execute())
+    return date.fromisoformat(res.data[0]["period_start"]) if res.data else None
+
+
+def get_bodies(client, ids):
+    """Stored text of club entries (Google entries have none)."""
+    out = {}
+    for chunk in _chunks(list(ids)):
+        rows = client.table("evidence_items").select("id,body").in_("id", chunk).execute().data
+        out.update({r["id"]: r["body"] for r in rows if r.get("body")})
+    return out

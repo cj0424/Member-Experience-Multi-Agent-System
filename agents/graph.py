@@ -3,8 +3,11 @@ graph.py — the two "forward" graphs of the system. Streamlit pages
 run these; the terminal runner at the bottom is only for testing.
 
 1. discovery_graph (Nuevos Patrones)
-   Supabase memory → Insights → classify against what's already
-   known → Action Planning → ⏸ Gate 1, one recommendation at a time.
+   Supabase memory → Insights (4 sources: survey, incident log, staff
+   notes, Google) → classify against what's already known → Action
+   Planning → ⏸ Gate 1, one recommendation at a time. A quiet week with
+   no pattern ends right after classify ("semana tranquila").
+   Each run analyses the next week not analysed yet (data/week*/).
 
 2. kit_graph (Kits de Ejecución)
    patterns waiting for a kit → Execution Kit → ⏸ Gate 2, one kit at
@@ -22,8 +25,11 @@ run knows about it.
 """
 
 import json
+import os
 import re
+import sys
 import uuid
+from datetime import date, timedelta
 from typing import TypedDict
 
 from langgraph.graph import StateGraph, START, END
@@ -31,14 +37,17 @@ from langgraph.types import interrupt, Command
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.config import get_stream_writer
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 import db
 from insights_agent import run_insights_agent, client
+from evidence.pipeline import next_week_to_analyse
 from action_planning_agent import run_action_planning_agent, run_action_planning_revision
 from execution_kit_agent import run_execution_kit_agent, run_execution_kit_revision
 
 RAG_FOLDER = "data/rag_library"
-REVIEW_FILE = "data/reviews/padel_club_reviews_anonymized.txt"
-SURVEY_FILE = "data/reviews/padel_club_survey_sept_week3.txt"
 MODEL = "gemini-3.7-flash"
 
 
@@ -64,6 +73,22 @@ def normalize(name: str) -> str:
     return re.sub(r"[^a-záéíóúñü0-9 ]", "", (name or "").lower()).strip()
 
 
+def week_label(period_start: str) -> str:
+    start = date.fromisoformat(period_start)
+    end = start + timedelta(days=6)
+    return f"{start:%d/%m} – {end:%d/%m/%Y}"
+
+
+def upcoming_week() -> dict | None:
+    """The week the next analysis will read (for the page caption)."""
+    try:
+        period_start, week_dir = next_week_to_analyse()
+    except Exception:
+        return None
+    return {"period_start": period_start.isoformat(), "week_dir": week_dir,
+            "label": week_label(period_start.isoformat())}
+
+
 def feedback_with_history(feedback: str, revisions: list[dict]) -> str:
     """Each revision only saw the latest feedback, so an idea rejected in
     round 1 could come back in round 2. This adds every earlier rejection
@@ -81,8 +106,13 @@ def feedback_with_history(feedback: str, revisions: list[dict]) -> str:
 # ===========================================================================
 
 class DiscoveryState(TypedDict, total=False):
+    week_dir: str             # optional input: which data/week*/ folder to read
+    period_start: str         # optional input: its Monday (YYYY-MM-DD)
+    period_end: str
     known: list[dict]         # patterns already in Supabase at the start
     insights_text: str
+    found: list[dict]         # active patterns from the rules engine, already named
+    evidence: dict            # strengths, a_vigilar, alerts, sources read
     run_id: int               # this analysis, saved in insights_runs
     items: list[dict]         # recommendations waiting for Gate 1
     skipped: list[dict]       # patterns found but already handled
@@ -94,9 +124,20 @@ class DiscoveryState(TypedDict, total=False):
 def insights_node(state: DiscoveryState) -> dict:
     narrate("🗂️ Leyendo los patrones ya registrados en Supabase...")
     known = db.get_all_patterns()
-    narrate("📖 Leyendo reseñas de Google y respuestas de encuesta...")
-    text = run_insights_agent(REVIEW_FILE, SURVEY_FILE, known_patterns=db.format_known_patterns(known))
-    return {"known": known, "insights_text": text}
+    week_dir, period_start = state.get("week_dir"), state.get("period_start")
+    if not week_dir or not period_start:
+        ps, week_dir = next_week_to_analyse()
+        period_start = ps.isoformat()
+    narrate(f"📅 Semana que se analiza: {week_label(period_start)}")
+    narrate("📖 Leyendo encuesta, incidencias, notas del personal y reseñas de Google...")
+    narrate("🏷️ Clasificando cada comentario por tema y aplicando las reglas...")
+    result = run_insights_agent(week_dir, date.fromisoformat(period_start), known)
+    ev = result["evidence"]
+    narrate(f"✅ {len(ev['patterns'])} patrón(es) · {len(ev['strengths'])} fortaleza(s) · "
+            f"{len(ev['a_vigilar'])} a vigilar · {len(ev['alerts'])} alerta(s)")
+    return {"known": known, "insights_text": result["text"], "found": result["patterns"],
+            "evidence": ev, "week_dir": week_dir, "period_start": period_start,
+            "period_end": ev["period_end"]}
 
 
 def extract_patterns(insights_text: str) -> list[dict]:
@@ -146,7 +187,9 @@ def classify_node(state: DiscoveryState) -> dict:
     known_by_id = {p["id"]: p for p in state["known"]}
     known_by_name = {normalize(p["pattern_name"]): p for p in state["known"]}
 
-    found_list = extract_patterns(state["insights_text"])
+    found_list = state.get("found")
+    if found_list is None:                     # older runs without structured output
+        found_list = extract_patterns(state["insights_text"])
     items, skipped, decisions, matched_ids = [], [], [], set()
 
     for found in found_list:
@@ -161,7 +204,8 @@ def classify_node(state: DiscoveryState) -> dict:
                 skipped.append({"pattern_id": None, "name": name, "reason": reason})
                 decisions.append({"patron": name, "decision": "omitido", "motivo": reason})
             else:
-                items.append({"kind": "nuevo", "name": name, "description": found.get("texto", name)})
+                items.append({"kind": "nuevo", "name": name, "description": found.get("texto", name),
+                              "meta": found.get("meta") or {}})
                 decisions.append({"patron": name, "decision": "nuevo → Action Planning"})
             continue
 
@@ -175,6 +219,7 @@ def classify_node(state: DiscoveryState) -> dict:
                 "description": found.get("texto", name),
                 "previous_action": match.get("approved_action") or "",
                 "rejected_ideas": match.get("rejected_ideas") or "",
+                "meta": found.get("meta") or {},
             })
             decisions.append({"patron": match["pattern_name"], "id": match["id"],
                               "decision": "reaparece → Action Planning"})
@@ -198,13 +243,17 @@ def classify_node(state: DiscoveryState) -> dict:
                           "decision": "no detectado como activo en este análisis"})
 
     run_id = db.save_insights_run(
-        sources=f"{REVIEW_FILE} + {SURVEY_FILE}",
+        sources=(f"{state.get('week_dir')} · semana {week_label(state['period_start'])} · "
+                 "encuesta + incidencias + personal + Google") if state.get("period_start") else "",
         analysis=state["insights_text"],
         found=found_list,
         decisions=decisions,
     )
 
-    narrate(f"✅ {len(items)} patrón(es) para revisar · {len(skipped)} ya conocido(s)")
+    if not items and not skipped:
+        narrate("🌤️ Semana tranquila: no hay evidencia suficiente para un patrón nuevo.")
+    else:
+        narrate(f"✅ {len(items)} patrón(es) para revisar · {len(skipped)} ya conocido(s)")
     return {"run_id": run_id, "items": items, "skipped": skipped,
             "not_detected": not_detected, "index": 0, "results": []}
 
@@ -266,6 +315,7 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
         return {}
     item = items[i]
 
+    meta = item.get("meta") or {}
     decision = interrupt({
         "type": "recommendation",
         "index": i,
@@ -273,6 +323,9 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
         "kind": item["kind"],
         "pattern_name": item["name"],
         "text": item["text"],
+        "priority": meta.get("priority"),
+        "confidence": meta.get("confidence"),
+        "evidence_ids": meta.get("evidence_ids"),
     })
     action = decision.get("action")
     results = list(state.get("results", []))
@@ -294,14 +347,16 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
     if action == "approve":
         if item["kind"] == "reaparece":
             pattern_id = item["pattern_id"]
-            attempt = db.start_new_attempt(pattern_id, item["text"], item["description"], reset_pivots=True)
+            attempt = db.start_new_attempt(pattern_id, item["text"], item["description"], reset_pivots=True,
+                                           meta=item.get("meta"))
             for entry in rejected:
                 entry = db.drop_kept_ideas(entry, item["text"])   # never record kept options as rejected
                 if entry:
                     db.append_rejected_idea(pattern_id, entry)
         else:
             row = db.create_pattern(item["name"], item["description"], item["text"],
-                                    rejected_ideas="\n".join(f"- {e}" for e in rejected) or None)
+                                    rejected_ideas="\n".join(f"- {e}" for e in rejected) or None,
+                                    meta=item.get("meta"))
             pattern_id, attempt = row.get("id"), 1
         _log_plan_story(pattern_id, item, attempt, run_id)
         db.log_event(pattern_id, item["name"], "plan_aprobado", narrative=item["text"], attempt=attempt)
@@ -314,7 +369,8 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
                 db.append_rejected_idea(pattern_id, entry)
         else:
             row = db.record_discarded_pattern(item["name"], item["description"], item["text"],
-                                              rejected_ideas="\n".join(f"- {e}" for e in rejected) or None)
+                                              rejected_ideas="\n".join(f"- {e}" for e in rejected) or None,
+                                              meta=item.get("meta"))
             pattern_id, attempt = row.get("id"), 1
         _log_plan_story(pattern_id, item, attempt, run_id)
         db.log_event(pattern_id, item["name"], "descartado", narrative=item["text"], attempt=attempt)
@@ -334,7 +390,9 @@ _discovery.add_node("planning", planning_node)
 _discovery.add_node("review", review_recommendation_node)
 _discovery.add_edge(START, "insights")
 _discovery.add_edge("insights", "classify")
-_discovery.add_edge("classify", "planning")
+# Nothing new to plan (quiet week, or only known patterns) → finish here
+_discovery.add_conditional_edges("classify", lambda s: "planning" if s["items"] else END,
+                                 {"planning": "planning", END: END})
 _discovery.add_edge("planning", "review")
 _discovery.add_conditional_edges("review", after_review, {"review": "review", END: END})
 
@@ -508,4 +566,4 @@ if __name__ == "__main__":
     if which == "2":
         _cli(kit_graph, "Kit")
     else:
-        _cli(discovery_graph, "Recomendación")
+        _cli(discovery_graph, "Recomendación")

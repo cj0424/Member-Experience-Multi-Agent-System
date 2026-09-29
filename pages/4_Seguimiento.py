@@ -1038,6 +1038,11 @@ elif st.session_state.sg_stage in ("checkin", "pivot", "pivot_revise", "result")
                 f'{md_inline(cur["verification_method"])}</div>',
                 unsafe_allow_html=True,
             )
+            if cur.get("source_evidence"):
+                with st.expander("📊 Lo que dicen las fuentes desde que se detectó (automático)"):
+                    st.caption("Encuesta, incidencias, notas del personal y Google. "
+                               "Se envía junto con tu respuesta; no hace falta que lo copies.")
+                    st.text(cur["source_evidence"])
 
             st.markdown('<div class="section-chip">1. ¿Se hizo la acción?</div>', unsafe_allow_html=True)
             done = st.radio(
@@ -1081,7 +1086,7 @@ elif st.session_state.sg_stage in ("checkin", "pivot", "pivot_revise", "result")
                 st.markdown('<div class="section-chip">2. ¿Ha mejorado el problema?</div>', unsafe_allow_html=True)
                 answer["feedback"] = st.text_area(
                     "Comentarios o reseñas", key=f"sg_fb_{idx}", height=120, label_visibility="collapsed",
-                    placeholder="Lo que has visto tú, o lo que te han comentado socios o personal sobre este tema desde que se aprobó el plan. Déjalo vacío si no hay nada.",
+                    placeholder="Lo que has visto tú, o lo que te han comentado socios o personal sobre este tema desde que se aprobó el plan (lo que ya está en las fuentes se añade solo). Déjalo vacío si no hay nada.",
                 )
                 r1, r2, _ = st.columns([1, 1, 3])
                 answer["rating_before"] = r1.text_input("Valoración media antes (opcional)", key=f"sg_rb_{idx}")
@@ -1188,4 +1193,4 @@ elif st.session_state.sg_stage == "done":
         if st.button("← Volver a Seguimiento", type="secondary"):
             st.session_state.sg_stage = "start"
             st.session_state.sg_pending = None
-            st.rerun()
+            st.rerun()
