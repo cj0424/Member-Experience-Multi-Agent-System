@@ -468,15 +468,42 @@ class KitState(TypedDict, total=False):
     results: list[dict]
 
 
+def _is_empty_value(text: str) -> bool:
+    return not re.sub(r"[\s:*_\-—–.]", "", text or "")
+
+
 def extract_verification_method(kit_text: str) -> str:
-    """Reads the 'Cómo verificar' line directly; asks Gemini only if
-    the format varies."""
-    match = re.search(r"C[oó]mo verificar\s*:?\**\s*:?\s*(.+)", kit_text)
-    if match and match.group(1).replace("**", "").strip():
-        return match.group(1).replace("**", "").strip()
+    """Reads the 'Cómo verificar' part of the kit. Gemini writes it either on
+    one line ("Cómo verificar: el miércoles…") or as a label followed by a list
+    of checks on the next lines; both are handled. Several checks are joined as
+    "(1) … (2) …" so they fit on one line wherever they're shown later.
+    Asks Gemini only if neither format is found."""
+    lines = kit_text.split("\n")
+    for i, raw in enumerate(lines):
+        m = re.search(r"C[oó]mo verificar(.*)$", raw, re.I)
+        if not m:
+            continue
+        first = m.group(1).replace("**", "").strip(" :*—–-\t")
+        checks = [] if _is_empty_value(first) else [first]
+        for nxt in lines[i + 1:]:
+            s = nxt.strip()
+            if not s:
+                if checks:
+                    break
+                continue
+            item = re.match(r"^(?:[-*•]|\d+[.)])\s+(.+)", s)
+            if item:
+                checks.append(item.group(1).replace("**", "").strip())
+                continue
+            break
+        if len(checks) == 1:
+            return checks[0]
+        if checks:
+            return " ".join(f"({n}) {c}" for n, c in enumerate(checks, 1))
 
     prompt = f"""Del siguiente kit de ejecución, extrae ÚNICAMENTE el texto del
-método de verificación (la línea "Cómo verificar"), sin la etiqueta.
+método de verificación (lo que aparece en "Cómo verificar"), sin la etiqueta,
+en una sola línea. Si hay varias comprobaciones, júntalas como (1) … (2) …
 Si no existe, responde exactamente: NO_ENCONTRADO
 
 KIT:

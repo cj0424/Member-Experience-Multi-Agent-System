@@ -136,7 +136,8 @@ div[class*="st-key-kit_"] strong.hl {
 }
 
 .section-chip {
-    display: inline-flex;
+    display: flex;
+    width: fit-content;
     align-items: center;
     gap: 8px;
     background-color: #1E3F59;
@@ -554,7 +555,7 @@ def parse_kit(text):
 
     segments, buffer, quote = [], [], []
     exec_fields = {}
-    state = {"list": None}
+    state = {"list": None, "collect": None}   # collect: field whose items follow on the next lines
 
     def close_list():
         if state["list"]:
@@ -594,10 +595,26 @@ def parse_kit(text):
         if re.fullmatch(r"[📋\s*]*Ejecuci[oó]n\s*:?\**", line):
             continue
 
-        field = re.match(r"^[-*•\s]*\**" + EXEC_FIELDS + r"\s*:?\**\s*:?\s*(.+)", line, re.I)
+        field = re.match(r"^[-*•\s]*\**" + EXEC_FIELDS + r"\s*:?\**\s*:?\s*(.*)", line, re.I)
         if field:
-            exec_fields[field.group(1).lower()] = field.group(2).replace("**", "").strip()
+            name = field.group(1).lower()
+            value = field.group(2).replace("**", "").strip(" :*—–-\t")
+            state["collect"] = None
+            if value:
+                exec_fields[name] = value
+            elif name.startswith(("cómo", "como")):
+                # "Cómo verificar:" with the checks listed on the next lines
+                exec_fields[name] = ""
+                state["collect"] = name
             continue
+
+        if state["collect"]:
+            item = re.match(r"^(?:[-*•]|\d+[.)])\s+(.+)", line)
+            if item:
+                current = exec_fields[state["collect"]]
+                exec_fields[state["collect"]] = (current + "\n" if current else "") + item.group(1).strip()
+                continue
+            state["collect"] = None
 
         change = re.match(r"^[*_\"“\s]*(?:✏️|✏)?\s*[*_\"“]*\s*Cambios respecto a tu feedback\s*[*_]*\s*:\s*[*_]*\s*(.+)$", line.strip('"“”'), re.I)
         if change:
@@ -693,10 +710,13 @@ def render_kit(kit_text, key_prefix):
         verify = exec_fields.get("cómo verificar") or exec_fields.get("como verificar")
         verify_html = ""
         if verify:
+            items = [v for v in verify.split("\n") if v.strip()]
+            body = ("<br>".join(f"• {md_inline(v)}" for v in items) if len(items) > 1
+                    else md_inline(verify))
             verify_html = (
                 '<div class="verify-box"><span class="verify-label">🔍 Cómo verificar '
                 '— esto es lo que Outcome Check revisará</span>'
-                f'{md_inline(verify)}</div>'
+                f'{body}</div>'
             )
         st.markdown(
             '<div class="section-chip">📋 Ejecución</div>'

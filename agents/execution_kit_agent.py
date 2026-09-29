@@ -196,6 +196,9 @@ Responsable: [rol]
 Plazo sugerido: [plazo]
 Cómo verificar: [específico — quién, cuándo, y al menos dos comprobaciones en días distintos]
 
+"Cómo verificar" va siempre al final, en la MISMA línea que la etiqueta (si hay
+varias comprobaciones: "(1) … (2) …"), no como una lista debajo.
+
 Ahora razona desde cero y redacta el kit de ejecución real."""
 
 
@@ -235,6 +238,9 @@ Formato:
 Responsable: [rol]
 Plazo sugerido: [plazo]
 Cómo verificar: [específico — quién, cuándo, y al menos dos comprobaciones en días distintos]
+
+"Cómo verificar" va siempre al final, en la MISMA línea que la etiqueta (si hay
+varias comprobaciones: "(1) … (2) …"), no como una lista debajo.
 
 Ahora redacta el kit revisado."""
 
