@@ -100,7 +100,8 @@ div[class*="st-key-hs_open_"] strong.hl {
 }
 
 .section-chip {
-    display: inline-flex;
+    display: flex;
+    width: fit-content;
     align-items: center;
     gap: 8px;
     background-color: #1E3F59;
@@ -111,6 +112,21 @@ div[class*="st-key-hs_open_"] strong.hl {
     border-radius: 8px;
     margin: 30px 0 12px 0;
 }
+
+/* Loyalty-guide note: at the bottom of the card, yellow, with its own label */
+.fid-note {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #FFFBEB;
+    border: 1px solid #F59E0B;
+    border-radius: 10px;
+    padding: 10px 16px;
+    max-width: 920px;
+    margin: 0 0 18px 0;
+}
+.fid-label { font-size: 14px; color: #92400E; font-weight: 700; }
+.fid-text { font-size: 16px; color: #1e293b; }
 
 .source-note {
     font-size: 15px;
@@ -687,6 +703,13 @@ def extract_fidelizacion_line(text):
     return None, text
 
 
+def fid_note_html(fid_text):
+    """The loyalty-guide conclusion, shown at the bottom of the card with its label."""
+    fid_text = re.sub(r"^NO APLICA", "No aplica", fid_text.strip())
+    return ('<div class="fid-note"><span class="fid-label">📘 Guía de fidelización</span>'
+            f'<span class="fid-text">{md_inline(fid_text)}</span></div>')
+
+
 SECTION_ICONS = [
     ("problema", "🧩"),
     ("qué se puede", "🛠️"),
@@ -710,7 +733,7 @@ def md_inline(s):
     s = html.escape(s, quote=False).replace("$", "&#36;")
     s = re.sub(r"\*\*(.+?)\*\*", r'<strong class="hl">\1</strong>', s)
     s = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", s)
-    return s
+    return s.replace("*", "")   # any stray, unpaired * left by Gemini
 
 
 def cost_class(label):
@@ -775,6 +798,21 @@ def build_card_html(text):
             close_list()
             state["in_option"] = False
             title = header.group(1).replace("**", "").strip().rstrip(":")
+            # "Opción 1: …" written as a heading is an option, not a section
+            opt_h = re.match(r"^Opci[oó]n\s*(\d+)\s*[:.\-–—]?\s*(.*)$", title, re.I)
+            if opt_h:
+                state["in_option"] = True
+                body = opt_h.group(2).strip() or title
+                pill = ""
+                cost = re.search(r"\(([^)]*(?:[Cc]oste|€|[Ii]nversi[oó]n)[^)]*)\)", body)
+                if cost:
+                    pill = f'<span class="pill {cost_class(cost.group(1))}">💶 {html.escape(cost.group(1))}</span>'
+                    body = body.replace(cost.group(0), "").strip()
+                parts.append(
+                    f'<div class="option-head"><span class="opt-num">{opt_h.group(1)}</span>'
+                    f'<span class="opt-title">{html.escape(body)}</span>{pill}</div>'
+                )
+                continue
             section = title.lower()
             parts.append(f'<div class="section-chip">{section_icon(title)} {html.escape(title)}</div>')
             continue
@@ -1112,9 +1150,9 @@ def render_event(e: dict, checkin_n: int | None, key: str):
                 st.markdown(clean)
         else:
             fid_text, body = extract_fidelizacion_line(narrative)
-            if fid_text:
-                st.markdown(f'<div class="fid-badge">🎯 {html.escape(fid_text)}</div>', unsafe_allow_html=True)
             render_recommendation(body)
+            if fid_text:
+                st.markdown(fid_note_html(fid_text), unsafe_allow_html=True)
 
 
 def render_pattern_story(p: dict):

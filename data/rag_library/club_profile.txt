@@ -44,14 +44,29 @@ confirmar)" no está decidido: no lo des por hecho.
 - Mantenimiento de mañana: recorrido por todas las pistas antes del
   primer turno (redes, puertas, cristales, estado de la superficie).
   Cepillado general de pistas una vez por semana, según calendario fijo.
-- Parte de incidencias: libreta en recepción. Cualquier empleado apunta
-  fecha, pista, problema y quién lo detectó. Mantenimiento lo revisa
-  cada mañana y marca lo resuelto.
+- Parte de incidencias: libreta en recepción, SOLO para problemas
+  (averías, quejas de socios, cosas que faltan o fallan). Cualquier
+  empleado apunta fecha, pista, problema y quién lo detectó.
+  Mantenimiento lo revisa cada mañana y marca lo resuelto.
+- Las tareas rutinarias (cepillados, revisiones periódicas, reposiciones
+  programadas) NO se apuntan en el parte de incidencias: se registran en
+  una hoja de mantenimiento propia, en el cuarto de mantenimiento.
 - Cierre (recepción de tarde): arqueo de caja, apagado de luces de
   pistas y de la climatización de recepción y vestuarios, revisión de
   objetos olvidados, nota de traspaso para el turno de mañana.
 - Mantenimiento especializado (descompactado del césped, revisión de
   juntas y cristales): empresa externa, contrato anual con 2 visitas.
+
+=== OPINIONES QUE EL SISTEMA ANALIZA CADA SEMANA ===
+El sistema de mejora lee cuatro fuentes. Para que sirvan, cada una se
+usa solo para lo suyo; no propongas mezclarlas:
+- Encuesta tras la sesión (QR en recepción): lo que opinan los socios.
+- Parte de incidencias: solo problemas (ver arriba).
+- Observaciones del personal: nota breve semanal de entrenadores,
+  recepción y mantenimiento con lo que han notado (qué comentan los
+  socios, cosas que se repiten, comprobaciones pedidas en un plan).
+  Es el sitio para impresiones y comprobaciones del personal.
+- Reseñas de Google: públicas, se leen en directo y no se guardan.
 
 === RESERVAS Y NORMAS PARA SOCIOS ===
 - Herramienta de reservas: Playtomic Manager. También se reserva en

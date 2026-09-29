@@ -90,11 +90,15 @@ evidencia que aparece debajo.
 
 Para cada tema:
 - "nombre": 3 a 8 palabras, en español de España, que describan el problema
-  concreto (por ejemplo "Aparcamiento lleno en el cambio de turno de tarde").
+  concreto (por ejemplo "Duchas sin agua caliente en el vestuario de hombres").
+  Pon una hora, un día, una pista o un lugar en el nombre SOLO si lo dicen la
+  mayoría de las menciones; si lo dice solo alguna, explícalo en "que_significa".
   Si hay un NOMBRE YA REGISTRADO, cópialo exactamente.
 - "que_significa": 1 o 2 frases cortas: qué pasa, cuándo o dónde si la evidencia
-  lo dice (pista, horario, vestuario), y qué fuentes lo confirman. Si hay evidencia
-  EN CONTRA, menciónala en media frase. No inventes cifras, fechas ni causas.
+  lo dice (pista, horario, vestuario), y qué fuentes lo confirman. Cuenta bien:
+  si hay una sola mención de una fuente, di "un socio" o "una nota", no "varios".
+  Si hay evidencia EN CONTRA, menciónala en media frase. No inventes cifras,
+  fechas ni causas.
 
 Responde SOLO con un JSON (sin ``` ni texto extra):
 [{{"topic": "...", "nombre": "...", "que_significa": "..."}}]

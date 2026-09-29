@@ -136,6 +136,12 @@ número real de ciclos transcurridos ({cycles_since_approval}).
   aún falta confirmar que se sostiene en el tiempo antes de cerrar.
   No sigas más.
 - Si ambas se cumplen → continúa al Paso 3.
+Ten en cuenta la ESTACIÓN: si el problema depende del tiempo o de la época
+del año (calor, frío, lluvia, humedad, luz natural, temporada alta o baja),
+puede mejorar o empeorar solo por el cambio de estación. En ese caso, una
+mejora que coincide con el cambio de estación NO demuestra que el plan
+funcione: dilo, y decide CONTINUAR hasta poder comprobarlo cuando vuelvan
+las condiciones en las que aparecía el problema.
 
 PASO 3 (dado que Paso 1 y 2 se cumplieron): Define el criterio de
 éxito específico para ESTE patrón, antes de mirar ninguna evidencia
@@ -279,4 +285,4 @@ if __name__ == "__main__":
         new_reviews_since_approval="""Socio-Z: "Las pistas ya no tienen tanta arena, se nota la mejora.\"""",
         rating_before="4.2", rating_after="4.4"
     )
-    print(result)
+    print(result)

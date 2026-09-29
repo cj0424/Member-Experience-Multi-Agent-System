@@ -225,7 +225,8 @@ def classify_node(state: DiscoveryState) -> dict:
                               "decision": "reaparece → Action Planning"})
         else:
             reason = {
-                "open": "Ya está en seguimiento",
+                "open": ("Ya está en seguimiento" if match.get("verification_method")
+                         else "Ya registrado · pendiente de kit"),
                 "escalated": "Escalado — pendiente de tu revisión",
                 "discarded": "Lo descartaste en un análisis anterior",
             }.get(status, "Ya registrado")
@@ -294,6 +295,63 @@ def planning_node(state: DiscoveryState) -> dict:
     return {"items": items}
 
 
+REJECTED_PROMPT = """Eres el registro de decisiones de un club de pádel. El propietario pidió
+cambios a una versión de un plan y después aprobó otra. Tu tarea: anotar SOLO las ideas
+de la VERSIÓN ANTERIOR que el propietario rechazó o dejó para más adelante en su FEEDBACK.
+
+Reglas:
+- Nunca anotes una idea que siga en la VERSIÓN APROBADA, aunque esté redactada con otras
+  palabras o dividida en pasos: esa idea se aceptó, no se rechazó.
+- Si el feedback solo cambia un detalle (la frecuencia, dónde se apunta algo), anota ese
+  detalle concreto (por ejemplo, "Cepillar solo una vez por semana").
+- "tipo": "Pospuesto" si el propietario dice que lo deja para más adelante, para otra
+  estación o solo si lo demás no basta; si no, "Descartado".
+- "motivo": el motivo del propietario, con sus palabras y breve. Si no da ninguno,
+  "sin motivo indicado".
+- Si el propietario no rechazó ni pospuso nada, devuelve [].
+
+Responde SOLO con un JSON (sin ``` ni texto extra):
+[{{"idea": "...", "tipo": "Descartado", "motivo": "..."}}]
+
+VERSIÓN ANTERIOR:
+{previous}
+
+FEEDBACK DEL PROPIETARIO:
+{feedback}
+
+VERSIÓN APROBADA:
+{approved}"""
+
+
+def rejected_from_feedback(revisions: list[dict], approved_text: str) -> list[str]:
+    """What the owner really turned down in each revision round, as
+    "Descartado: idea (motivo: …)" or "Pospuesto: idea (motivo: …)".
+    Gemini reads the earlier version, the owner's feedback and the approved
+    version, so options that were KEPT (even reworded) are never recorded as
+    rejected. Falls back to the older word-matching method if Gemini fails."""
+    entries = []
+    for rev in revisions:
+        try:
+            raw = client.models.generate_content(
+                model=MODEL,
+                contents=REJECTED_PROMPT.format(previous=rev["text"], feedback=rev["feedback"],
+                                                approved=approved_text),
+            ).text
+            raw = raw.strip().replace("```json", "").replace("```", "").strip()
+            for x in json.loads(raw):
+                idea = (x.get("idea") or "").strip()
+                if not idea:
+                    continue
+                kind = "Pospuesto" if (x.get("tipo") or "").lower().startswith("pos") else "Descartado"
+                reason = (x.get("motivo") or "sin motivo indicado").strip()
+                entries.append(f"{kind}: {idea} (motivo: {reason})")
+        except Exception:  # noqa: BLE001 - keep the old behaviour rather than lose the record
+            fallback = db.drop_kept_ideas(db.rejected_entry(rev["text"], rev["feedback"]), approved_text)
+            if fallback:
+                entries.append(fallback)
+    return entries
+
+
 def _log_plan_story(pattern_id, item, attempt, run_id):
     """Writes this pattern's discovery story to pattern_history: how it
     was found, then every version the owner asked to change."""
@@ -345,14 +403,14 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
     rejected = [db.rejected_entry(r["text"], r["feedback"]) for r in item.get("revisions", [])]
 
     if action == "approve":
+        # Only what the owner actually turned down (or postponed) — never options he kept
+        rejected = rejected_from_feedback(item.get("revisions", []), item["text"])
         if item["kind"] == "reaparece":
             pattern_id = item["pattern_id"]
             attempt = db.start_new_attempt(pattern_id, item["text"], item["description"], reset_pivots=True,
                                            meta=item.get("meta"))
             for entry in rejected:
-                entry = db.drop_kept_ideas(entry, item["text"])   # never record kept options as rejected
-                if entry:
-                    db.append_rejected_idea(pattern_id, entry)
+                db.append_rejected_idea(pattern_id, entry)
         else:
             row = db.create_pattern(item["name"], item["description"], item["text"],
                                     rejected_ideas="\n".join(f"- {e}" for e in rejected) or None,
@@ -566,4 +624,4 @@ if __name__ == "__main__":
     if which == "2":
         _cli(kit_graph, "Kit")
     else:
-        _cli(discovery_graph, "Recomendación")
+        _cli(discovery_graph, "Recomendación")

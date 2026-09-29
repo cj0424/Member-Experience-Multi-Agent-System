@@ -60,6 +60,7 @@ TOPICS = {
     "musica_volumen":       {"label": "Volumen de la música",             "severity": 1, "reach": 2},
     "red_puertas":          {"label": "Redes o puertas de las pistas",    "severity": 2, "reach": 2},
     "clases_profesores":    {"label": "Clases y profesores",              "severity": 2, "reach": 2},
+    "plazas_clases":        {"label": "Plazas y listas de espera en clases", "severity": 2, "reach": 2},
     "personal_recepcion":   {"label": "Atención en recepción",            "severity": 1, "reach": 3},
     "ambiente":             {"label": "Ambiente del club",                "severity": 1, "reach": 3},
     "instalaciones":        {"label": "Instalaciones en general",         "severity": 1, "reach": 3},

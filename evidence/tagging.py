@@ -30,6 +30,10 @@ Reglas:
 - "detail": un dato concreto si lo hay (p. ej. "pista 12", "vestuario de hombres"), si no null.
 - No inventes nada que no esté en el texto. Si un tema no encaja, usa "otro".
 - Un registro de recepción sobre un objeto olvidado -> tema "objetos_perdidos".
+- Grupos de clase llenos, listas de espera o gente que pide plaza y no la hay ->
+  tema "plazas_clases" con polaridad "queja" (es una demanda que el club no cubre),
+  NO un elogio de "clases_profesores". Elogio de profesores o de una clase concreta
+  -> "clases_profesores".
 
 Devuelve SOLO un JSON (sin ``` ni texto extra) con esta forma:
 [{{"id": "ENC-001", "tags": [{{"topic": "aparcamiento", "polarity": "queja", "safety": false, "detail": null}}]}}]
