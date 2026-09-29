@@ -1,0 +1,162 @@
+{
+  "week_start": "2026-09-14",
+  "seed": 20260914,
+  "implemented": [],
+  "events": [],
+  "survey": [
+    {
+      "band": "mañana",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-001",
+      "date": "2026-09-14",
+      "weekday": "lunes"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-002",
+      "date": "2026-09-14",
+      "weekday": "lunes"
+    },
+    {
+      "band": "mañana",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-003",
+      "date": "2026-09-15",
+      "weekday": "martes"
+    },
+    {
+      "band": "tarde",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-004",
+      "date": "2026-09-15",
+      "weekday": "martes"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "atmosphere",
+      "id": "ENC-005",
+      "date": "2026-09-15",
+      "weekday": "martes"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-006",
+      "date": "2026-09-15",
+      "weekday": "martes"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-007",
+      "date": "2026-09-16",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "mañana",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-008",
+      "date": "2026-09-17",
+      "weekday": "jueves"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-009",
+      "date": "2026-09-17",
+      "weekday": "jueves"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-010",
+      "date": "2026-09-17",
+      "weekday": "jueves"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-011",
+      "date": "2026-09-17",
+      "weekday": "jueves"
+    },
+    {
+      "band": "noche",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-012",
+      "date": "2026-09-18",
+      "weekday": "viernes"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-013",
+      "date": "2026-09-19",
+      "weekday": "sábado"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-014",
+      "date": "2026-09-20",
+      "weekday": "domingo"
+    }
+  ],
+  "incidents": [],
+  "staff_notes": [
+    {
+      "role": "Recepción",
+      "topic": "indoor_temperature",
+      "id": "OBS-001",
+      "date": "2026-09-16",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "outside_lights",
+      "id": "OBS-002",
+      "date": "2026-09-16",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Mantenimiento",
+      "topic": "sand",
+      "id": "OBS-003",
+      "date": "2026-09-17",
+      "weekday": "jueves"
+    }
+  ]
+}

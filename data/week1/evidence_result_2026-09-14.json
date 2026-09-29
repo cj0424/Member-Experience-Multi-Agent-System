@@ -1,0 +1,112 @@
+{
+  "run_date": "2026-09-20",
+  "window": {
+    "club_from": "2026-08-24",
+    "google_from": "2025-09-21",
+    "slow_from": "2026-06-23"
+  },
+  "patterns": [
+    {
+      "topic": "luces_exteriores",
+      "label": "Luces fuera de las pistas",
+      "mentions": 2,
+      "distinct_dates": 2,
+      "source_types": [
+        "google",
+        "staff"
+      ],
+      "evidence_ids": [
+        "OBS-002",
+        "REV-005"
+      ],
+      "details": [],
+      "rule": "principal",
+      "severity": 1,
+      "reach": 3,
+      "frequency": 1,
+      "recency": 3,
+      "score": 9,
+      "priority": "Media",
+      "confidence": "Moderada",
+      "contradicting_ids": []
+    }
+  ],
+  "strengths": [
+    {
+      "topic": "clases_profesores",
+      "label": "Clases y profesores",
+      "mentions": 4,
+      "distinct_dates": 4,
+      "source_types": [
+        "google",
+        "survey"
+      ],
+      "evidence_ids": [
+        "ENC-002",
+        "ENC-006",
+        "ENC-013",
+        "REV-004"
+      ],
+      "details": [
+        "grupo de los martes"
+      ]
+    }
+  ],
+  "a_vigilar": [
+    {
+      "topic": "arena_pistas",
+      "label": "Arena en las pistas",
+      "mentions": 1,
+      "distinct_dates": 1,
+      "source_types": [
+        "staff"
+      ],
+      "evidence_ids": [
+        "OBS-003"
+      ],
+      "details": [
+        "fondos y esquinas"
+      ],
+      "severity": 2
+    },
+    {
+      "topic": "aparcamiento",
+      "label": "Aparcamiento",
+      "mentions": 2,
+      "distinct_dates": 2,
+      "source_types": [
+        "survey"
+      ],
+      "evidence_ids": [
+        "ENC-003",
+        "ENC-007"
+      ],
+      "details": [],
+      "severity": 1
+    }
+  ],
+  "alerts": [],
+  "sources": {
+    "survey": {
+      "read": 14,
+      "status": "ok",
+      "error": null
+    },
+    "incident": {
+      "read": 0,
+      "status": "empty",
+      "error": null
+    },
+    "staff": {
+      "read": 3,
+      "status": "ok",
+      "error": null
+    },
+    "google": {
+      "read": 5,
+      "status": "ok",
+      "error": null
+    }
+  },
+  "google_new_reviews": 5
+}
