@@ -136,7 +136,8 @@ def build_pattern_block(p, name, meaning, registro, known_id):
         lines.append(f"↔️ En contra: {', '.join(p['contradicting_ids'])}")
     if p["rule"] != "principal":
         lines.append("🐢 Detectado por la regla lenta: se repite en 3 semanas distintas en 90 días.")
-    return "\n".join(lines)
+    # Two spaces before each line break: Markdown shows one item per line
+    return "  \n".join(lines)
 
 
 def build_report(ev, blocks):

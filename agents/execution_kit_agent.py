@@ -23,6 +23,16 @@ Every prompt receives the shared RAG library (rag.py): the club profile
 (staff, shifts, channels, tools, rules), so each piece fits how this club
 actually works, plus the technical references for pieces that need them
 (e.g. a maintenance protocol).
+
+Phase 3 rules (after the first real kit, where a Google reply said the
+fix was already done and promised diffusers the plan only buys if needed):
+- public and copy-ready messages never say an action is done before it is;
+  they're marked "para publicar/enviar cuando…"
+- optional parts of the plan are never presented as certain
+- verification: at least two checks on different days, including the
+  person who reported the problem if it came from staff
+- style: instructions may be impersonal ("se recomienda", "conviene");
+  copy-ready texts to a person or group are direct and natural
 """
 
 import os
@@ -78,6 +88,29 @@ puede confirmar que existan:
    sé ESPECÍFICO: indica quién exactamente lo hace (rol concreto,
    no solo "el personal") y en qué momento (apertura, cierre, etc.).
 
+IMPORTANTE — no des nada por hecho antes de que ocurra:
+
+4. Los mensajes públicos o listos para enviar (respuestas a reseñas
+   de Google, avisos a socios, mensajes al grupo del personal,
+   correos) NUNCA dicen que una acción ya está hecha si el kit se
+   prepara antes de hacerla. Escríbelos para enviarlos DESPUÉS, e
+   indícalo en el título de la pieza (por ejemplo, "para publicar
+   cuando el ajuste esté comprobado"). Si el mensaje se envía antes
+   de la acción, redáctalo en futuro ("vamos a revisar…"), sin
+   prometer fechas ni resultados que el club no controla.
+
+5. Lo que la recomendación marca como opcional o condicional (por
+   ejemplo, "si hace falta, comprar difusores") NUNCA aparece como
+   seguro en ningún mensaje. En las instrucciones internas, déjalo
+   como condición ("si tras el ajuste…"); en los mensajes públicos,
+   menciona solo lo que la recomendación hace con seguridad.
+
+6. En "Cómo verificar", pide al menos DOS comprobaciones en días
+   distintos (una sola comprobación puede ser casualidad). Si la
+   recomendación indica que el problema lo detectó alguien del
+   personal (por ejemplo, un entrenador), que esa persona participe
+   en la comprobación.
+
 FORMATO DE SALIDA — dos tipos, según lo que la pieza realmente sea:
 - Comunicaciones (mensajes, correos, avisos, protocolos internos,
   información de referencia) van como TEXTO NORMAL dentro del kit
@@ -109,7 +142,17 @@ FORMATO DE SALIDA — dos tipos, según lo que la pieza realmente sea:
   ejemplo, un protocolo técnico de mantenimiento).
 - Escribe en español de España, tanto en los mensajes a socios como
   en las instrucciones al personal. Usa con el propietario y con los
-  socios el tratamiento que indica el PERFIL DEL CLUB (tú o usted)."""
+  socios el tratamiento que indica el PERFIL DEL CLUB (tú o usted).
+
+ESTILO:
+- Recomendaciones e instrucciones: pueden ser impersonales ("se
+  recomienda", "conviene", "se informará"). Es lo normal.
+- Textos listos para enviar a una persona o a un grupo (respuestas
+  en Google, correos, WhatsApp, avisos a socios): directos y
+  naturales, como los escribiría una persona del club.
+- Evita las fórmulas burocráticas en cualquier texto: "proceder a"
+  ("hemos procedido a ajustar" → "hemos ajustado"), "llevar a cabo",
+  "a la mayor brevedad", "en aras de"."""
 
 
 def build_prompt(approved_recommendation: str) -> str:
@@ -131,6 +174,8 @@ Antes de redactar nada, analiza la recomendación y pregúntate:
 - ¿Hay algo físico que adquirir o preparar? Indícalo con claridad.
 - ¿Hay algo que requiere contactar a personas específicas?
 - ¿Hay algún registro de seguimiento que necesite un tracker real?
+- ¿Cada mensaje se envía antes o después de la acción? Redáctalo
+  según eso (regla 4).
 
 {SHARED_QUALITY_RULES}
 
@@ -149,7 +194,7 @@ donde corresponda]
 📋 Ejecución:
 Responsable: [rol]
 Plazo sugerido: [plazo]
-Cómo verificar: [específico — quién y cuándo]
+Cómo verificar: [específico — quién, cuándo, y al menos dos comprobaciones en días distintos]
 
 Ahora razona desde cero y redacta el kit de ejecución real."""
 
@@ -189,7 +234,7 @@ Formato:
 📋 Ejecución:
 Responsable: [rol]
 Plazo sugerido: [plazo]
-Cómo verificar: [específico]
+Cómo verificar: [específico — quién, cuándo, y al menos dos comprobaciones en días distintos]
 
 Ahora redacta el kit revisado."""
 

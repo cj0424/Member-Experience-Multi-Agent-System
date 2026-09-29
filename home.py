@@ -634,7 +634,7 @@ st.caption("Vista general del sistema de mejora continua")
 
 counts = db.get_journey_counts()
 days = counts.get("days_since_analysis")
-analysis_text = ("Aún no has analizado reseñas." if days is None
+analysis_text = ("Aún no has analizado las opiniones del club." if days is None
                  else "Último análisis hoy." if days == 0
                  else f"Último análisis hace {days} día(s).")
 tiles = [
