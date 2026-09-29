@@ -1,0 +1,232 @@
+{
+  "week_start": "2026-09-21",
+  "seed": 20260921,
+  "implemented": [
+    "outside_lights"
+  ],
+  "events": [
+    {
+      "event": "drinks_machine_empty",
+      "dates": [
+        "2026-09-21"
+      ]
+    },
+    {
+      "event": "booking_overrun",
+      "dates": [
+        "2026-09-26"
+      ]
+    },
+    {
+      "event": "playtomic_booking_error",
+      "dates": [
+        "2026-09-27"
+      ]
+    }
+  ],
+  "survey": [
+    {
+      "band": "mañana",
+      "tone": "mixed",
+      "problems": [
+        "court12_light"
+      ],
+      "positive_theme": null,
+      "id": "ENC-015",
+      "date": "2026-09-22",
+      "weekday": "martes"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-016",
+      "date": "2026-09-22",
+      "weekday": "martes"
+    },
+    {
+      "band": "noche",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-017",
+      "date": "2026-09-22",
+      "weekday": "martes"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-018",
+      "date": "2026-09-22",
+      "weekday": "martes"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-019",
+      "date": "2026-09-23",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-020",
+      "date": "2026-09-23",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-021",
+      "date": "2026-09-24",
+      "weekday": "jueves"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-022",
+      "date": "2026-09-24",
+      "weekday": "jueves"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-023",
+      "date": "2026-09-24",
+      "weekday": "jueves"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-024",
+      "date": "2026-09-25",
+      "weekday": "viernes"
+    },
+    {
+      "band": "mañana",
+      "tone": "mixed",
+      "problems": [
+        "indoor_temperature"
+      ],
+      "positive_theme": null,
+      "id": "ENC-025",
+      "date": "2026-09-26",
+      "weekday": "sábado"
+    },
+    {
+      "band": "tarde",
+      "tone": "negative",
+      "problems": [
+        "booking_overrun"
+      ],
+      "positive_theme": null,
+      "id": "ENC-026",
+      "date": "2026-09-26",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-027",
+      "date": "2026-09-26",
+      "weekday": "sábado"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-028",
+      "date": "2026-09-27",
+      "weekday": "domingo"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-029",
+      "date": "2026-09-27",
+      "weekday": "domingo"
+    }
+  ],
+  "incidents": [
+    {
+      "topic": "drinks_machine_empty",
+      "kind": "event",
+      "id": "INC-001",
+      "date": "2026-09-21",
+      "weekday": "lunes"
+    },
+    {
+      "topic": "sand",
+      "kind": "desk_complaint",
+      "id": "INC-002",
+      "date": "2026-09-25",
+      "weekday": "viernes"
+    },
+    {
+      "topic": "booking_overrun",
+      "kind": "event",
+      "id": "INC-003",
+      "date": "2026-09-26",
+      "weekday": "sábado"
+    },
+    {
+      "topic": "playtomic_booking_error",
+      "kind": "event",
+      "id": "INC-004",
+      "date": "2026-09-27",
+      "weekday": "domingo"
+    }
+  ],
+  "staff_notes": [
+    {
+      "role": "Recepción",
+      "topic": "drinks_machine_empty",
+      "id": "OBS-004",
+      "date": "2026-09-21",
+      "weekday": "lunes"
+    },
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-005",
+      "date": "2026-09-23",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Mantenimiento",
+      "topic": "court12_light",
+      "id": "OBS-006",
+      "date": "2026-09-24",
+      "weekday": "jueves"
+    },
+    {
+      "role": "Recepción",
+      "topic": "classes_demand",
+      "id": "OBS-007",
+      "date": "2026-09-25",
+      "weekday": "viernes"
+    }
+  ]
+}

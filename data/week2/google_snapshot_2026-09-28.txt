@@ -1,0 +1,29 @@
+=== GOOGLE PLACES — INSTANTÁNEA SEMANAL ===
+Consulta: lunes 28 de septiembre de 2026
+Regla: las 5 reseñas más recientes (máximo que devuelve Google por consulta)
+Nota: reseñas reales de un club de Madrid, parafraseadas y anonimizadas.
+Mes real; el día es aproximado. La valoración media y el total de reseñas
+se leen en directo en producción y no se guardan.
+Esta semana no hay reseñas nuevas: son las mismas 5 que la semana anterior.
+
+REV-001, 28 de enero de 2026
+Autor: Socio-001
+"Pistas magníficas, buen bar, vestuarios y aparcamiento fácil."
+
+REV-002, 24 de enero de 2026
+Autor: Socio-002
+"Excelente sitio para jugar al pádel."
+
+REV-003, 20 de enero de 2026
+Autor: Socio-003
+"Fui ahora con la renovación y el club está muy bien."
+
+REV-004, 15 de enero de 2026
+Autor: Socio-004
+"Buenas pistas, buenas instalaciones y buenos profesores."
+
+REV-005, 10 de enero de 2026
+Autor: Socio-005
+"Instalaciones estupendas, las pistas y el bar genial. Lo único es
+que no me acostumbro a las luces que hay fuera de las pistas, pero
+por lo demás todo bien."

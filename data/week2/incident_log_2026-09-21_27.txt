@@ -1,0 +1,30 @@
+=== REGISTRO DE INCIDENCIAS — RECEPCIÓN ===
+=== Semana del 21 al 27 de septiembre (simulado, anonimizado) ===
+
+INC-001, lunes 21 de septiembre, 17:30
+Registrado por: Recepción (turno tarde)
+Área: Cafetería
+Descripción: La máquina de bebidas está vacía.
+Acción: Se repone a las 18:00.
+Estado: Cerrada
+
+INC-002, viernes 25 de septiembre, 19:10
+Registrado por: Recepción (turno tarde)
+Área: Pistas
+Descripción: Un socio comenta en recepción que había mucha arena en la pista donde ha jugado.
+Acción: Se avisa a mantenimiento.
+Estado: Abierta
+
+INC-003, sábado 26 de septiembre, 17:20
+Registrado por: Recepción (turno tarde)
+Área: Reservas
+Descripción: La reserva de las 17:00 empieza unos 20 min tarde porque el partido anterior se alarga.
+Acción: Se avisa a los jugadores del turno anterior. Se ofrecen minutos extra al final.
+Estado: Cerrada
+
+INC-004, domingo 27 de septiembre, 10:40
+Registrado por: Recepción (turno mañana)
+Área: Reservas
+Descripción: Un socio no puede reservar en Playtomic: la app le da error al pagar.
+Acción: Se le hace la reserva desde recepción. Se avisa al propietario por si se repite.
+Estado: Cerrada
