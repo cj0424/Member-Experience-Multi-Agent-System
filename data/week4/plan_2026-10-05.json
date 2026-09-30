@@ -1,0 +1,195 @@
+{
+  "week_start": "2026-10-05",
+  "seed": 20261005,
+  "implemented": [
+    "court12_light",
+    "indoor_temperature",
+    "outside_lights",
+    "sand"
+  ],
+  "events": [
+    {
+      "event": "towels_out",
+      "dates": [
+        "2026-10-07"
+      ]
+    },
+    {
+      "event": "drinks_machine_empty",
+      "dates": [
+        "2026-10-09"
+      ]
+    },
+    {
+      "event": "booking_overrun",
+      "dates": [
+        "2026-10-05"
+      ]
+    }
+  ],
+  "survey": [
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-040",
+      "date": "2026-10-05",
+      "weekday": "lunes"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "indoor_temperature"
+      ],
+      "positive_theme": null,
+      "id": "ENC-041",
+      "date": "2026-10-06",
+      "weekday": "martes"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-042",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-043",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "noche",
+      "tone": "negative",
+      "problems": [
+        "towels_out"
+      ],
+      "positive_theme": null,
+      "id": "ENC-044",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-045",
+      "date": "2026-10-09",
+      "weekday": "viernes"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "atmosphere",
+      "id": "ENC-046",
+      "date": "2026-10-10",
+      "weekday": "sábado"
+    },
+    {
+      "band": "mañana",
+      "tone": "mixed",
+      "problems": [
+        "indoor_temperature"
+      ],
+      "positive_theme": null,
+      "id": "ENC-047",
+      "date": "2026-10-11",
+      "weekday": "domingo"
+    },
+    {
+      "band": "noche",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-048",
+      "date": "2026-10-11",
+      "weekday": "domingo"
+    }
+  ],
+  "incidents": [
+    {
+      "topic": "booking_overrun",
+      "kind": "event",
+      "id": "INC-007",
+      "date": "2026-10-05",
+      "weekday": "lunes"
+    },
+    {
+      "topic": "towels_out",
+      "kind": "event",
+      "id": "INC-008",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "topic": "drinks_machine_empty",
+      "kind": "event",
+      "id": "INC-009",
+      "date": "2026-10-09",
+      "weekday": "viernes"
+    }
+  ],
+  "staff_notes": [
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-014",
+      "date": "2026-10-06",
+      "weekday": "martes"
+    },
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-015",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Mantenimiento",
+      "topic": "towels_out",
+      "id": "OBS-016",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Mantenimiento",
+      "topic": "member_feedback_positive",
+      "id": "OBS-017",
+      "date": "2026-10-07",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "drinks_machine_empty",
+      "id": "OBS-018",
+      "date": "2026-10-09",
+      "weekday": "viernes"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "classes_demand",
+      "id": "OBS-019",
+      "date": "2026-10-10",
+      "weekday": "sábado"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "court12_light",
+      "id": "OBS-020",
+      "date": "2026-10-11",
+      "weekday": "domingo"
+    }
+  ]
+}

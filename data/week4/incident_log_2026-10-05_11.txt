@@ -1,0 +1,23 @@
+=== REGISTRO DE INCIDENCIAS — RECEPCIÓN ===
+=== Semana del 5 al 11 de octubre (simulado, anonimizado) ===
+
+INC-007, lunes 5 de octubre, 20:15
+Registrado por: Recepción (turno tarde)
+Área: Reservas
+Descripción: La reserva de las 20:00 empieza tarde porque el partido anterior se alarga unos 15 minutos.
+Acción: Se avisa a los jugadores del turno anterior. Se ofrecen minutos extra al final.
+Estado: Cerrada
+
+INC-008, miércoles 7 de octubre, 20:40
+Registrado por: Recepción (turno tarde)
+Área: Vestuarios
+Descripción: No quedan toallas en el vestuario de hombres.
+Acción: Se reponen a las 21:00.
+Estado: Cerrada
+
+INC-009, viernes 9 de octubre, 17:50
+Registrado por: Recepción (turno tarde)
+Área: Cafetería
+Descripción: La máquina de bebidas está vacía otra vez.
+Acción: Se avisa a la empresa de la cafetería para que la reponga.
+Estado: Abierta
