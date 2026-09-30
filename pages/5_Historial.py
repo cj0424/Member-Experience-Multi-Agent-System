@@ -1205,7 +1205,6 @@ def render_pattern_story(p: dict):
 st.title("📈 Historial")
 render_journey(4)
 agent_line("Registro de todo lo que han hecho los 4 agentes y lo que decidiste tú")
-st.caption("La historia completa de cada patrón: cómo se detectó, qué se decidió, qué se hizo y cómo fue.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(

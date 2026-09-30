@@ -935,7 +935,6 @@ for key, default in {"sg_stage": "start", "sg_config": None, "sg_pending": None,
 st.title("🔁 Seguimiento")
 render_journey(3)
 agent_line("Outcome Check Agent (decide si cerrar, seguir o cambiar) · Action Planning Agent (nuevo enfoque si hace falta)")
-st.caption("Comprueba si las acciones se hicieron y si funcionaron. El sistema decide si cerrar, seguir esperando o cambiar de enfoque.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(
@@ -1193,4 +1192,4 @@ elif st.session_state.sg_stage == "done":
         if st.button("← Volver a Seguimiento", type="secondary"):
             st.session_state.sg_stage = "start"
             st.session_state.sg_pending = None
-            st.rerun()
+            st.rerun()

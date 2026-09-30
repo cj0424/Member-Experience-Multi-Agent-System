@@ -847,7 +847,6 @@ for key, default in {"ek_stage": "start", "ek_config": None, "ek_pending": None,
 st.title("📋 Kits de Ejecución")
 render_journey(2)
 agent_line("Execution Kit Agent (redacta mensajes, protocolos y registros)")
-st.caption("Convierte cada recomendación aprobada en piezas listas para usar, y apruébalas antes de ejecutarlas.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(

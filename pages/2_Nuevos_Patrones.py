@@ -950,8 +950,6 @@ for key, default in {"np_stage": "start", "np_config": None, "np_plan_config": N
 st.title("🔍 Nuevos Patrones")
 render_journey(1)
 agent_line("Insights Agent (analiza las 4 fuentes del club) · Action Planning Agent (propone el plan)")
-st.caption("Analiza la semana (encuesta, incidencias, notas del personal y reseñas de Google) y "
-           "revisa la recomendación de cada patrón, una a una, antes de ponerla en marcha.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(
