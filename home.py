@@ -637,10 +637,17 @@ days = counts.get("days_since_analysis")
 analysis_text = ("Aún no has analizado las opiniones del club." if days is None
                  else "Último análisis hoy." if days == 0
                  else f"Último análisis hace {days} día(s).")
+pending_plan = counts.get("pending_plan", 0)
+if pending_plan:
+    detect_tile = ("detect", "🔍 1 · Detectar", True, pending_plan,
+                   "patrón(es) detectados esperan su recomendación. Revísalos uno a uno.",
+                   "Revisar recomendaciones →", PAGE_PATHS["Detectar"])
+else:
+    detect_tile = ("detect", "🔍 1 · Detectar", days is None or days >= 7,
+                   days if days is not None else "—", analysis_text + " Lo habitual es cada semana.",
+                   "Analizar →", PAGE_PATHS["Detectar"])
 tiles = [
-    ("detect", "🔍 1 · Detectar", days is None or days >= 7,
-     days if days is not None else "—", analysis_text + " Lo habitual es cada semana.",
-     "Analizar →", PAGE_PATHS["Detectar"]),
+    detect_tile,
     ("kits", "📋 2 · Preparar", counts["pending_kit"] > 0,
      counts["pending_kit"], "plan(es) esperan su kit de ejecución.",
      "Preparar kits →", PAGE_PATHS["Preparar"]),
@@ -673,7 +680,8 @@ result = supabase.table("patterns").select("*").order("id").execute()
 patterns = [p for p in (result.data or []) if p.get("status") != "discarded"]
 
 total = len(patterns)
-open_count = len([p for p in patterns if p.get("status") == "open"])
+# "En seguimiento activo" = open AND with an approved kit (pending-kit plans aren't followed yet)
+open_count = len([p for p in patterns if p.get("status") == "open" and p.get("verification_method")])
 closed_count = len([p for p in patterns if p.get("status") == "closed"])
 attention_count = len([
     p for p in patterns

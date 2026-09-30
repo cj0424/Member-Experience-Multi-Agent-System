@@ -15,6 +15,11 @@ Grounded ONLY on real data: Supabase (patterns + pattern_history,
 including what the owner said at each check-in), the journey counts, and
 the club profile (roles, Monday meeting, tú/usted). Read-only: it never
 approves, changes or sends anything.
+
+Phase 3: Pala also sees the patterns detected and waiting for their
+recommendation (pending_recommendations), each pattern's priority, what
+the four sources said automatically at the last check-in (kept apart from
+what the owner said), and tells rejected ideas from postponed ones.
 """
 
 import os
@@ -34,7 +39,9 @@ CHECKIN_EVERY_DAYS = 14
 
 # Only used to point the owner to the right place — not to explain pages.
 PAGE_MAP = """- "Resumen": tarjetas de "Tu siguiente paso" y el estado de cada patrón.
-- "1 · Detectar": botón "Ejecutar análisis"; revisar planes nuevos (Aprobar / Pedir cambios / Descartar).
+- "1 · Detectar": botón "Ejecutar análisis" (detecta los patrones de la semana); los nuevos esperan en la lista
+  "Pendientes de recomendación" → en su tarjeta, "Generar recomendación →" (Aprobar / Pedir cambios /
+  Descartar, o "Decidir más tarde"). Se revisan uno a uno.
 - "2 · Preparar": tarjeta del patrón → botón "Generar kit →"; kits aprobados → "Ver kit →" (trackers en Excel).
 - "3 · Seguir": tarjeta del patrón → botón "Revisar →" (se indica si se hizo, con qué prueba, y si mejoró).
 - "4 · Historial": tarjeta del patrón → "Ver historia →" (historia completa y lo descartado)."""
@@ -95,6 +102,8 @@ def club_digest() -> str:
         last_date = _parse_date(last.get("created_at")) if last else None
 
         parts = [f"#{p['id']} {p['pattern_name']}", f"fase: {stage}", f"intento {attempt}"]
+        if p.get("priority"):
+            parts.append(f"prioridad {p['priority']}")
         if p.get("last_decision"):
             parts.append(f"última decisión: {p['last_decision']}")
         block = " | ".join(parts)
@@ -114,11 +123,18 @@ def club_digest() -> str:
                 else:
                     block += "\n   Sin seguimientos aún"
 
-        # The most up-to-date facts: what the owner said at the last check-in
+        # The most up-to-date facts: what the owner said at the last check-in. Since
+        # Phase 3 the check-in also stores what the four sources said automatically;
+        # it's shown apart, so Pala never presents it as the owner's own words.
         if last:
-            if last.get("evidence_summary"):
+            summary = last.get("evidence_summary") or ""
+            owner_part, _, sources_part = summary.partition("\nFuentes desde la detección:")
+            if owner_part.strip():
                 block += ("\n   Lo que indicó el propietario en el último seguimiento (lo más actual): "
-                          f"{_one_line(last['evidence_summary'], 500)}")
+                          f"{_one_line(owner_part, 500)}")
+            if sources_part.strip():
+                block += ("\n   Lo que dijeron las fuentes en ese seguimiento (automático: encuesta, "
+                          f"incidencias, personal, Google): {_one_line(sources_part, 400)}")
             block += f"\n   Conclusión del último seguimiento: {_checkin_conclusion(last.get('narrative'))}"
 
         if p.get("approved_action") and p.get("status") != "discarded":
@@ -128,12 +144,35 @@ def club_digest() -> str:
                       f"último que se indicó): {_one_line(p['verification_method'], 220)}")
         if p.get("rejected_ideas"):
             # Never cut: a partial list would make the owner think an idea wasn't rejected.
-            block += f"\n   Ideas ya descartadas (lista completa): {_one_line(p['rejected_ideas'], None)}"
+            # Each line says "Descartado:" or "Pospuesto:" (postponed ideas can come back later).
+            block += ("\n   Ideas descartadas o pospuestas (lista completa): "
+                      f"{_one_line(p['rejected_ideas'], None)}")
         lines.append(block)
     return "\n".join(lines) or "Todavía no hay patrones registrados."
 
 
-def build_prompt(question: str, history: list[dict], digest: str, counts: dict, club_profile: str) -> str:
+def pending_digest() -> str:
+    """Patterns detected by the analysis and waiting for the owner to
+    generate their recommendation (Detectar → "Generar recomendación →")."""
+    try:
+        waiting = db.get_pending_recommendations()
+    except Exception:
+        return "No disponible."
+    lines = []
+    for r in waiting:
+        meta = r.get("meta") or {}
+        ids = [i.strip() for i in (meta.get("evidence_ids") or "").split(",") if i.strip()]
+        parts = [r["name"], f"prioridad {meta.get('priority') or '—'}",
+                 f"confianza {meta.get('confidence') or '—'}", f"{len(ids)} mención(es)",
+                 f"detectado el {_fmt(_parse_date(r.get('created_at')))}"]
+        if r.get("kind") == "reaparece":
+            parts.append("vuelve a aparecer (se había cerrado)")
+        lines.append("- " + " | ".join(parts))
+    return "\n".join(lines) or "Ninguno."
+
+
+def build_prompt(question: str, history: list[dict], digest: str, counts: dict, club_profile: str,
+                 pending: str = "Ninguno.") -> str:
     past = "\n".join(
         f"{'Propietario' if m['role'] == 'user' else 'Pala'}: {m['content']}"
         for m in history[-6:]
@@ -167,7 +206,10 @@ CÓMO RESPONDER:
 - Qué hacer ahora: lista numerada de 1 a 5 acciones, por prioridad:
   1) patrones ESCALADOS; 2) FLAG con algo concreto que resolver;
   3) seguimientos que ya tocan (fecha recomendada pasada o hoy);
-  4) planes esperando su kit; 5) análisis si hace 7+ días del último.
+  4) patrones detectados que esperan su recomendación (empieza por el de
+     prioridad más alta; se revisan uno a uno en "1 · Detectar");
+  5) planes esperando su kit; 6) análisis si hace 7+ días del último.
+  Si hay más de 5, quédate con las 5 primeras.
   Cada acción en una línea corta: qué hacer y, si hace falta, un
   "porque…" breve.
 - Distingue dónde se hace cada cosa. Si la acción es EN EL CLUB (llamar a
@@ -187,6 +229,12 @@ CÓMO RESPONDER:
   con su motivo: "idea (motivo: …)". Nómbrala tan exacta como se
   descartó (por ejemplo, "solo el aviso en las reservas", no "el aviso"),
   para no confundirla con algo que sí está en el plan aprobado.
+  Distingue las DESCARTADAS de las POSPUESTAS: una idea pospuesta ("más
+  adelante", "en primavera", "solo si no basta") no está rechazada; dilo
+  así y, si su condición ya se cumple, puedes recordarla.
+- Lo que dijeron las fuentes en un seguimiento es automático (socios,
+  personal, Google); lo que indicó el propietario es lo suyo. No los
+  mezcles ni atribuyas uno al otro.
 - Un patrón concreto: su historia en 3 líneas (qué se detectó, qué se hizo,
   cómo va, incluido lo que indicó el propietario) y, para más detalle,
   "4 · Historial" → su tarjeta.
@@ -216,6 +264,10 @@ SITUACIÓN ACTUAL:
 - Planes esperando su kit: {counts.get('pending_kit', 0)}
 - Patrones que toca revisar: {counts.get('due_checkins', 0)}
 - Patrones escalados: {counts.get('escalated', 0)}
+- Patrones detectados esperando su recomendación: {counts.get('pending_plan', 0)}
+
+PATRONES DETECTADOS QUE ESPERAN SU RECOMENDACIÓN (aún sin plan):
+{pending}
 
 PATRONES DEL CLUB (datos reales):
 {digest}
@@ -237,7 +289,8 @@ def run_faq_agent(question: str, history: list[dict] | None = None) -> str:
         counts = db.get_journey_counts()
     except Exception:
         counts = {}
-    prompt = build_prompt(question, history or [], club_digest(), counts, load_club_profile())
+    prompt = build_prompt(question, history or [], club_digest(), counts, load_club_profile(),
+                          pending=pending_digest())
     response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
     return response.text
 

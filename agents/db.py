@@ -389,7 +389,12 @@ def get_journey_counts() -> dict:
     escalated = [p for p in patterns if p.get("status") == "escalated"]
     runs = (supabase.table("insights_runs").select("created_at")
             .order("created_at", desc=True).limit(1).execute().data or [])
+    try:
+        pending_plan = len(get_pending_recommendations())
+    except Exception:  # noqa: BLE001 - table not created yet
+        pending_plan = 0
     return {
+        "pending_plan": pending_plan,
         "pending_kit": len(pending_kit),
         "due_checkins": len(due),
         "escalated": len(escalated),
@@ -471,3 +476,56 @@ def source_evidence_summary(pattern: dict) -> str:
     else:
         lines.append("Todavía no se ha analizado ninguna semana posterior: no hay datos nuevos.")
     return "\n".join(lines)
+
+
+
+# ---------------------------------------------------------------------------
+# Pending recommendations (Phase 3) — patterns Insights detected that are
+# waiting for the owner to generate and review their recommendation, one at
+# a time. Saved in Supabase, so nothing is lost if the app restarts.
+# Table: pending_recommendations (sql/phase3_pending_recommendations.sql)
+# ---------------------------------------------------------------------------
+
+def create_pending_recommendation(item: dict, run_id: int | None) -> dict:
+    meta = item.get("meta") or {}
+    row = supabase.table("pending_recommendations").insert({
+        "kind": item["kind"],
+        "pattern_id": item.get("pattern_id"),
+        "name": item["name"],
+        "description": item["description"],
+        "topic": meta.get("topic"),
+        "meta": meta,
+        "previous_action": item.get("previous_action"),
+        "rejected_ideas": item.get("rejected_ideas"),
+        "insights_run_id": run_id,
+        "status": "pending",
+    }).execute().data
+    return row[0] if row else {}
+
+
+def get_pending_recommendations() -> list[dict]:
+    """Waiting recommendations, most urgent first (priority score, then oldest)."""
+    rows = (supabase.table("pending_recommendations").select("*")
+            .eq("status", "pending").order("id").execute().data or [])
+    return sorted(rows, key=lambda r: -((r.get("meta") or {}).get("priority_score") or 0))
+
+
+def get_pending_recommendation(pending_id: int) -> dict | None:
+    rows = (supabase.table("pending_recommendations").select("*")
+            .eq("id", pending_id).execute().data or [])
+    return rows[0] if rows else None
+
+
+def refresh_pending_recommendation(pending_id: int, description: str, meta: dict, run_id: int | None):
+    """A newer analysis found the same pattern again: keep the latest evidence."""
+    supabase.table("pending_recommendations").update({
+        "description": description, "meta": meta, "insights_run_id": run_id,
+    }).eq("id", pending_id).execute()
+
+
+def close_pending_recommendation(pending_id: int, outcome: str):
+    """outcome: 'approved' or 'discarded'."""
+    from datetime import datetime, timezone
+    supabase.table("pending_recommendations").update({
+        "status": outcome, "decided_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", pending_id).execute()

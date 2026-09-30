@@ -1,15 +1,21 @@
 """
-graph.py — the two "forward" graphs of the system. Streamlit pages
+graph.py — the "forward" graphs of the system. Streamlit pages
 run these; the terminal runner at the bottom is only for testing.
 
-1. discovery_graph (Nuevos Patrones)
+1. discovery_graph (Nuevos Patrones · "Ejecutar análisis")
    Supabase memory → Insights (4 sources: survey, incident log, staff
-   notes, Google) → classify against what's already known → Action
-   Planning → ⏸ Gate 1, one recommendation at a time. A quiet week with
-   no pattern ends right after classify ("semana tranquila").
+   notes, Google) → classify against what's already known → each new
+   pattern is saved in Supabase as a PENDING recommendation. No plans
+   are written here. A quiet week ends with nothing pending.
    Each run analyses the next week not analysed yet (data/week*/).
 
-2. kit_graph (Kits de Ejecución)
+2. plan_graph (Nuevos Patrones · "Generar recomendación →")
+   ONE pending recommendation → Action Planning → ⏸ Gate 1 (approve /
+   ask for changes / discard). The owner goes one pattern at a time,
+   when they have time; the rest wait in Supabase, so nothing is lost
+   if the app restarts.
+
+3. kit_graph (Kits de Ejecución)
    patterns waiting for a kit → Execution Kit → ⏸ Gate 2, one kit at
    a time.
 
@@ -114,7 +120,9 @@ class DiscoveryState(TypedDict, total=False):
     found: list[dict]         # active patterns from the rules engine, already named
     evidence: dict            # strengths, a_vigilar, alerts, sources read
     run_id: int               # this analysis, saved in insights_runs
-    items: list[dict]         # recommendations waiting for Gate 1
+    items: list[dict]         # discovery: new patterns found · plan_graph: the one being reviewed
+    saved: list[dict]         # discovery: pending recommendations saved in this run
+    pending_id: int           # plan_graph input: which pending recommendation to plan
     skipped: list[dict]       # patterns found but already handled
     not_detected: list[dict]  # known patterns NOT found active this run
     index: int
@@ -186,6 +194,13 @@ def classify_node(state: DiscoveryState) -> dict:
     narrate("🧭 Comparando con lo que el sistema ya conoce...")
     known_by_id = {p["id"]: p for p in state["known"]}
     known_by_name = {normalize(p["pattern_name"]): p for p in state["known"]}
+    try:
+        waiting = db.get_pending_recommendations()
+    except Exception:  # noqa: BLE001 - table not created yet
+        waiting = []
+    waiting_by_topic = {r["topic"]: r for r in waiting if r.get("topic")}
+    waiting_by_name = {normalize(r["name"]): r for r in waiting}
+    refreshed = []
 
     found_list = state.get("found")
     if found_list is None:                     # older runs without structured output
@@ -194,6 +209,15 @@ def classify_node(state: DiscoveryState) -> dict:
 
     for found in found_list:
         name = (found.get("nombre") or "").strip()
+        topic = (found.get("meta") or {}).get("topic")
+        waiting_match = (waiting_by_topic.get(topic) if topic else None) or waiting_by_name.get(normalize(name))
+        if waiting_match and not found.get("id"):
+            # Already detected and waiting for its recommendation: keep one, with the latest evidence
+            refreshed.append((waiting_match["id"], found))
+            reason = "Ya detectado · pendiente de recomendación"
+            skipped.append({"pattern_id": None, "name": waiting_match["name"], "reason": reason})
+            decisions.append({"patron": waiting_match["name"], "decision": "omitido", "motivo": reason})
+            continue
         match = known_by_id.get(found.get("id")) or known_by_name.get(normalize(name))
 
         if not match:
@@ -251,12 +275,48 @@ def classify_node(state: DiscoveryState) -> dict:
         decisions=decisions,
     )
 
+    for pending_id, found in refreshed:
+        db.refresh_pending_recommendation(pending_id, found.get("texto", ""), found.get("meta") or {}, run_id)
+
     if not items and not skipped:
         narrate("🌤️ Semana tranquila: no hay evidencia suficiente para un patrón nuevo.")
     else:
-        narrate(f"✅ {len(items)} patrón(es) para revisar · {len(skipped)} ya conocido(s)")
+        narrate(f"✅ {len(items)} patrón(es) nuevo(s) · {len(skipped)} ya conocido(s)")
     return {"run_id": run_id, "items": items, "skipped": skipped,
             "not_detected": not_detected, "index": 0, "results": []}
+
+
+def save_pending_node(state: DiscoveryState) -> dict:
+    """Each new pattern waits in Supabase for the owner to generate its
+    recommendation, one at a time (plan_graph). Nothing is planned here."""
+    saved = []
+    for item in state["items"]:
+        row = db.create_pending_recommendation(item, state.get("run_id"))
+        saved.append({"pending_id": row.get("id"), "name": item["name"], "kind": item["kind"],
+                      "meta": item.get("meta") or {}})
+    if saved:
+        narrate(f"📥 {len(saved)} patrón(es) guardado(s): genera su recomendación cuando quieras, uno a uno.")
+    return {"saved": saved}
+
+
+def load_pending_node(state: DiscoveryState) -> dict:
+    """plan_graph start: loads ONE pending recommendation from Supabase."""
+    rec = db.get_pending_recommendation(state["pending_id"])
+    if not rec or rec.get("status") != "pending":
+        narrate("Esta recomendación ya no está pendiente.")
+        return {"items": [], "index": 0, "results": [], "known": db.get_all_patterns()}
+    item = {
+        "pending_id": rec["id"],
+        "kind": rec["kind"],
+        "pattern_id": rec.get("pattern_id"),
+        "name": rec["name"],
+        "description": rec["description"],
+        "meta": rec.get("meta") or {},
+        "previous_action": rec.get("previous_action") or "",
+        "rejected_ideas": rec.get("rejected_ideas") or "",
+    }
+    return {"items": [item], "index": 0, "results": [], "run_id": rec.get("insights_run_id"),
+            "known": db.get_all_patterns()}
 
 
 def existing_plans_context(known: list[dict], proposed: list[dict]) -> str:
@@ -418,6 +478,8 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
             pattern_id, attempt = row.get("id"), 1
         _log_plan_story(pattern_id, item, attempt, run_id)
         db.log_event(pattern_id, item["name"], "plan_aprobado", narrative=item["text"], attempt=attempt)
+        if item.get("pending_id"):
+            db.close_pending_recommendation(item["pending_id"], "approved")
         results.append({"pattern_name": item["name"], "outcome": "approved"})
     else:
         if item["kind"] == "reaparece":
@@ -432,6 +494,8 @@ def review_recommendation_node(state: DiscoveryState) -> dict:
             pattern_id, attempt = row.get("id"), 1
         _log_plan_story(pattern_id, item, attempt, run_id)
         db.log_event(pattern_id, item["name"], "descartado", narrative=item["text"], attempt=attempt)
+        if item.get("pending_id"):
+            db.close_pending_recommendation(item["pending_id"], "discarded")
         results.append({"pattern_name": item["name"], "outcome": "discarded"})
 
     return {"index": i + 1, "results": results}
@@ -444,17 +508,27 @@ def after_review(state: DiscoveryState) -> str:
 _discovery = StateGraph(DiscoveryState)
 _discovery.add_node("insights", insights_node)
 _discovery.add_node("classify", classify_node)
-_discovery.add_node("planning", planning_node)
-_discovery.add_node("review", review_recommendation_node)
+_discovery.add_node("save_pending", save_pending_node)
 _discovery.add_edge(START, "insights")
 _discovery.add_edge("insights", "classify")
-# Nothing new to plan (quiet week, or only known patterns) → finish here
-_discovery.add_conditional_edges("classify", lambda s: "planning" if s["items"] else END,
-                                 {"planning": "planning", END: END})
-_discovery.add_edge("planning", "review")
-_discovery.add_conditional_edges("review", after_review, {"review": "review", END: END})
+_discovery.add_edge("classify", "save_pending")
+_discovery.add_edge("save_pending", END)
 
 discovery_graph = _discovery.compile(checkpointer=MemorySaver())
+
+
+# One recommendation at a time, started from the page's list of pending ones
+_plan = StateGraph(DiscoveryState)
+_plan.add_node("load", load_pending_node)
+_plan.add_node("planning", planning_node)
+_plan.add_node("review", review_recommendation_node)
+_plan.add_edge(START, "load")
+_plan.add_conditional_edges("load", lambda s: "planning" if s["items"] else END,
+                            {"planning": "planning", END: END})
+_plan.add_edge("planning", "review")
+_plan.add_conditional_edges("review", after_review, {"review": "review", END: END})
+
+plan_graph = _plan.compile(checkpointer=MemorySaver())
 
 
 # ===========================================================================
@@ -620,9 +694,9 @@ def resume(decision: dict) -> Command:
 # Terminal runner — for testing only; the owner uses Streamlit
 # ===========================================================================
 
-def _cli(graph, label: str):
+def _cli(graph, label: str, graph_input: dict | None = None):
     config = new_thread()
-    pending = run_until_pause(graph, {}, config)
+    pending = run_until_pause(graph, graph_input or {}, config)
     analysis = graph.get_state(config).values.get("insights_text")
     if analysis:
         print("\n=== ANÁLISIS COMPLETO DE INSIGHTS ===\n")
@@ -647,8 +721,17 @@ def _cli(graph, label: str):
 
 
 if __name__ == "__main__":
-    which = input("¿Qué grafo? (1 = descubrimiento, 2 = kits): ").strip()
-    if which == "2":
+    which = input("¿Qué grafo? (1 = análisis, 2 = recomendación pendiente, 3 = kits): ").strip()
+    if which == "3":
         _cli(kit_graph, "Kit")
+    elif which == "2":
+        waiting = db.get_pending_recommendations()
+        if not waiting:
+            print("No hay recomendaciones pendientes.")
+        else:
+            for r in waiting:
+                print(f"#{r['id']} {r['name']}")
+            chosen = int(input("¿Cuál? (#id): ").strip().lstrip("#"))
+            _cli(plan_graph, "Recomendación", {"pending_id": chosen})
     else:
-        _cli(discovery_graph, "Recomendación")
+        _cli(discovery_graph, "Análisis")

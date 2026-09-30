@@ -99,6 +99,11 @@ usa solo para lo suyo; no propongas mezclarlas:
   que deben ver todos los que entran.
 - El club no tiene boletín por email ni base de datos propia fuera de
   Playtomic.
+- Preferencia del propietario: no pedir a los socios esfuerzos para
+  resolver problemas del club (venir antes, compartir coche, cambiar
+  hábitos) ni anunciar problemas que la mayoría no ha notado. A los
+  socios se les comunica cuando hay un cambio concreto que les afecta,
+  con su antelación, dentro del aviso semanal.
 
 === COMUNICACIÓN INTERNA DEL EQUIPO ===
 - Grupo de WhatsApp del personal para el día a día.

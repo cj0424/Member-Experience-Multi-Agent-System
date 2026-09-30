@@ -25,6 +25,11 @@ rules only need to be edited in one place:
 Every prompt receives the shared RAG library (rag.py): the technical
 references it can cite, plus the club profile — how this club actually
 works — so recommendations fit the club, not a generic one.
+
+Phase 3: the plan no longer has to write a verdict on the loyalty guide
+for every pattern (it was "no aplica" for almost every practical problem).
+Any library document — loyalty guide included — is used only when it
+really applies, and the "Fuente" line says which one and what it added.
 """
 
 import os
@@ -38,37 +43,20 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 SHARED_RULES = """Reglas:
-- Basa la solución técnica en la biblioteca de referencia si algún
-  documento aplica realmente (cítalo por su nombre); si ninguno
-  aplica, dilo explícitamente y usa buenas prácticas generales.
+- Usa un documento de la biblioteca de referencia SOLO si aplica de
+  verdad a este patrón, y cítalo en "Fuente" por su nombre junto con
+  lo que aporta (por ejemplo, "Normas de conservación de pistas —
+  frecuencia y método de cepillado"). Si ninguno aplica, en "Fuente"
+  pon "buenas prácticas generales". No escribas ninguna línea sobre
+  documentos que NO aplican.
 
-- La biblioteca puede incluir un documento de fidelización/retención,
-  distinto de los documentos técnicos. Para TODO patrón, sin
-  excepción, sigue estos dos pasos EN ORDEN:
-  PASO 1 — Evalúa: ¿el documento de fidelización/retención podría
-  aportar algo útil aquí? Esto es obligatorio para todos los
-  patrones, no solo los de satisfacción general.
-  PASO 2 — Según lo que concluyas en el Paso 1, escribe una línea
-  breve mostrando tu conclusión, usando uno de estos tres casos:
-    (a) USAR COMO PRINCIPAL — el patrón es de satisfacción general
-        sin un problema concreto que resolver, así que el documento
-        de fidelización es la base de la recomendación.
-    (b) USAR COMO COMPLEMENTO — hay un problema real que resolver,
-        pero una táctica de fidelización aporta valor genuino
-        mientras se soluciona. Antes de incluirla, comprueba: ¿esta
-        táctica añadiría más presión sobre el mismo recurso o
-        limitación que causa el problema (ej. más gente en un
-        espacio ya con capacidad ajustada)? Si es así, ajusta la
-        táctica para evitarlo (ej. limitarla a una franja horaria
-        con menos presión) en vez de descartarla directamente.
-    (c) NO APLICA — el documento no aporta nada útil a este
-        problema concreto. Dilo en una frase y sigue adelante sin
-        forzarlo.
-  Esta línea de conclusión debe aparecer SIEMPRE en tu respuesta,
-  igual que ya haces con los riesgos ("Ojo con...") — nunca la
-  omitas, incluso si la conclusión es (c).
-  La fidelización NUNCA sustituye la acción correctiva real de un
-  problema — solo puede complementarla.
+- La biblioteca incluye un documento de fidelización/retención.
+  Úsalo solo cuando aporte algo real: como base, si el patrón es de
+  satisfacción general sin un problema concreto que resolver; o como
+  complemento, si una táctica de fidelización ayuda mientras se
+  resuelve un problema real sin añadir presión sobre lo que lo causa
+  (por ejemplo, más gente en un espacio que ya se llena). Nunca
+  sustituye la acción correctiva real.
 
 - Antes de proponer cualquier acción, razona si podría chocar con
   algo que ya sabes de este club a partir de la evidencia real
@@ -109,7 +97,7 @@ SHARED_RULES = """Reglas:
 
 CLOSING_FORMAT = """Termina con:
 ⏱️ **Esfuerzo:** [Bajo/Medio/Alto]
-📚 **Fuente:** [documento citado, o "buenas prácticas generales"]
+📚 **Fuente:** [documento citado — qué aporta, en pocas palabras; o "buenas prácticas generales"]
 🟢/🟡/🔴 **Confianza:** [Alto/Moderado/Bajo]"""
 
 

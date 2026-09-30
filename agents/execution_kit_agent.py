@@ -109,7 +109,10 @@ IMPORTANTE — no des nada por hecho antes de que ocurra:
    distintos (una sola comprobación puede ser casualidad). Si la
    recomendación indica que el problema lo detectó alguien del
    personal (por ejemplo, un entrenador), que esa persona participe
-   en la comprobación.
+   en la comprobación. Indica que el resultado de cada comprobación
+   se anota en las OBSERVACIONES DEL PERSONAL (no en la nota de
+   traspaso ni en el parte de incidencias): es lo que el sistema lee
+   para saber si el plan funciona.
 
 FORMATO DE SALIDA — dos tipos, según lo que la pieza realmente sea:
 - Comunicaciones (mensajes, correos, avisos, protocolos internos,

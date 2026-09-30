@@ -17,7 +17,7 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
-from graph import discovery_graph, new_thread, run_until_pause, resume, upcoming_week, week_label
+from graph import discovery_graph, plan_graph, new_thread, run_until_pause, resume, upcoming_week, week_label
 
 st.set_page_config(page_title="Nuevos Patrones — Club de Pádel", layout="wide")
 
@@ -59,6 +59,22 @@ hr { border: none; border-top: 1px solid #DBDFE3; }
     box-shadow: 0 8px 24px rgba(194,65,12,0.12) !important;
     padding: 32px 40px 28px 40px !important;
 }
+
+/* Pending recommendations list: quiet white cards, soft orange on hover (like Kits) */
+div[class*="st-key-np_item_"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #DBDFE3 !important;
+    border-radius: 16px !important;
+    padding: 18px 26px !important;
+    margin-bottom: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+div[class*="st-key-np_item_"]:hover {
+    border-color: #F2B08F !important;
+    box-shadow: 0 4px 14px rgba(194,65,12,0.08) !important;
+}
+.pending-name { color: #030338; font-size: 18px; font-weight: 700; line-height: 1.35; }
+.pending-meta { font-size: 14px; color: #748092; margin-top: 4px; }
 
 .rec-pattern-name {
     font-family: 'Paytone One', sans-serif;
@@ -705,23 +721,126 @@ def render_recommendation(text):
 
 
 
-def run_graph(graph_input, title: str, key: str):
-    """Runs or resumes the discovery graph, showing each agent step
-    in the big narration box. Returns the next pause, or None."""
+def run_graph(graph, graph_input, config, title: str, key: str):
+    """Runs or resumes a graph, showing each agent step in the big
+    narration box. Returns the next pause, or None."""
     with st.container(key=key):
         with st.status(title, expanded=True, type="step"):
-            pending = run_until_pause(
-                discovery_graph, graph_input, st.session_state.np_config, on_step=st.write
-            )
+            pending = run_until_pause(graph, graph_input, config, on_step=st.write)
         st.status("Listo", state="complete", type="step")
     return pending
 
 
 def apply_decision(decision: dict, title: str, key: str):
-    pending = run_graph(resume(decision), title, key)
+    pending = run_graph(plan_graph, resume(decision), st.session_state.np_plan_config, title, key)
     st.session_state.np_pending = pending
-    st.session_state.np_stage = "reviewing" if pending else "done"
+    st.session_state.np_stage = "reviewing" if pending else "decided"
     st.rerun()
+
+
+def render_analysis_summary(values: dict):
+    """What the last analysis found: alerts, quiet week, known patterns,
+    strengths and topics to watch. New patterns appear in the list below."""
+    evidence = values.get("evidence") or {}
+    saved = values.get("saved") or []
+    skipped = values.get("skipped", [])
+    not_detected = values.get("not_detected", [])
+
+    st.success("✅ Análisis completado"
+               + (f" · semana {week_label(values['period_start'])}" if values.get("period_start") else "."))
+
+    for a in evidence.get("alerts", []):
+        st.error(f"⚠️ **Alerta de seguridad — {a['label']}**: avisa sin esperar. "
+                 f"Evidencia: {', '.join(a['evidence_ids'])}")
+
+    if saved:
+        st.markdown(f'<div class="section-title">📥 {len(saved)} patrón(es) nuevo(s): están en la lista de '
+                    'abajo, esperando su recomendación</div>', unsafe_allow_html=True)
+    elif evidence and not evidence.get("patterns"):
+        st.markdown('<div class="section-title">🌤️ Semana tranquila: no hay evidencia suficiente '
+                    'para un patrón nuevo.</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="section-title">No hay patrones nuevos en este análisis.</div>',
+                    unsafe_allow_html=True)
+
+    if skipped or not_detected:
+        rows = "".join(
+            f'<div class="known-row"><span class="known-name">⏭️ {html.escape(s["name"])}</span>'
+            f'<span class="known-reason">{html.escape(s["reason"])}</span></div>'
+            for s in skipped
+        ) + "".join(
+            f'<div class="known-row"><span class="known-name">💤 {html.escape(n["name"])}</span>'
+            f'<span class="known-reason">No detectado como activo esta vez</span></div>'
+            for n in not_detected
+        )
+        st.markdown('<div class="section-title">Lo que el sistema ya conocía</div>'
+                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+
+    if evidence.get("strengths"):
+        rows = "".join(
+            f'<div class="known-row"><span class="known-name">💪 {html.escape(x["label"])}</span>'
+            f'<span class="known-reason">{x["mentions"]} menciones</span></div>'
+            for x in evidence["strengths"]
+        )
+        st.markdown('<div class="section-title">Fortalezas del club</div>'
+                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+
+    if evidence.get("a_vigilar"):
+        rows = "".join(
+            f'<div class="known-row"><span class="known-name">👀 {html.escape(x["label"])}</span>'
+            f'<span class="known-reason">{x["mentions"]} mención(es) · aún no es patrón</span></div>'
+            for x in evidence["a_vigilar"]
+        )
+        st.markdown('<div class="section-title">A vigilar</div>'
+                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+
+    if values.get("insights_text"):
+        with st.expander("🔎 Ver análisis completo de Insights"):
+            st.markdown(values["insights_text"])
+
+
+def pending_meta_line(rec: dict) -> str:
+    meta = rec.get("meta") or {}
+    ids = [i.strip() for i in (meta.get("evidence_ids") or "").split(",") if i.strip()]
+    parts = []
+    if meta.get("priority"):
+        parts.append(f"⚡ Prioridad {meta['priority']}")
+    if meta.get("confidence"):
+        parts.append(f"Confianza {meta['confidence']}")
+    if ids:
+        parts.append(f"{len(ids)} mención(es): {', '.join(ids)}")
+    if rec.get("kind") == "reaparece":
+        parts.append("🔄 vuelve a aparecer")
+    return " · ".join(parts)
+
+
+def render_pending_list():
+    """Detected patterns waiting for their recommendation — one button each."""
+    try:
+        waiting = db.get_pending_recommendations()
+    except Exception:
+        st.warning("Falta la tabla de recomendaciones pendientes en Supabase "
+                   "(sql/phase3_pending_recommendations.sql).")
+        return
+    st.subheader(f"Pendientes de recomendación ({len(waiting)})")
+    if not waiting:
+        st.caption("No hay patrones esperando recomendación. Cuando el análisis detecte uno nuevo, aparecerá aquí.")
+        return
+    st.caption("Ordenados por prioridad. Genera cada recomendación cuando tengas un momento: se revisan una a una.")
+    for rec in waiting:
+        with st.container(key=f"np_item_{rec['id']}"):
+            c1, c2 = st.columns([5, 1.7], vertical_alignment="center")
+            c1.markdown(f'<div class="pending-name">{html.escape(rec["name"])}</div>'
+                        f'<div class="pending-meta">{html.escape(pending_meta_line(rec))}</div>',
+                        unsafe_allow_html=True)
+            if c2.button("Generar recomendación →", key=f"np_gen_{rec['id']}", type="primary"):
+                st.session_state.np_plan_config = new_thread()
+                st.session_state.np_show_summary = False
+                pending = run_graph(plan_graph, {"pending_id": rec["id"]}, st.session_state.np_plan_config,
+                                    "Preparando la recomendación...", "np_status_plan")
+                st.session_state.np_pending = pending
+                st.session_state.np_stage = "reviewing" if pending else "decided"
+                st.rerun()
 
 
 # ---------------------------------------------------------------------------
@@ -818,7 +937,8 @@ def agent_line(text: str):
 # Session state
 # ---------------------------------------------------------------------------
 
-for key, default in {"np_stage": "start", "np_config": None, "np_pending": None}.items():
+for key, default in {"np_stage": "start", "np_config": None, "np_plan_config": None,
+                     "np_pending": None, "np_last": None, "np_show_summary": False}.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
@@ -830,20 +950,20 @@ for key, default in {"np_stage": "start", "np_config": None, "np_pending": None}
 st.title("🔍 Nuevos Patrones")
 render_journey(1)
 agent_line("Insights Agent (analiza las 4 fuentes del club) · Action Planning Agent (propone el plan)")
-st.caption("Analiza la semana (encuesta, incidencias, notas del personal y reseñas de Google), "
-           "genera recomendaciones, y apruébalas antes de ejecutarlas.")
+st.caption("Analiza la semana (encuesta, incidencias, notas del personal y reseñas de Google) y "
+           "revisa la recomendación de cada patrón, una a una, antes de ponerla en marcha.")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(
         "**Qué hace el sistema:** lee la semana siguiente sin analizar: la encuesta de los socios, "
         "el registro de incidencias de recepción, las notas del personal y las reseñas de Google. "
         "Un tema solo es un patrón si se repite en días distintos y lo confirman 3 menciones o "
-        "2 fuentes distintas en los últimos 28 días. Lo compara con los patrones que ya conoce y "
-        "propone un plan solo para lo nuevo (o para un problema cerrado que vuelve a aparecer).\n\n"
+        "2 fuentes distintas en los últimos 28 días. Lo compara con los patrones que ya conoce.\n\n"
+        "**Los patrones nuevos esperan en una lista**, ordenados por prioridad. Pulsa *Generar "
+        "recomendación* en el que quieras: el sistema prepara el plan y tú decides *Aprobar*, "
+        "*Pedir cambios* o *Descartar*. Los demás siguen esperando; no se pierden aunque cierres la app.\n\n"
         "**También verás:** alertas de seguridad (se avisan sin esperar), fortalezas del club y "
         "temas *a vigilar* que aún no llegan a patrón.\n\n"
-        "**Qué decides tú:** para cada plan, *Aprobar*, *Pedir cambios* o *Descartar*. "
-        "Todo queda guardado, también lo que descartas, para que no se vuelva a proponer.\n\n"
         "**Después:** los planes aprobados pasan a **Kits de Ejecución**."
     )
 
@@ -857,27 +977,33 @@ if st.session_state.np_stage == "start":
         st.warning("No encuentro datos de ninguna semana en la carpeta data/.")
     if st.button("🔎 Ejecutar análisis", type="primary"):
         st.session_state.np_config = new_thread()
-        pending = run_graph({}, "Analizando reseñas y encuestas...", "np_status")
-        st.session_state.np_pending = pending
-        st.session_state.np_stage = "reviewing" if pending else "done"
+        run_graph(discovery_graph, {}, st.session_state.np_config,
+                  "Analizando la semana...", "np_status")
+        st.session_state.np_last = discovery_graph.get_state(st.session_state.np_config).values
+        st.session_state.np_show_summary = True
         st.rerun()
+
+    if st.session_state.np_show_summary and st.session_state.np_last:
+        render_analysis_summary(st.session_state.np_last)
+
+    st.divider()
+    render_pending_list()
 
 
 elif st.session_state.np_stage in ("reviewing", "revise"):
-    snapshot = discovery_graph.get_state(st.session_state.np_config)
+    snapshot = plan_graph.get_state(st.session_state.np_plan_config)
     if not snapshot.next:
-        st.warning("La revisión en curso se perdió (por ejemplo, porque la app se reinició). "
-                   "Lo que ya aprobaste o descartaste está guardado.")
-        if st.button("← Empezar de nuevo", type="secondary"):
+        st.warning("La revisión se interrumpió (por ejemplo, porque la app se reinició). "
+                   "No se ha perdido nada: la recomendación sigue en la lista de pendientes.")
+        if st.button("← Volver a la lista", type="secondary"):
             st.session_state.np_stage = "start"
             st.rerun()
         st.stop()
 
     current = st.session_state.np_pending
-    idx, total = current["index"], current["total"]
+    idx = current["index"]
 
-    st.subheader(f"Recomendación {idx + 1} de {total}")
-    render_progress_dots(total, idx)
+    st.subheader("Recomendación")
 
     with st.container(key="rec_card"):
         st.markdown(f'<div class="rec-pattern-name">{html.escape(current["pattern_name"])}</div>', unsafe_allow_html=True)
@@ -887,7 +1013,7 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
         if current["kind"] == "reaparece":
             st.markdown(
                 '<div class="reappear-note">🔄 Este patrón ya se había cerrado como resuelto, '
-                'pero vuelve a aparecer en las reseñas. El plan tiene en cuenta lo que se hizo antes.</div>',
+                'pero vuelve a aparecer. El plan tiene en cuenta lo que se hizo antes.</div>',
                 unsafe_allow_html=True,
             )
 
@@ -897,7 +1023,7 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
             st.markdown(fid_note_html(fid_text), unsafe_allow_html=True)
 
         if st.session_state.np_stage == "reviewing":
-            col1, col2, col3, _ = st.columns([1.1, 1.4, 1.3, 4])
+            col1, col2, col3, col4 = st.columns([1.1, 1.4, 1.3, 4])
             with col1:
                 if st.button("✅ Aprobar", key=f"approve_{idx}", type="primary"):
                     apply_decision({"action": "approve"}, "Guardando tu decisión...", "np_status_save")
@@ -908,6 +1034,11 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
             with col3:
                 if st.button("❌ Descartar", key=f"discard_{idx}", type="secondary"):
                     apply_decision({"action": "discard"}, "Guardando tu decisión...", "np_status_save")
+            with col4:
+                if st.button("← Decidir más tarde", key=f"later_{idx}", type="secondary"):
+                    # Nothing is saved: the recommendation stays in the pending list
+                    st.session_state.np_stage = "start"
+                    st.rerun()
 
         else:
             st.markdown('<div class="section-chip">✏️ ¿Qué cambiarías?</div>', unsafe_allow_html=True)
@@ -934,84 +1065,27 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
                     st.rerun()
 
 
-elif st.session_state.np_stage == "done":
-    values = discovery_graph.get_state(st.session_state.np_config).values
-    results = values.get("results", [])
-    skipped = values.get("skipped", [])
-    not_detected = values.get("not_detected", [])
-
-    evidence = values.get("evidence") or {}
-
-    st.success("✅ Análisis completado"
-               + (f" · semana {week_label(values['period_start'])}" if values.get("period_start") else "."))
-
-    for a in evidence.get("alerts", []):
-        st.error(f"⚠️ **Alerta de seguridad — {a['label']}**: avisa sin esperar. "
-                 f"Evidencia: {', '.join(a['evidence_ids'])}")
-
-    approved = [r for r in results if r["outcome"] == "approved"]
-    discarded = [r for r in results if r["outcome"] == "discarded"]
-
-    if not results:
-        if evidence and not evidence.get("patterns"):
-            st.markdown('<div class="section-title">🌤️ Semana tranquila: no hay evidencia suficiente '
-                        'para un patrón nuevo.</div>', unsafe_allow_html=True)
+elif st.session_state.np_stage == "decided":
+    results = plan_graph.get_state(st.session_state.np_plan_config).values.get("results", [])
+    for r in results:
+        if r["outcome"] == "approved":
+            st.success(f"✅ Aprobada: {r['pattern_name']}. Ya puedes preparar su kit en Kits de Ejecución.")
         else:
-            st.markdown('<div class="section-title">No hay patrones nuevos en este análisis.</div>',
-                        unsafe_allow_html=True)
-    if approved:
-        st.markdown(f'<div class="section-title">{len(approved)} aprobada(s)</div>', unsafe_allow_html=True)
-        for r in approved:
-            st.markdown(f'<span class="tag tag-approved">✓ {html.escape(r["pattern_name"])}</span>', unsafe_allow_html=True)
-    if discarded:
-        st.markdown(f'<div class="section-title">{len(discarded)} descartada(s)</div>', unsafe_allow_html=True)
-        for r in discarded:
-            st.markdown(f'<span class="tag tag-discarded">✗ {html.escape(r["pattern_name"])}</span>', unsafe_allow_html=True)
+            st.info(f"❌ Descartada: {r['pattern_name']}. Queda guardado para que no se vuelva a proponer.")
 
-    if skipped or not_detected:
-        rows = "".join(
-            f'<div class="known-row"><span class="known-name">⏭️ {html.escape(s["name"])}</span>'
-            f'<span class="known-reason">{html.escape(s["reason"])}</span></div>'
-            for s in skipped
-        ) + "".join(
-            f'<div class="known-row"><span class="known-name">💤 {html.escape(n["name"])}</span>'
-            f'<span class="known-reason">No detectado como activo esta vez</span></div>'
-            for n in not_detected
-        )
-        st.markdown('<div class="section-title">Lo que el sistema ya conocía</div>'
-                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
+    try:
+        remaining = len(db.get_pending_recommendations())
+    except Exception:
+        remaining = 0
+    st.caption(f"Quedan {remaining} recomendación(es) pendiente(s)." if remaining
+               else "No quedan recomendaciones pendientes.")
 
-    if evidence.get("strengths"):
-        rows = "".join(
-            f'<div class="known-row"><span class="known-name">💪 {html.escape(x["label"])}</span>'
-            f'<span class="known-reason">{x["mentions"]} menciones</span></div>'
-            for x in evidence["strengths"]
-        )
-        st.markdown('<div class="section-title">Fortalezas del club</div>'
-                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
-
-    if evidence.get("a_vigilar"):
-        rows = "".join(
-            f'<div class="known-row"><span class="known-name">👀 {html.escape(x["label"])}</span>'
-            f'<span class="known-reason">{x["mentions"]} mención(es) · aún no es patrón</span></div>'
-            for x in evidence["a_vigilar"]
-        )
-        st.markdown('<div class="section-title">A vigilar</div>'
-                    f'<div class="known-list">{rows}</div>', unsafe_allow_html=True)
-
-    if values.get("insights_text"):
-        with st.expander("🔎 Ver análisis completo de Insights"):
-            st.markdown(values["insights_text"])
-
-    st.divider()
-    c1, c2, _ = st.columns([2, 1.4, 3])
+    c1, c2, _ = st.columns([2, 2, 3])
     with c1:
-        if approved:
-            next_step_button("📋 Siguiente: preparar sus kits →", PAGE_PATHS["Preparar"], "np_next")
-        else:
-            next_step_button("🔁 Ir a Seguimiento →", PAGE_PATHS["Seguir"], "np_next")
-    with c2:
-        if st.button("← Analizar de nuevo", type="secondary"):
+        if st.button("← Volver a la lista", type="primary" if remaining else "secondary"):
             st.session_state.np_stage = "start"
             st.session_state.np_pending = None
             st.rerun()
+    with c2:
+        if any(r["outcome"] == "approved" for r in results):
+            next_step_button("📋 Preparar su kit →", PAGE_PATHS["Preparar"], "np_next")
