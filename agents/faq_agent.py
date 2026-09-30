@@ -141,6 +141,11 @@ def club_digest() -> str:
             # The plan's own text (not just its titles), so conditions like
             # "solo si el fallo es general" reach Pala
             block += f"\n   Plan aprobado (texto): {_one_line(p['approved_action'], 600)}"
+        if p.get("execution_kit") and p.get("status") != "discarded":
+            # The approved kit is the latest word on HOW it's done (the owner may have
+            # changed details at the kit stage, e.g. frequency or who checks)
+            kit = re.sub(r"===TRACKER_SPEC===.*?(===FIN_TRACKER_SPEC===|$)", "", p["execution_kit"], flags=re.S)
+            block += f"\n   Kit aprobado (lo más reciente sobre cómo se hace): {_one_line(kit, 900)}"
         if p.get("status") == "open" and p.get("verification_method"):
             block += (f"\n   Cómo verificar (del kit original; si ya hubo seguimientos, manda lo "
                       f"último que se indicó): {_one_line(p['verification_method'], 220)}")
@@ -234,6 +239,9 @@ CÓMO RESPONDER:
   Distingue las DESCARTADAS de las POSPUESTAS: una idea pospuesta ("más
   adelante", "en primavera", "solo si no basta") no está rechazada; dilo
   así y, si su condición ya se cumple, puedes recordarla.
+- Si el plan aprobado y el kit aprobado dicen cosas distintas sobre cómo se
+  hace (frecuencia, quién, cuándo, qué se comprueba), manda el KIT: es lo
+  más reciente y lo que decidió el propietario al preparar la ejecución.
 - Si una parte del plan aprobado es condicional ("si…", "solo si…", "si no
   basta…", "cuando…"), dilo así ("si la revisión no basta, pedir
   presupuesto a un electricista"). Nunca la presentes como un paso seguro.
