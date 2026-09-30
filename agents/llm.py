@@ -23,6 +23,7 @@ the real cost is $0; the figure shows what the paid tier would cost.
 Output is billed INCLUDING thinking tokens, so both are counted as output.
 """
 
+import logging
 import os
 import time
 
@@ -30,6 +31,10 @@ from dotenv import load_dotenv
 from google import genai
 
 load_dotenv()
+
+# The SDK logs a notice about "automatic function calling" (AFC) on every call.
+# We don't use tools/AFC, so it's noise in the terminal: keep only real errors.
+logging.getLogger("google_genai").setLevel(logging.ERROR)
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.7-flash")
 MAX_ATTEMPTS = 3

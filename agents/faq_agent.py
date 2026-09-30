@@ -312,10 +312,17 @@ def _blocked_without_login() -> bool:
 
 
 WEEKLY_QUESTION = (
-    "Prepara el resumen del lunes para enviarlo por WhatsApp al propietario. Máximo 8 líneas, "
-    "texto plano sin negritas ni enlaces: 1) qué ha detectado el último análisis y qué "
-    "recomendaciones esperan su decisión en la app; 2) las tareas de esta semana en el club, "
-    "cada una con UN responsable; 3) lo que está en espera (Esperando: …). Empieza por lo más urgente."
+    "Prepara el resumen del lunes para enviarlo por mensaje al propietario. Texto plano, sin "
+    "negritas ni enlaces, frases cortas, máximo unas 12 líneas. Usa EXACTAMENTE estas secciones, "
+    "en este orden, cada una empezando por su emoji:\n"
+    "⚠️ Alertas: alertas de seguridad o patrones escalados; si no hay, escribe 'ninguna'.\n"
+    "📥 Decidir en la app: recomendaciones que esperan en 1 · Detectar (de mayor a menor "
+    "prioridad) y planes que esperan su kit en 2 · Preparar; si no hay, 'nada pendiente'.\n"
+    "🔁 Seguimientos: los que tocan esta semana o ya tocan, con su fecha o condición y qué prueba "
+    "llevar (3 · Seguir).\n"
+    "🛠️ Tareas en el club: una por línea, con UN responsable (rol del perfil) y para qué patrón.\n"
+    "⏳ Esperando: lo que depende de algo externo.\n"
+    "No repitas la misma tarea en dos secciones."
 )
 
 

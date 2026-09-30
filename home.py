@@ -759,7 +759,8 @@ try:
 except Exception:
     last = None
 if last:
-    sent = {"sent": "enviado por WhatsApp", "not_sent": "guardado (WhatsApp sin configurar)",
+    via = {"telegram": "Telegram", "whatsapp": "WhatsApp"}.get(last.get("channel"), "")
+    sent = {"sent": f"enviado por {via}", "not_sent": "guardado sin enviar",
             "error": "no se pudo enviar"}.get(last.get("status"), last.get("status"))
     when = str(last.get("created_at") or "")[:10]
     with st.expander(f"📬 Último resumen semanal · {when} · {sent}"):

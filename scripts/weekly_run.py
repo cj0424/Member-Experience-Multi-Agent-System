@@ -2,7 +2,7 @@
 weekly_run.py — the weekly job (Phase 3). Run it every Monday morning:
 
     python scripts/weekly_run.py            # analyse + summary + send
-    python scripts/weekly_run.py --no-send  # same, but don't send WhatsApp
+    python scripts/weekly_run.py --no-send  # same, but don't send the message
 
 What it does, in order:
 1. Analysis: if there's a week not analysed yet in data/week*/, runs the
@@ -10,8 +10,9 @@ What it does, in order:
    recomendación", saved in Supabase, for the owner to review one by one).
 2. Summary: Pala writes the Monday message (what's waiting in the app, this
    week's tasks with one owner each, what's on hold).
-3. Delivery: sends it by WhatsApp if configured (agents/notify.py), and always
-   saves it in Supabase (notifications), so it also shows on the Dashboard.
+3. Delivery: sends it through the configured channel (agents/notify.py:
+   Telegram for the demo, WhatsApp in production), and always saves it in
+   Supabase (notifications), so it also shows on the Dashboard.
 
 Scheduling it (Windows Task Scheduler, or GitHub Actions once deployed) is a
 separate step: this script is exactly what the schedule will run.
@@ -32,7 +33,7 @@ from evidence.pipeline import list_weeks  # noqa: E402
 from faq_agent import run_weekly_summary  # noqa: E402
 from graph import discovery_graph, new_thread, run_until_pause, week_label  # noqa: E402
 from llm import GeminiUnavailable  # noqa: E402
-from notify import send_whatsapp, whatsapp_configured  # noqa: E402
+from notify import channel, configured, send  # noqa: E402
 
 
 def new_week_available() -> bool:
@@ -43,7 +44,7 @@ def new_week_available() -> bool:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--no-send", action="store_true", help="save the summary but don't send WhatsApp")
+    ap.add_argument("--no-send", action="store_true", help="save the summary but don't send it")
     args = ap.parse_args()
 
     label = None
@@ -66,12 +67,13 @@ def main():
         sys.exit(1)
 
     print("3/3 Enviando y guardando...")
-    if args.no_send or not whatsapp_configured():
-        status, error, channel = "not_sent", ("--no-send" if args.no_send else "WhatsApp sin configurar"), "none"
+    if args.no_send or not configured():
+        status, used = "not_sent", "none"
+        error = "--no-send" if args.no_send else f"{channel()} sin configurar"
     else:
-        sent, error = send_whatsapp(body)
-        status, channel = ("sent" if sent else "error"), "whatsapp"
-    db.save_notification(body, channel, status, error=error, week_label=label)
+        sent, error = send(body)
+        status, used = ("sent" if sent else "error"), channel()
+    db.save_notification(body, used, status, error=error, week_label=label)
     print("\n" + body + "\n")
     print(f"Estado: {status}" + (f" ({error})" if error else ""))
 
