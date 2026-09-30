@@ -1,0 +1,182 @@
+{
+  "week_start": "2026-09-28",
+  "seed": 20260928,
+  "implemented": [
+    "court12_light",
+    "indoor_temperature",
+    "outside_lights",
+    "sand"
+  ],
+  "events": [
+    {
+      "event": "tap_or_toilet_fault",
+      "dates": [
+        "2026-10-04"
+      ]
+    },
+    {
+      "event": "lost_item",
+      "dates": [
+        "2026-10-03"
+      ]
+    }
+  ],
+  "survey": [
+    {
+      "band": "tarde",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-030",
+      "date": "2026-09-28",
+      "weekday": "lunes"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-031",
+      "date": "2026-09-28",
+      "weekday": "lunes"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "indoor_temperature"
+      ],
+      "positive_theme": null,
+      "id": "ENC-032",
+      "date": "2026-10-01",
+      "weekday": "jueves"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-033",
+      "date": "2026-10-02",
+      "weekday": "viernes"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-034",
+      "date": "2026-10-02",
+      "weekday": "viernes"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-035",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "band": "tarde",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-036",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "band": "tarde",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-037",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-038",
+      "date": "2026-10-04",
+      "weekday": "domingo"
+    },
+    {
+      "band": "noche",
+      "tone": "negative",
+      "problems": [
+        "sand"
+      ],
+      "positive_theme": null,
+      "id": "ENC-039",
+      "date": "2026-10-04",
+      "weekday": "domingo"
+    }
+  ],
+  "incidents": [
+    {
+      "topic": "lost_item",
+      "kind": "event",
+      "id": "INC-005",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "topic": "tap_or_toilet_fault",
+      "kind": "event",
+      "id": "INC-006",
+      "date": "2026-10-04",
+      "weekday": "domingo"
+    }
+  ],
+  "staff_notes": [
+    {
+      "role": "Entrenador",
+      "topic": "member_feedback_positive",
+      "id": "OBS-008",
+      "date": "2026-09-30",
+      "weekday": "miércoles"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "member_feedback_positive",
+      "id": "OBS-009",
+      "date": "2026-10-02",
+      "weekday": "viernes"
+    },
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-010",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "classes_demand",
+      "id": "OBS-011",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-012",
+      "date": "2026-10-03",
+      "weekday": "sábado"
+    },
+    {
+      "role": "Recepción",
+      "topic": "member_feedback_positive",
+      "id": "OBS-013",
+      "date": "2026-10-04",
+      "weekday": "domingo"
+    }
+  ]
+}

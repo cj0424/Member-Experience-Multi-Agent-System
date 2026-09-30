@@ -1,0 +1,16 @@
+=== REGISTRO DE INCIDENCIAS — RECEPCIÓN ===
+=== Semana del 28 de septiembre al 4 de octubre (simulado, anonimizado) ===
+
+INC-005, sábado 3 de octubre, 13:10
+Registrado por: Recepción (turno mañana)
+Área: Objetos perdidos
+Descripción: Un socio se deja una mochila en el vestuario. Se guarda en recepción.
+Acción: Se le avisa por el chat de la reserva en Playtomic y la recoge por la tarde.
+Estado: Cerrada
+
+INC-006, domingo 4 de octubre, 18:30
+Registrado por: Recepción (turno tarde)
+Área: Vestuarios
+Descripción: La cisterna de un aseo del vestuario de mujeres no deja de correr.
+Acción: Se cierra la llave de paso de ese aseo y se deja una nota para mantenimiento.
+Estado: Abierta
