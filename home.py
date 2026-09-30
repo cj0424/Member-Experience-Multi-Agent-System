@@ -29,11 +29,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "agents"))
 
 from outcome_check_agent import supabase
 import db
+from auth import require_login, can, actor_label
 
 st.set_page_config(
     page_title="Dashboard — Club de Pádel",
     layout="wide"
 )
+role = require_login("ver")
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">
@@ -730,4 +732,39 @@ else:
                 render_pattern_detail(p)
 
 st.divider()
+
+# Gemini usage in the last 7 days (logged by agents/llm.py) — owner only (access matrix)
+try:
+    usage = db.get_llm_usage(7) if can("coste_gemini") else None
+except Exception:
+    usage = None
+if usage and usage["calls"]:
+    line = (f"🤖 Uso de Gemini (últimos 7 días): {usage['calls']} llamadas · "
+            f"{usage['seconds'] / 60:.1f} min · {usage['tokens']:,} tokens".replace(",", "."))
+    if usage["cost_usd"] is not None:
+        line += f" · ~${usage['cost_usd']:.2f}"
+    if usage["errors"] or usage["retried"]:
+        line += f" · {usage['retried']} reintentada(s), {usage['errors']} fallida(s)"
+    with st.expander(line):
+        rows = sorted(usage["per_agent"].items(), key=lambda kv: -kv[1]["calls"])
+        st.markdown("\n".join(
+            f"- **{agent}**: {v['calls']} llamadas · {v['seconds']:.0f} s · "
+            f"{(v['seconds'] / v['calls']):.1f} s de media · {v['tokens']:,} tokens".replace(",", ".")
+            for agent, v in rows
+        ))
+
+# Last weekly summary (scripts/weekly_run.py)
+try:
+    last = db.get_last_notification()
+except Exception:
+    last = None
+if last:
+    sent = {"sent": "enviado por WhatsApp", "not_sent": "guardado (WhatsApp sin configurar)",
+            "error": "no se pudo enviar"}.get(last.get("status"), last.get("status"))
+    when = str(last.get("created_at") or "")[:10]
+    with st.expander(f"📬 Último resumen semanal · {when} · {sent}"):
+        st.text(last.get("body") or "")
+        if last.get("error"):
+            st.caption(f"Detalle: {last['error']}")
+
 st.caption("Datos en tiempo real desde Supabase.")

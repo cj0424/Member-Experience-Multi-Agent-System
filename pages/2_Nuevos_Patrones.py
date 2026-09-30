@@ -17,9 +17,13 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
+from auth import require_login, can, actor_label
 from graph import discovery_graph, plan_graph, new_thread, run_until_pause, resume, upcoming_week, week_label
+from llm import GeminiUnavailable
 
 st.set_page_config(page_title="Nuevos Patrones — Club de Pádel", layout="wide")
+role = require_login("detectar")
+
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">
@@ -725,8 +729,13 @@ def run_graph(graph, graph_input, config, title: str, key: str):
     """Runs or resumes a graph, showing each agent step in the big
     narration box. Returns the next pause, or None."""
     with st.container(key=key):
-        with st.status(title, expanded=True, type="step"):
-            pending = run_until_pause(graph, graph_input, config, on_step=st.write)
+        try:
+            with st.status(title, expanded=True, type="step"):
+                pending = run_until_pause(graph, graph_input, config, on_step=st.write)
+        except GeminiUnavailable as e:
+            # Clear message instead of a red technical error; saved decisions are untouched
+            st.error(f"⏳ {e}")
+            st.stop()
         st.status("Listo", state="complete", type="step")
     return pending
 

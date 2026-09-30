@@ -44,19 +44,26 @@ Entradas:
 
 
 def _gemini_call(prompt: str) -> str:
-    """Default LLM call using the google-genai SDK."""
+    """Default LLM call: agents/llm.py (retries + tracking) when available,
+    otherwise the google-genai SDK directly (e.g. in the standalone test script)."""
+    config = {"response_mime_type": "application/json", "temperature": 0}
+    try:
+        from llm import generate
+    except ImportError:
+        import sys
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agents"))
+        try:
+            from llm import generate
+        except ImportError:
+            generate = None
+    if generate:
+        return generate(prompt, agent="insights_tagging", model=model_name(), config=config)
     from google import genai  # pip install google-genai
-
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise RuntimeError("Falta GEMINI_API_KEY (o GOOGLE_API_KEY) en el .env")
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     client = genai.Client(api_key=api_key)
-    resp = client.models.generate_content(
-        model=model, contents=prompt,
-        config={"response_mime_type": "application/json", "temperature": 0},
-    )
-    return resp.text
+    return client.models.generate_content(model=model_name(), contents=prompt, config=config).text
 
 
 def _clean_json(text: str):
@@ -102,6 +109,8 @@ def tag_items(items, llm_call=None, retries=3):
                 last_error = None
                 break
             except Exception as e:  # noqa: BLE001
+                if type(e).__name__ == "GeminiUnavailable":
+                    raise   # already retried inside llm.generate: show the friendly message
                 last_error = e
                 time.sleep(2 ** attempt)
         if last_error:

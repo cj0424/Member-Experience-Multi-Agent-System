@@ -22,18 +22,12 @@ the four sources said automatically at the last check-in (kept apart from
 what the owner said), and tells rejected ideas from postponed ones.
 """
 
-import os
 import re
 from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
-from google import genai
 
 import db
 from rag import load_club_profile
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+from llm import generate, GeminiUnavailable
 
 CHECKIN_EVERY_DAYS = 14
 
@@ -304,15 +298,45 @@ PREGUNTA:
 Responde ahora."""
 
 
+def _blocked_without_login() -> bool:
+    """Inside the Streamlit app, Pala only answers a logged-in user (it sees all
+    the club's data). Scripts (e.g. the weekly run) are not in a browser session."""
+    try:
+        from streamlit.runtime import exists
+        if not exists():
+            return False
+        from auth import is_authorized
+        return not is_authorized()
+    except Exception:  # noqa: BLE001
+        return False
+
+
+WEEKLY_QUESTION = (
+    "Prepara el resumen del lunes para enviarlo por WhatsApp al propietario. Máximo 8 líneas, "
+    "texto plano sin negritas ni enlaces: 1) qué ha detectado el último análisis y qué "
+    "recomendaciones esperan su decisión en la app; 2) las tareas de esta semana en el club, "
+    "cada una con UN responsable; 3) lo que está en espera (Esperando: …). Empieza por lo más urgente."
+)
+
+
+def run_weekly_summary() -> str:
+    """The Monday message: what's waiting in the app, this week's tasks, what's on hold."""
+    return run_faq_agent(WEEKLY_QUESTION)
+
+
 def run_faq_agent(question: str, history: list[dict] | None = None) -> str:
+    if _blocked_without_login():
+        return "Inicia sesión para usar Pala."
     try:
         counts = db.get_journey_counts()
     except Exception:
         counts = {}
     prompt = build_prompt(question, history or [], club_digest(), counts, load_club_profile(),
                           pending=pending_digest())
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    try:
+        return generate(prompt, agent="pala")
+    except GeminiUnavailable as e:
+        return str(e)
 
 
 if __name__ == "__main__":

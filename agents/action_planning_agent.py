@@ -32,14 +32,8 @@ Any library document — loyalty guide included — is used only when it
 really applies, and the "Fuente" line says which one and what it added.
 """
 
-import os
-from dotenv import load_dotenv
-from google import genai
 from rag import load_rag_library, load_club_profile
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+from llm import generate
 
 
 SHARED_RULES = """Reglas:
@@ -257,8 +251,7 @@ def run_action_planning_agent(pattern_description: str, rag_folder: str = "data/
     """First-pass recommendation for a brand-new confirmed pattern."""
     rag_context = load_rag_library(rag_folder)
     prompt = build_prompt(pattern_description, rag_context, load_club_profile(rag_folder))
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="action_planning")
 
 
 def run_action_planning_revision(pattern_description: str, rag_folder: str,
@@ -267,8 +260,7 @@ def run_action_planning_revision(pattern_description: str, rag_folder: str,
     rag_context = load_rag_library(rag_folder)
     prompt = build_revision_prompt(pattern_description, rag_context, load_club_profile(rag_folder),
                                      previous_recommendation, owner_feedback)
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="action_planning")
 
 
 def run_action_planning_from_pivot(pattern_description: str, rag_folder: str,
@@ -283,8 +275,7 @@ def run_action_planning_from_pivot(pattern_description: str, rag_folder: str,
     prompt = build_from_pivot_prompt(pattern_description, rag_context, load_club_profile(rag_folder),
                                        previous_action, outcome_evidence,
                                        rejected_ideas)
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="action_planning")
 
 
 if __name__ == "__main__":

@@ -50,8 +50,8 @@ MAX_PIVOTS = 2
 
 EVIDENCE_TIERS = {
     1: "Evidencia ALTA — registro firmado",
-    2: "Evidencia MEDIA — observación directa del propietario",
-    3: "Evidencia BAJA — relato verbal, sin registro",
+    2: "Evidencia MEDIA — lo comprobó en persona quien registra el seguimiento",
+    3: "Evidencia BAJA — me lo contaron, sin registro",
 }
 
 
@@ -154,13 +154,17 @@ def checkin_node(state: ContinuityState) -> dict:
         results.append({"pattern_id": p["id"], "pattern_name": p["pattern_name"], "decision": "OMITIDO"})
         return {"index": i + 1, "results": results}
 
+    submitted_by = answer.get("submitted_by")          # role of the logged-in user (Phase 3)
+    who_line = f"Seguimiento registrado por: {submitted_by}\n" if submitted_by else ""
+
     # 1. Execution evidence
     if answer.get("executed"):
         tier = int(answer.get("tier") or 3)
-        verification_result = f"Confirmado — [{EVIDENCE_TIERS[tier]}] {answer.get('evidence_text', '').strip()}"
+        verification_result = (f"{who_line}Confirmado — [{EVIDENCE_TIERS[tier]}] "
+                               f"{answer.get('evidence_text', '').strip()}")
         cycles = (p.get("cycles_since_approval") or 0) + 1
     else:
-        verification_result = "No confirmado todavía"
+        verification_result = f"{who_line}No confirmado todavía"
         cycles = p.get("cycles_since_approval") or 0
 
     db.update_pattern(p["id"], {"verification_result": verification_result,
@@ -332,4 +336,4 @@ if __name__ == "__main__":
     for r in values.get("results", []):
         print(f"🔁 {r['pattern_name']}: {r['decision']}")
     for r in values.get("pivot_results", []):
-        print(f"{'✅' if r['outcome'] == 'approved' else '❌'} Nuevo enfoque — {r['pattern_name']}")
+        print(f"{'✅' if r['outcome'] == 'approved' else '❌'} Nuevo enfoque — {r['pattern_name']}")

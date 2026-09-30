@@ -18,10 +18,14 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
+from auth import require_login, can, actor_label
 from graph import kit_graph, new_thread, run_until_pause, resume
 from execution_kit_agent import extract_tracker_specs, build_tracker_excel, safe_filename
+from llm import GeminiUnavailable
 
 st.set_page_config(page_title="Kits de Ejecución — Club de Pádel", layout="wide")
+role = require_login("preparar")
+
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">
@@ -728,8 +732,12 @@ def render_kit(kit_text, key_prefix):
 
 def run_graph(graph_input, title: str, key: str):
     with st.container(key=key):
-        with st.status(title, expanded=True, type="step"):
-            pending = run_until_pause(kit_graph, graph_input, st.session_state.ek_config, on_step=st.write)
+        try:
+            with st.status(title, expanded=True, type="step"):
+                pending = run_until_pause(kit_graph, graph_input, st.session_state.ek_config, on_step=st.write)
+        except GeminiUnavailable as e:
+            st.error(f"⏳ {e}")
+            st.stop()
         st.status("Listo", state="complete", type="step")
     return pending
 

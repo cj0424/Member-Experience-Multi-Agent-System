@@ -24,19 +24,12 @@ import re
 import sys
 from datetime import date
 
-from dotenv import load_dotenv
-from google import genai
-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from evidence.pipeline import run as run_evidence  # noqa: E402
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-MODEL = "gemini-3.7-flash"
+from llm import generate, GeminiUnavailable, MODEL  # noqa: E402
 
 SOURCE_LABELS = {"survey": "encuesta", "incident": "incidencias",
                  "staff": "personal", "google": "Google"}
@@ -107,13 +100,15 @@ TEMAS:
 {chr(10).join(blocks)}"""
     written = {}
     try:
-        raw = client.models.generate_content(model=MODEL, contents=prompt).text
+        raw = generate(prompt, agent="insights_naming")
         raw = raw.strip().replace("```json", "").replace("```", "").strip()
         for x in json.loads(raw):
             if x.get("topic"):
                 written[x["topic"]] = {"nombre": (x.get("nombre") or "").strip(),
                                        "que_significa": (x.get("que_significa") or "").strip()}
-    except Exception:  # noqa: BLE001 - fall back to the topic label below
+    except GeminiUnavailable:
+        raise
+    except Exception:  # noqa: BLE001 - unreadable answer: fall back to the topic label below
         pass
     return written
 

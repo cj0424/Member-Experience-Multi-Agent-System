@@ -529,3 +529,51 @@ def close_pending_recommendation(pending_id: int, outcome: str):
     supabase.table("pending_recommendations").update({
         "status": outcome, "decided_at": datetime.now(timezone.utc).isoformat(),
     }).eq("id", pending_id).execute()
+
+
+
+# ---------------------------------------------------------------------------
+# Gemini usage (Phase 3) — every call is logged by agents/llm.py in llm_calls
+# ---------------------------------------------------------------------------
+
+def get_llm_usage(days: int = 7) -> dict:
+    """Totals for the last `days` days: calls, errors, seconds, tokens, cost, and per agent."""
+    from datetime import datetime, timezone
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    rows = (supabase.table("llm_calls").select("*").gte("created_at", since).execute().data or [])
+    per_agent = {}
+    for r in rows:
+        a = per_agent.setdefault(r.get("agent") or "otro", {"calls": 0, "seconds": 0.0, "tokens": 0})
+        a["calls"] += 1
+        a["seconds"] += (r.get("duration_ms") or 0) / 1000
+        a["tokens"] += (r.get("input_tokens") or 0) + (r.get("output_tokens") or 0)
+    costs = [float(r["cost_usd"]) for r in rows if r.get("cost_usd") is not None]
+    return {
+        "calls": len(rows),
+        "errors": sum(1 for r in rows if r.get("status") == "error"),
+        "retried": sum(1 for r in rows if (r.get("attempts") or 1) > 1),
+        "seconds": sum((r.get("duration_ms") or 0) for r in rows) / 1000,
+        "tokens": sum((r.get("input_tokens") or 0) + (r.get("output_tokens") or 0) for r in rows),
+        "cost_usd": round(sum(costs), 4) if costs else None,
+        "per_agent": per_agent,
+    }
+
+
+
+# ---------------------------------------------------------------------------
+# Weekly notifications (Phase 3) — written by scripts/weekly_run.py
+# Table: notifications (sql/phase3_notifications.sql)
+# ---------------------------------------------------------------------------
+
+def save_notification(body: str, channel: str, status: str, error: str | None = None,
+                      week_label: str | None = None) -> dict:
+    rows = supabase.table("notifications").insert({
+        "channel": channel, "body": body, "status": status, "error": error, "week_label": week_label,
+    }).execute().data
+    return rows[0] if rows else {}
+
+
+def get_last_notification() -> dict | None:
+    rows = (supabase.table("notifications").select("*")
+            .order("created_at", desc=True).limit(1).execute().data or [])
+    return rows[0] if rows else None

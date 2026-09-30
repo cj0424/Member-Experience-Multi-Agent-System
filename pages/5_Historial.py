@@ -17,8 +17,11 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
+from auth import require_login, can, actor_label
 
 st.set_page_config(page_title="Historial — Club de Pádel", layout="wide")
+role = require_login("ver")
+
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">

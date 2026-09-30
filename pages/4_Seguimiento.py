@@ -19,10 +19,14 @@ import html
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
+from auth import require_login, can, actor_label
 from graph import new_thread, run_until_pause, resume
+from llm import GeminiUnavailable
 from continuity_graph import continuity_graph, summarize_tracker
 
 st.set_page_config(page_title="Seguimiento — Club de Pádel", layout="wide")
+role = require_login("seguir")
+
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">
@@ -812,10 +816,14 @@ def render_outcome(narrative: str):
 
 def run_graph(graph_input, title: str, key: str):
     with st.container(key=key):
-        with st.status(title, expanded=True, type="step"):
-            pending = run_until_pause(
-                continuity_graph, graph_input, st.session_state.sg_config, on_step=st.write
-            )
+        try:
+            with st.status(title, expanded=True, type="step"):
+                pending = run_until_pause(
+                    continuity_graph, graph_input, st.session_state.sg_config, on_step=st.write
+                )
+        except GeminiUnavailable as e:
+            st.error(f"⏳ {e}")
+            st.stop()
         st.status("Listo", state="complete", type="step")
     return pending
 
@@ -1059,7 +1067,7 @@ elif st.session_state.sg_stage in ("checkin", "pivot", "pivot_revise", "result")
                         "¿Qué prueba tienes?",
                         ["📋 Un registro firmado (el tracker Excel)",
                          "👀 Lo comprobé yo mismo",
-                         "💬 El personal me lo dijo"],
+                         "💬 Me lo contaron (sin registro)"],
                         key=f"sg_tier_{idx}",
                     )
                     tier = 1 if tier_label.startswith("📋") else 2 if tier_label.startswith("👀") else 3
@@ -1087,9 +1095,9 @@ elif st.session_state.sg_stage in ("checkin", "pivot", "pivot_revise", "result")
                     "Comentarios o reseñas", key=f"sg_fb_{idx}", height=120, label_visibility="collapsed",
                     placeholder="Lo que has visto tú, o lo que te han comentado socios o personal sobre este tema desde que se aprobó el plan (lo que ya está en las fuentes se añade solo). Déjalo vacío si no hay nada.",
                 )
-                r1, r2, _ = st.columns([1, 1, 3])
-                answer["rating_before"] = r1.text_input("Valoración media antes (opcional)", key=f"sg_rb_{idx}")
-                answer["rating_after"] = r2.text_input("Valoración media ahora (opcional)", key=f"sg_ra_{idx}")
+                # Google's rating isn't stored (Google's terms), so there's no "before" to compare:
+                # the old optional rating fields were removed. Who submits is recorded instead.
+                answer["submitted_by"] = actor_label()
 
             label = "Continuar →" if done == "Revisar más tarde" else "🔁 Enviar y evaluar"
             if st.button(label, type="primary", key=f"sg_submit_{idx}"):

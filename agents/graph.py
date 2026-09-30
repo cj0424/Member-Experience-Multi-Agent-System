@@ -48,7 +48,8 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 import db
-from insights_agent import run_insights_agent, client
+from insights_agent import run_insights_agent
+from llm import generate, GeminiUnavailable
 from evidence.pipeline import next_week_to_analyse
 from action_planning_agent import run_action_planning_agent, run_action_planning_revision
 from execution_kit_agent import run_execution_kit_agent, run_execution_kit_revision
@@ -67,7 +68,7 @@ def narrate(message: str):
 
 
 def gemini_json(prompt: str):
-    raw = client.models.generate_content(model=MODEL, contents=prompt).text.strip()
+    raw = generate(prompt, agent="graph_helper").strip()
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
@@ -392,11 +393,8 @@ def rejected_from_feedback(revisions: list[dict], approved_text: str) -> list[st
     entries = []
     for rev in revisions:
         try:
-            raw = client.models.generate_content(
-                model=MODEL,
-                contents=REJECTED_PROMPT.format(previous=rev["text"], feedback=rev["feedback"],
-                                                approved=approved_text),
-            ).text
+            raw = generate(REJECTED_PROMPT.format(previous=rev["text"], feedback=rev["feedback"],
+                                                  approved=approved_text), agent="rejected_ideas")
             raw = raw.strip().replace("```json", "").replace("```", "").strip()
             for x in json.loads(raw):
                 idea = (x.get("idea") or "").strip()
@@ -405,7 +403,7 @@ def rejected_from_feedback(revisions: list[dict], approved_text: str) -> list[st
                 kind = "Pospuesto" if (x.get("tipo") or "").lower().startswith("pos") else "Descartado"
                 reason = (x.get("motivo") or "sin motivo indicado").strip()
                 entries.append(f"{kind}: {idea} (motivo: {reason})")
-        except Exception:  # noqa: BLE001 - keep the old behaviour rather than lose the record
+        except Exception:  # noqa: BLE001 - Gemini down or unreadable: keep the old method rather than lose the record
             fallback = db.drop_kept_ideas(db.rejected_entry(rev["text"], rev["feedback"]), approved_text)
             if fallback:
                 entries.append(fallback)
@@ -582,7 +580,7 @@ Si no existe, responde exactamente: NO_ENCONTRADO
 
 KIT:
 {kit_text}"""
-    result = client.models.generate_content(model=MODEL, contents=prompt).text.strip()
+    result = generate(prompt, agent="graph_helper").strip()
     return "Ver kit de ejecución completo" if result in ("", "NO_ENCONTRADO") else result
 
 

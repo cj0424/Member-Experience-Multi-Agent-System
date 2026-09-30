@@ -35,17 +35,11 @@ fix was already done and promised diffusers the plan only buys if needed):
   copy-ready texts to a person or group are direct and natural
 """
 
-import os
 import json
-from dotenv import load_dotenv
-from google import genai
 from rag import load_rag_library, load_club_profile
+from llm import generate
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 SHARED_QUALITY_RULES = """Antes de incluir CUALQUIER pieza, aplica esta prueba estricta:
 ¿esto le da al lector algo que genuinamente NO sabría o NO tendría
@@ -309,14 +303,12 @@ def safe_filename(title: str) -> str:
 
 def run_execution_kit_agent(approved_recommendation: str):
     prompt = build_prompt(approved_recommendation)
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="execution_kit")
 
 
 def run_execution_kit_revision(approved_recommendation: str, previous_kit: str, owner_feedback: str):
     prompt = build_revision_prompt(approved_recommendation, previous_kit, owner_feedback)
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="execution_kit")
 
 
 if __name__ == "__main__":

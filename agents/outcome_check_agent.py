@@ -33,13 +33,11 @@ club actually works (e.g. who can realistically verify what, and when).
 
 import os
 from dotenv import load_dotenv
-from google import genai
 from supabase import create_client
 from rag import load_club_profile
+from llm import generate
 
 load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
@@ -240,8 +238,7 @@ def run_outcome_check_agent(pattern_name: str, verification_method: str, verific
                            action_description, cycles_since_approval,
                            new_reviews_since_approval, rating_before, rating_after,
                            club_profile=load_club_profile())
-    response = client.models.generate_content(model="gemini-3.7-flash", contents=prompt)
-    return response.text
+    return generate(prompt, agent="outcome_check")
 
 
 def run_outcome_check_from_db(pattern_name: str,
