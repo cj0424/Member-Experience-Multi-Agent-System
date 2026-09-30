@@ -218,6 +218,12 @@ Si la decisión es CONTINUAR por MEJORA PARCIAL, añade un párrafo
 breve con el ajuste concreto que recomiendas mantener o probar hasta
 el siguiente seguimiento.
 
+Si la decisión es CONTINUAR porque aún no ha pasado tiempo suficiente,
+añade una o dos frases con el siguiente paso práctico mientras tanto
+(por ejemplo, a quién reclamar algo pendiente y cuándo, o qué
+comprobar antes del próximo seguimiento). Sin inventar fechas que no
+salgan de los datos.
+
 Si la decisión es PIVOTAR, añade un párrafo igual de claro,
 explicando qué se intentó, por qué no fue suficiente según la
 evidencia real, y una hipótesis concreta de qué probar diferente la

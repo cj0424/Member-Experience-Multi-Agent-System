@@ -169,7 +169,8 @@ def pending_digest() -> str:
     for r in waiting:
         meta = r.get("meta") or {}
         ids = [i.strip() for i in (meta.get("evidence_ids") or "").split(",") if i.strip()]
-        parts = [r["name"], f"prioridad {meta.get('priority') or '—'}",
+        score = meta.get("priority_score")
+        parts = [r["name"], f"prioridad {meta.get('priority') or '—'}" + (f" ({score}/15)" if score else ""),
                  f"confianza {meta.get('confidence') or '—'}", f"{len(ids)} mención(es)",
                  f"detectado el {_fmt(_parse_date(r.get('created_at')))}"]
         if r.get("kind") == "reaparece":
@@ -210,13 +211,19 @@ QUÉ DATOS MANDAN:
 
 CÓMO RESPONDER:
 - Empieza por la respuesta, en una frase. Nada de introducciones.
-- Qué hacer ahora: lista numerada de 1 a 5 acciones, por prioridad:
+- Qué hacer ahora: lista numerada de 1 a 6 acciones, por prioridad:
   1) patrones ESCALADOS; 2) FLAG con algo concreto que resolver;
-  3) seguimientos que ya tocan (fecha recomendada pasada o hoy);
-  4) patrones detectados que esperan su recomendación (empieza por el de
-     prioridad más alta; se revisan uno a uno en "1 · Detectar");
-  5) planes esperando su kit; 6) análisis si hace 7+ días del último.
-  Si hay más de 5, quédate con las 5 primeras.
+  3) AJUSTES que propuso el último seguimiento (decisión CONTINUAR con un
+     cambio concreto: mover una tarea de día, reparar un foco…). Son
+     tareas EN EL CLUB: di cuál y para qué patrón;
+  4) seguimientos que ya tocan (fecha recomendada pasada o hoy);
+  5) patrones detectados que esperan su recomendación (empieza por el de
+     mayor puntuación de prioridad; se revisan uno a uno en "1 · Detectar");
+  6) planes esperando su kit; 7) análisis si hace 7+ días del último.
+  Si hay más de 6, quédate con las 6 primeras.
+- Si un seguimiento dice que aún falta tiempo porque depende de algo
+  externo (por ejemplo, la respuesta de Playtomic), añade una línea
+  "Esperando: …" y, si ya ha pasado una semana, sugiere reclamarlo.
   Cada acción en una línea corta: qué hacer y, si hace falta, un
   "porque…" breve.
 - Distingue dónde se hace cada cosa. Si la acción es EN EL CLUB (llamar a
