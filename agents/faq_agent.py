@@ -138,7 +138,9 @@ def club_digest() -> str:
             block += f"\n   Conclusión del último seguimiento: {_checkin_conclusion(last.get('narrative'))}"
 
         if p.get("approved_action") and p.get("status") != "discarded":
-            block += f"\n   Plan aprobado: {_one_line(db.summarize_recommendation(p['approved_action']), 200)}"
+            # The plan's own text (not just its titles), so conditions like
+            # "solo si el fallo es general" reach Pala
+            block += f"\n   Plan aprobado (texto): {_one_line(p['approved_action'], 600)}"
         if p.get("status") == "open" and p.get("verification_method"):
             block += (f"\n   Cómo verificar (del kit original; si ya hubo seguimientos, manda lo "
                       f"último que se indicó): {_one_line(p['verification_method'], 220)}")
@@ -232,6 +234,9 @@ CÓMO RESPONDER:
   Distingue las DESCARTADAS de las POSPUESTAS: una idea pospuesta ("más
   adelante", "en primavera", "solo si no basta") no está rechazada; dilo
   así y, si su condición ya se cumple, puedes recordarla.
+- Si una parte del plan aprobado es condicional ("si…", "solo si…", "si no
+  basta…", "cuando…"), dilo así ("si la revisión no basta, pedir
+  presupuesto a un electricista"). Nunca la presentes como un paso seguro.
 - Lo que dijeron las fuentes en un seguimiento es automático (socios,
   personal, Google); lo que indicó el propietario es lo suyo. No los
   mezcles ni atribuyas uno al otro.
