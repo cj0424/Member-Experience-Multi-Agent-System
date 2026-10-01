@@ -1,10 +1,11 @@
 === GOOGLE PLACES — INSTANTÁNEA SEMANAL ===
 Consulta: lunes 28 de septiembre de 2026
-Regla: las 5 reseñas más recientes (máximo que devuelve Google por consulta)
-Nota: reseñas reales de un club de Madrid, parafraseadas y anonimizadas.
+Formato: como lo devolvería la API de Google (máximo 5 reseñas por consulta)
+Nota: basadas en reseñas reales de un club de Madrid (muestra recogida a mano),
+parafraseadas y anonimizadas. No son las reseñas más recientes del club:
+se usan las mismas 5 cada semana.
 Mes real; el día es aproximado. La valoración media y el total de reseñas
 se leen en directo en producción y no se guardan.
-Esta semana no hay reseñas nuevas: son las mismas 5 que la semana anterior.
 
 REV-001, 28 de enero de 2026
 Autor: Socio-001

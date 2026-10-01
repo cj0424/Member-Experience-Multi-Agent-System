@@ -14,7 +14,7 @@ flowchart TD
     A1([Post-session survey<br/>QR answers]):::source
     A2([Reception<br/>incident log]):::source
     A3([Staff notes<br/>coaches · reception · maintenance]):::source
-    A4([Google reviews<br/>5 newest · reference only]):::source
+    A4([Google reviews<br/>max 5 · reference only]):::source
 
     A1 --> B[Load the week<br/>store evidence]:::source
     A2 --> B
@@ -62,7 +62,7 @@ flowchart TD
 
 ## What each piece actually does
 
-**Feedback sources** *(blue)* — The system reads four sources once a week: the survey members answer after playing, the reception incident log, staff notes, and Google reviews. Google is read the same way its official API returns it, with only the 5 newest reviews. The system stores a reference to each review (its id and date) but never the text, as Google's terms require. In this project, the club's own sources are simulated from written assumptions, documented in `data/SIMULATION_ASSUMPTIONS.md`.
+**Feedback sources** *(blue)* — The system reads four sources once a week: the survey members answer after playing, the reception incident log, staff notes, and Google reviews. In production, Google would return the 5 newest reviews per week, and the system stores only a reference to each one (its id and date), never the text, as Google's terms require. In this project, all four sources are simulated: the club's own sources are generated from written assumptions, and Google is replaced by 5 real, anonymised reviews from an earlier sample, the same every week. Why, and what it means for the results, is explained in `data/SIMULATION_ASSUMPTIONS.md`.
 
 **Detection** *(purple)* — Gemini reads each entry and labels its topic, whether it's a complaint or praise, and whether it suggests a safety risk. It also notes the specific place or item mentioned, such as a court number, so the system can tell when several complaints point to the same spot. A rules engine then decides what counts as a pattern. A topic qualifies when it's mentioned on at least 2 different days, and either 3 times or by 2 different sources, within the last 28 days. The same rules set each pattern's priority and list the club's strengths, topics to watch and safety alerts. New patterns are saved in Supabase and wait there until the owner opens them. The full rules are in [`insights-pattern-rules.md`](insights-pattern-rules.md).
 
@@ -97,9 +97,9 @@ This matters because the owner is accountable for the club, and every plan uses 
 
 ## What this doesn't solve yet
 
-* **It hasn't been used at a real club.** All club data is simulated, so only a pilot can show the effect on real members.
+* **It hasn't been used at a real club.** All data is simulated, so the results show the system works correctly on realistic inputs; only a pilot, described in `pilot-plan.md`, can show the effect on real members.
 * **The weekly run is started manually.** Running it automatically every Monday morning is a deployment step.
 * **Safety alerts only appear in the app.** They should reach the owner's phone immediately instead of waiting for the weekly briefing.
 * **Plan and kit approvals don't record who made them.** Follow-ups already do.
-* **Google reviews come from a saved snapshot.** The connection point for Google's live API is ready in `evidence/loaders.py`.
+* **Google reviews are a fixed sample.** The connection point for Google's live API is ready in `evidence/loaders.py`.
 * **A kit or follow-up review in progress is lost if the app restarts.** Detected patterns are not affected, because they wait in Supabase.

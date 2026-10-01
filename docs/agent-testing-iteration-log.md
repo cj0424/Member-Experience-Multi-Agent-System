@@ -1,7 +1,7 @@
 # Member Experience Multi-Agent System — Testing & Iteration Log
 
 **Project:** Member-Experience-Multi-Agent-System — a case study for an independent padel club in Madrid.
-**Data note:** the club is not named. Google reviews are anonymized and paraphrased. The survey, incident log, staff notes, club profile, trackers and check-in inputs are simulated: realistic for a Spanish padel club, but not describing any real one.
+**Data note:** the club is not named, and all data is simulated. Google reviews are real reviews of a Madrid club, collected by hand, anonymised and paraphrased, and used as a fixed sample. The survey, incident log, staff notes, club profile, trackers and check-in inputs are simulated: realistic for a Spanish padel club, but not describing any real one. Why, and what it means for the results: [`data/SIMULATION_ASSUMPTIONS.md`](../data/SIMULATION_ASSUMPTIONS.md).
 **What this is:** a dated record of every version each part of the system went through, what changed, why, and whether it passed — written during development and testing.
 
 **How to read the tables:** *What changed* is the edit made · *Why* is the reason (a bug, a user concern, a design gap) · *Result* is Pass / Fail / Rejected, with the evidence.
@@ -303,7 +303,7 @@ Pala listed **approved** ideas as rejected. The same list goes to Action Plannin
 | Change | What it means |
 |---|---|
 | **Four sources** | Post-session QR survey (`ENC-`), reception incident log (`INC-`), staff notes (`OBS-`), Google reviews (`REV-`) |
-| **Google as the Places API returns it** | The 5 newest reviews per run, stored as a reference only (id + date, not the text, per Google's terms); a plug-in point for a live connection |
+| **Google in the format the Places API returns** | At most 5 reviews per run, stored as a reference only (id + date, not the text, per Google's terms). In this project: 5 real, anonymised reviews from the Phase 1–2 sample, the same every week — real content, simulated timing. A plug-in point is ready for a live connection |
 | **Club sources generated, not written to order** | `scripts/generate_week_plan.py`: the seed is the week's start date, frequencies come from written assumptions (`data/SIMULATION_ASSUMPTIONS.md`). The script decides what happens; only the wording is written by hand |
 | **Fixes change probabilities** | Once a fix is in place, mentions of that problem become less likely — never impossible |
 | **Detection by rules, not by the model** | A pattern needs 2+ different dates and 3 mentions or 2 source types within 28 days, with at least one club source. Priority = 2×severity + reach + frequency + recency (5–15). Safety = always Alta. Gemini only tags each entry and names patterns. 14 unit tests |
@@ -377,6 +377,7 @@ Each check-in now shows "what the sources say since detection" (before/after cou
 | 14 | Optional rating fields with no data behind them | Removed; check-ins record who submitted them |
 | 15 | Cost underestimated | Thinking tokens counted as output, as Google bills them |
 | 16 | An SDK notice on every call in the terminal | Hidden (errors still shown) |
+| 17 | A fourth "Decidir más tarde" button next to the three decisions | Replaced by a "← Volver a la lista" link above the recommendation: navigation kept apart from decisions |
 
 ## 3.7 Production readiness
 
@@ -399,12 +400,32 @@ Each check-in now shows "what the sources say since detection" (before/after cou
 | Telegram for the demo | Same flow as WhatsApp without a Meta business setup; WhatsApp stays the production channel |
 | A separate Google Cloud project for login | Keeps login settings apart from the project that holds the Gemini key |
 
-## 3.8 The numbers
+## 3.8 Self-check — and a new first-version measurement
+
+Every kit revision in 3.3 had the same causes. Both writing agents now review their own draft before answering:
+
+| Agent | The self-check asks |
+|---|---|
+| Execution Kit | Does each task fit the shift and workload of whoever does it? Does it ask members for effort, or announce a problem most haven't noticed? Does a seasonal routine say when it stops? Does every message to members announce a concrete change? |
+| Action Planning | Do the actions fit staff shifts and workload? Do they avoid asking members for effort? Do seasonal measures say until when? |
+
+Measured on two new patterns (class waiting lists, match overruns), plan and kit each, judged as a realistic owner. Choosing between the options a plan offers counts as a decision, not a correction.
+
+| | Before the self-check | After |
+|---|---|---|
+| Plans passing on the first version | — | 2/2 |
+| Kits passing on the first version | 0/5 | 1/2 |
+| **Total** | — | **3/4** |
+
+The one revision was smaller than before: the overruns kit planned the reception round at the exact moment new players arrive at the desk, and didn't offer lost minutes back to the delayed group. Both were fixed in one sentence of feedback.
+
+## 3.9 The numbers
 
 | Metric | Value |
 |---|---|
 | Patterns detected over 4 weeks | 8, with 0 duplicates |
 | Kits approved: first version → after one revision | 0/5 → 5/5 |
+| First versions passing after the self-check | 3/4 (plans 2/2, kits 1/2) |
 | Correct check-in decisions | 5/5 |
 | Pala answer | ~10–12 s, ~9,800 tokens, **~$0.01** |
 | Weekly briefing (no new week) | ~$0.01 |
@@ -412,7 +433,7 @@ Each check-in now shows "what the sources say since detection" (before/after cou
 | Hosting, login, database, bot | $0 |
 | Unit tests | 14 passing |
 
-## 3.9 Setup issues
+## 3.10 Setup issues
 
 | Issue | Fix |
 |---|---|
@@ -421,10 +442,10 @@ Each check-in now shows "what the sources say since detection" (before/after cou
 | Streamlit secrets rejected as invalid | Built from `.env` and `secrets.toml` by one command, straight to the clipboard |
 | Repository renamed on GitHub | Remote URL updated |
 
-## Current status — commit `8988c82`
+## Current status
 
-**Live and tested:** 4-source intake · rules-based detection with priorities · one-by-one recommendations saved in Supabase · kits · check-ins with automatic evidence · Pala · retries and cost tracking · Google login, access matrix, "Ver como" · Row Level Security · weekly briefing by Telegram.
+**Live and tested:** 4-source intake · rules-based detection with priorities · one-by-one recommendations saved in Supabase · kits · check-ins with automatic evidence · Pala · retries and cost tracking · Google login, access matrix, "Ver como" · Row Level Security · weekly briefing by Telegram · evaluation set (`eval/`) · architecture doc.
 
-**Not yet done:** automatic Monday scheduling · immediate safety alerts · recording who approved plans and kits · the seasonal check (heat's next check-in) · demo video · evaluation set · project docs.
+**Not yet done:** demo video · README · automatic Monday scheduling · immediate safety alerts · recording who approved plans and kits.
 
-**Scope:** all data is simulated. The system behaves correctly on realistic inputs across the whole loop; whether it improves a real club's member experience can only be shown in a pilot.
+**Scope:** all data is simulated (see [`data/SIMULATION_ASSUMPTIONS.md`](../data/SIMULATION_ASSUMPTIONS.md)). The system works correctly on realistic inputs across the whole loop; whether it improves a real club's member experience can only be shown in a pilot ([`pilot-plan.md`](pilot-plan.md)).
