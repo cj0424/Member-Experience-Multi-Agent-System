@@ -1010,6 +1010,12 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
     current = st.session_state.np_pending
     idx = current["index"]
 
+    # Navigation, kept apart from the three decisions: leaving doesn't decide anything,
+    # the recommendation simply stays in the pending list (it's saved in Supabase)
+    if st.button("← Volver a la lista", key=f"back_{idx}", type="tertiary"):
+        st.session_state.np_stage = "start"
+        st.rerun()
+
     st.subheader("Recomendación")
 
     with st.container(key="rec_card"):
@@ -1030,7 +1036,7 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
             st.markdown(fid_note_html(fid_text), unsafe_allow_html=True)
 
         if st.session_state.np_stage == "reviewing":
-            col1, col2, col3, col4 = st.columns([1.1, 1.4, 1.3, 4])
+            col1, col2, col3, _ = st.columns([1.1, 1.4, 1.3, 4])
             with col1:
                 if st.button("✅ Aprobar", key=f"approve_{idx}", type="primary"):
                     apply_decision({"action": "approve"}, "Guardando tu decisión...", "np_status_save")
@@ -1041,11 +1047,6 @@ elif st.session_state.np_stage in ("reviewing", "revise"):
             with col3:
                 if st.button("❌ Descartar", key=f"discard_{idx}", type="secondary"):
                     apply_decision({"action": "discard"}, "Guardando tu decisión...", "np_status_save")
-            with col4:
-                if st.button("← Decidir más tarde", key=f"later_{idx}", type="secondary"):
-                    # Nothing is saved: the recommendation stays in the pending list
-                    st.session_state.np_stage = "start"
-                    st.rerun()
 
         else:
             st.markdown('<div class="section-chip">✏️ ¿Qué cambiarías?</div>', unsafe_allow_html=True)
