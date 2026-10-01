@@ -1,0 +1,154 @@
+[
+  {
+    "id": "O1_glare_fixed",
+    "description": "Physical fix done and checked by the owner; 1 complaint before, 0 in 3 weeks after",
+    "expected": [
+      "CERRAR",
+      "CONTINUAR"
+    ],
+    "preferred": "CERRAR",
+    "pattern_name": "Deslumbramiento por luces fuera de las pistas",
+    "action_description": "Reorientar los focos del pasillo hacia el suelo y comprobar dos tardes que no deslumbran al entrar.",
+    "verification_method": "(1) El entrenador comprueba una tarde a las 19:00 que no hay deslumbramiento al entrar. (2) Recepción de tarde lo comprueba otro día y lo anota en las observaciones del personal.",
+    "verification_result": "Confirmado — [Evidencia MEDIA — lo comprobó en persona quien registra el seguimiento] Lo miré yo a las 19:00 y ya no deslumbra. El entrenador y recepción también lo comprobaron dos tardes.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 3\nAntes (28 días hasta la detección): 1 quejas, 0 elogios\nDesde entonces: 0 quejas, 0 elogios\nNinguna mención desde la detección. Ojo: no haber menciones no demuestra por sí solo que esté resuelto.",
+    "owner": "Nadie lo ha vuelto a comentar."
+  },
+  {
+    "id": "O2_sand_partial",
+    "description": "Signed tracker; complaints 2 → 1, the remaining one on a Sunday with no maintenance",
+    "expected": [
+      "CONTINUAR"
+    ],
+    "preferred": "CONTINUAR",
+    "pattern_name": "Acumulación de arena en las pistas",
+    "action_description": "Cepillado general los lunes y repaso de fondos y esquinas miércoles y viernes, firmado en la hoja del cuarto de mantenimiento.",
+    "verification_method": "(1) El miércoles a las 12:00 la gerente revisa la hoja de mantenimiento. (2) El viernes a las 15:00 recepción revisa los fondos de las pistas 1 y 2.",
+    "verification_result": "Confirmado — [Evidencia ALTA — registro firmado] Tracker con 6 filas firmadas: 28/09 general, 30/09 fondos (a mediodía, césped húmedo), 02/10 fondos, 05/10 general, 07/10 fondos, 09/10 fondos.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 2\nAntes (28 días hasta la detección): 2 quejas, 0 elogios\nDesde entonces: 1 quejas, 0 elogios\nMenciones desde la detección:\n- ENC-039 (encuesta, domingo 04/10) queja: mal, la pista tenía bastante arena acumulada en los fondos",
+    "owner": "Entre semana va mejor. La queja fue un domingo por la noche, y los domingos no hay mantenimiento."
+  },
+  {
+    "id": "O3_court12_partial",
+    "description": "Fix mostly worked; one light still weaker (coach note)",
+    "expected": [
+      "CONTINUAR"
+    ],
+    "preferred": "CONTINUAR",
+    "pattern_name": "Falta de iluminación en la pista 12",
+    "action_description": "Revisión matinal de proyectores, drivers y tulipas de la pista 12; electricista solo si hay un fallo general.",
+    "verification_method": "(1) Recepción de tarde comprueba la luz de la pista 12 a las 20:00 el primer día tras el ajuste. (2) Lo repite dos días después.",
+    "verification_result": "Confirmado — [Evidencia MEDIA — lo comprobó en persona quien registra el seguimiento] Mantenimiento limpió las tulipas y cambió un driver. Lo miré a las 20:00: la pista está mejor, pero un foco del fondo sigue más flojo.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 2\nAntes (28 días hasta la detección): 2 quejas, 0 elogios\nDesde entonces: 1 quejas, 0 elogios\nMenciones desde la detección:\n- OBS-020 (personal, 11/10) queja [pista 12]: En la pista 12, un foco del lado del fondo sigue dando menos luz que los demás.",
+    "owner": "Mejor que antes, pero ese foco hay que mirarlo."
+  },
+  {
+    "id": "O4_heat_low_evidence",
+    "description": "Only a verbal report from the manager (low evidence)",
+    "expected": [
+      "FLAG"
+    ],
+    "preferred": "FLAG",
+    "pattern_name": "Calor en la nave nueva por la tarde",
+    "action_description": "Abrir los portones de 15:00 a 15:30 solo los días de calor; dejar de hacerlo cuando refresque.",
+    "verification_method": "(1) La gerente comprueba el miércoles a las 15:15 que recepción aplica el criterio. (2) Revisa el viernes de la semana siguiente la hoja de observaciones del personal.",
+    "verification_result": "Confirmado — [Evidencia BAJA — me lo contaron, sin registro] La gerente dijo: que recepción abre los portones los días de calor, pero estas semanas casi no ha hecho falta.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 2\nAntes (28 días hasta la detección): 2 quejas, 0 elogios\nDesde entonces: 3 quejas, 0 elogios\nMenciones desde la detección:\n- ENC-032 (encuesta, 01/10) queja: el ambiente estaba un poco cargado\n- ENC-041 (encuesta, 06/10) queja: seguía algo cargado, poca ventilación\n- ENC-047 (encuesta, 11/10) queja: a primera hora hacía frío dentro de la nave",
+    "owner": "Por la tarde algún socio aún lo nota cargado, y por la mañana ya empieza a hacer fresco."
+  },
+  {
+    "id": "O5_parking_too_early",
+    "description": "Only the first step done (query to Playtomic); the change hasn't reached members; complaints continue",
+    "expected": [
+      "CONTINUAR",
+      "FLAG"
+    ],
+    "preferred": "CONTINUAR",
+    "pattern_name": "Aparcamiento lleno a las ocho de la tarde",
+    "action_description": "Consultar a Playtomic si se pueden desfasar los horarios de inicio; si es posible, escalonar las reservas de tarde con 7 días de aviso a los socios.",
+    "verification_method": "La gerente comprueba la respuesta de Playtomic y revisa en la reunión del lunes la parrilla de dos tardes distintas antes de aprobar el cambio.",
+    "verification_result": "Confirmado — [Evidencia MEDIA — lo comprobó en persona quien registra el seguimiento] Vi el correo que la gerente mandó a Playtomic el 29/09. Todavía no han contestado.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 2\nAntes (28 días hasta la detección): 3 quejas, 0 elogios\nDesde entonces: 2 quejas, 0 elogios\nMenciones desde la detección:\n- ENC-036 (encuesta, 03/10) queja: me costó un poco aparcar\n- ENC-045 (encuesta, 09/10) queja: el parking estaba a tope",
+    "owner": "Todo sigue igual: sin la respuesta de Playtomic no hemos cambiado nada."
+  },
+  {
+    "id": "O6_heat_season_change",
+    "description": "Routine done and recorded, complaints fell — but only because it got colder (season change)",
+    "expected": [
+      "CONTINUAR"
+    ],
+    "preferred": "CONTINUAR",
+    "pattern_name": "Calor en la nave nueva por la tarde",
+    "action_description": "Abrir los portones de 15:00 a 15:30 solo los días de calor; dejar de hacerlo cuando refresque.",
+    "verification_method": "(1) La gerente comprueba el miércoles a las 15:15 que recepción aplica el criterio. (2) Revisa el viernes de la semana siguiente la hoja de observaciones del personal.",
+    "verification_result": "Confirmado — [Evidencia MEDIA — lo comprobó en persona quien registra el seguimiento] He revisado las observaciones del personal: la gerente anotó que se abrieron los portones los 3 días de calor de finales de septiembre. Desde mediados de octubre ya no hace falta.",
+    "cycles": 2,
+    "sources": "Semanas analizadas desde que se detectó: 4\nAntes (28 días hasta la detección): 2 quejas (calor), 0 elogios\nDesde entonces: 0 quejas por calor en las 2 últimas semanas; 1 queja por frío a primera hora\nMenciones desde la detección:\n- ENC-047 (encuesta, 11/10) queja: a primera hora hacía frío dentro de la nave",
+    "owner": "Ya no hay quejas de calor, pero es que ya hace fresco: es octubre."
+  },
+  {
+    "id": "O7_no_mentions_no_confirmation",
+    "description": "Done (signed record) but no mentions either way and no owner confirmation of the result",
+    "expected": [
+      "CONTINUAR"
+    ],
+    "preferred": "CONTINUAR",
+    "pattern_name": "Música alta en la cafetería",
+    "action_description": "Bajar el volumen de la música de la cafetería a partir de las 19:00 y marcarlo en el equipo de sonido.",
+    "verification_method": "(1) Recepción comprueba el volumen a las 19:30 un martes. (2) Lo repite un viernes y lo anota en las observaciones del personal.",
+    "verification_result": "Confirmado — [Evidencia ALTA — registro firmado] Hoja firmada por recepción: comprobado el martes y el viernes a las 19:30.",
+    "cycles": 1,
+    "sources": "Semanas analizadas desde que se detectó: 1\nAntes (28 días hasta la detección): 3 quejas, 0 elogios\nDesde entonces: 0 quejas, 0 elogios\nNinguna mención desde la detección. Ojo: no haber menciones no demuestra por sí solo que esté resuelto.",
+    "owner": "Ninguna"
+  },
+  {
+    "id": "O8_not_done",
+    "description": "The action hasn't been carried out yet",
+    "expected": [
+      "FLAG"
+    ],
+    "preferred": "FLAG",
+    "pattern_name": "Máquina de bebidas sin existencias",
+    "action_description": "Pedir a la empresa de la cafetería un calendario de reposición antes de las tardes de más uso.",
+    "verification_method": "(1) La gerente confirma por escrito el nuevo calendario con la empresa. (2) Recepción comprueba la máquina dos tardes y lo anota en las observaciones del personal.",
+    "verification_result": "No confirmado todavía",
+    "cycles": 0,
+    "sources": "Semanas analizadas desde que se detectó: 1\nAntes (28 días hasta la detección): 4 quejas, 0 elogios\nDesde entonces: 1 quejas, 0 elogios\nMenciones desde la detección:\n- INC-012 (incidencias, 14/10) queja: la máquina de bebidas vuelve a estar vacía",
+    "owner": "Aún no hemos hablado con la empresa de la cafetería."
+  },
+  {
+    "id": "O9_approach_failed",
+    "description": "Done consistently for 3 cycles, complaints the same or worse, owner sees no change",
+    "expected": [
+      "PIVOTAR"
+    ],
+    "preferred": "PIVOTAR",
+    "pattern_name": "Toallas agotadas en el vestuario por la tarde",
+    "action_description": "Reponer las toallas a las 18:00 desde recepción, con una revisión rápida del vestuario.",
+    "verification_method": "(1) Recepción firma la reposición de las 18:00 cada día. (2) La gerente revisa la hoja los viernes.",
+    "verification_result": "Confirmado — [Evidencia ALTA — registro firmado] Hoja firmada todos los días de las últimas 6 semanas, sin huecos.",
+    "cycles": 3,
+    "sources": "Semanas analizadas desde que se detectó: 6\nAntes (28 días hasta la detección): 3 quejas, 0 elogios\nDesde entonces: 5 quejas, 0 elogios\nMenciones desde la detección:\n- INC-021 (incidencias, 23/10) queja: no quedan toallas a las 20:30\n- ENC-071 (encuesta, 28/10) queja: otra vez sin toallas al acabar\n- OBS-033 (personal, 02/11) queja: a las 21:00 ya no hay toallas en el vestuario de hombres\n- INC-025 (incidencias, 06/11) queja: sin toallas a las 21:15\n- ENC-088 (encuesta, 11/11) queja: no había toallas",
+    "owner": "Se reponen cada día a las 18:00, pero a las 21:00 se vuelven a acabar. Sigue igual."
+  },
+  {
+    "id": "O10_real_contradiction",
+    "description": "Staff say it improved, but several members say it's the same or worse",
+    "expected": [
+      "PIVOTAR"
+    ],
+    "preferred": "PIVOTAR",
+    "pattern_name": "Suciedad en los vestuarios por la noche",
+    "action_description": "Añadir una limpieza rápida de vestuarios a las 20:00 por parte de recepción.",
+    "verification_method": "(1) Recepción firma la limpieza de las 20:00. (2) La gerente revisa el vestuario un día a las 21:30.",
+    "verification_result": "Confirmado — [Evidencia ALTA — registro firmado] Hoja de limpieza firmada a diario durante 4 semanas.",
+    "cycles": 2,
+    "sources": "Semanas analizadas desde que se detectó: 4\nAntes (28 días hasta la detección): 3 quejas, 0 elogios\nDesde entonces: 4 quejas, 0 elogios\nMenciones desde la detección:\n- ENC-061 (encuesta, 20/10) queja: el vestuario sucio a las 22:00\n- ENC-066 (encuesta, 24/10) queja: duchas con barro y papeles por la noche\n- ENC-079 (encuesta, 03/11) queja: igual de sucio que siempre por la noche\n- OBS-037 (personal, 05/11) queja: a última hora el vestuario está sucio otra vez",
+    "owner": "Recepción me dice que ahora está mucho mejor."
+  }
+]

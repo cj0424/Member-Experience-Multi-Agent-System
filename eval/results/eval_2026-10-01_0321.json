@@ -1,0 +1,317 @@
+{
+  "tagging": {
+    "entries": 77,
+    "runs": 3,
+    "complaint_recall": 1.0,
+    "complaint_precision": 1.0,
+    "praise_accuracy": 1.0,
+    "consistency": 1.0,
+    "top_misses": [],
+    "top_false_alarms": []
+  },
+  "outcome": {
+    "cases": [
+      {
+        "id": "O1_glare_fixed",
+        "description": "Physical fix done and checked by the owner; 1 complaint before, 0 in 3 weeks after",
+        "expected": [
+          "CERRAR",
+          "CONTINUAR"
+        ],
+        "decisions": [
+          "CERRAR",
+          "CERRAR",
+          "CERRAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Deslumbramiento por luces fuera de las pistas (ciclo 1)\n\nPaso 1: Has revisado los focos personalmente a las 19:00 y el entrenador y recepción también lo hicieron dos tardes. Al tratarse de una comprobación directa y específica, la **ejecución queda confirmada con nivel medio**.\n\nPaso 2: Reorientar focos es un ajuste físico inmediato. Tres semanas analizadas y varias comprobaciones en horario de tarde son suficientes para verificar que la orientación quedó bien fijada, por lo que **ha transcurrido el tiempo necesario**.\n\nPaso 3: El criterio de éxito es la **eliminación del deslumbramiento al entrar** comprobada en la franja nocturna y la ausencia de nuevas molestias.\n\nPaso 4: En las tres semanas analizadas las quejas bajaron de una a cero. Además, la revisión presencial tuya y del equipo a las 19:00 constata que la luz ya no ciega al acceder a las pistas. La **comprobación directa respalda el resultado**.\n\nPaso 5: La verificación presencial en distintas tardes coincide con la ausencia de incidencias posteriores, por lo que **se cumple el criterio fijado**.\n\nDecisión: 🟢 CERRAR\n\nTeníamos una molestia puntual por focos del pasillo exterior que deslumbraban a los jugadores al entrar a jugar por la tarde. Se reorientaron hacia el suelo y, tras comprobarlo tú mismo a las 19:00 junto con el entrenador y recepción en días distintos, **el ajuste físico ha resuelto la molestia** de forma definitiva sin que se hayan repetido quejas."
+      },
+      {
+        "id": "O2_sand_partial",
+        "description": "Signed tracker; complaints 2 → 1, the remaining one on a Sunday with no maintenance",
+        "expected": [
+          "CONTINUAR"
+        ],
+        "decisions": [
+          "CONTINUAR",
+          "CONTINUAR",
+          "CONTINUAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Acumulación de arena en las pistas (ciclo 1)\n\nPaso 1: El registro físico en el cuarto de mantenimiento incluye seis fechas firmadas con las tareas realizadas entre el 28 de septiembre y el 9 de octubre. La **ejecución queda confirmada con nivel alto**.\n\nPaso 2: El cepillado produce un efecto visible desde la primera semana, y dos semanas completas permiten comprobar si el césped aguanta la carga habitual de partidos. Hay **tiempo suficiente para evaluar el resultado**.\n\nPaso 3: El criterio de éxito es una **reducción clara de quejas por arena** y una superficie uniforme a lo largo de toda la semana.\n\nPaso 4: En las cuatro semanas previas hubo dos quejas. En las dos semanas analizadas tras la acción consta una queja en encuesta el domingo 04/10 por arena en los fondos. Indicas que entre semana el estado de la pista es bueno, pero el domingo por la noche vuelve a acumularse arena. La evidencia refleja una **mejora entre semana con desajuste dominical**.\n\nPaso 5: La rutina actual funciona bien de lunes a viernes, pero no llega a cubrir el uso intenso del fin de semana. Al haber una mejora real con un fallo puntual localizado, procede **ajustar el plan y continuar**.\n\nDecisión: 🔵 CONTINUAR\n\nEl cepillado programado ha solucionado el problema durante los días laborables, pero la carga de juego del fin de semana satura los fondos el domingo por la tarde. Como mantenimiento trabaja los sábados por la mañana, conviene **añadir un repaso de fondos los sábados** para que las pistas aguanten en buen estado hasta el cierre del domingo. Mantén este ajuste durante el próximo ciclo para verificar si desaparecen las quejas del fin de semana."
+      },
+      {
+        "id": "O3_court12_partial",
+        "description": "Fix mostly worked; one light still weaker (coach note)",
+        "expected": [
+          "CONTINUAR"
+        ],
+        "decisions": [
+          "CONTINUAR",
+          "CONTINUAR",
+          "CONTINUAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Falta de iluminación en la pista 12 (ciclo 1)\n\nPaso 1: Has comprobado en persona a las 20:00 la limpieza de tulipas y el cambio de driver. Dispones de **evidencia media que confirma la ejecución**.\n\nPaso 2: En reparaciones de iluminación el efecto es inmediato desde el primer encendido nocturno, y dos semanas bastan para ver si la pista quedó bien iluminada. Ha pasado **tiempo suficiente para evaluar el resultado**.\n\nPaso 3: El criterio de éxito es conseguir una **iluminación homogénea sin zonas oscuras** en toda la superficie de juego.\n\nPaso 4: La pista ha mejorado respecto al inicio, pero tanto la nota del personal (OBS-020) como tu propia comprobación confirman que **un foco del fondo sigue flojo**.\n\nPaso 5: El plan ha funcionado en casi toda la pista, pero queda un problema puntual en un proyector concreto. Es una **mejora parcial con ajuste necesario**.\n\nDecisión: 🔵 CONTINUAR\n\nLa intervención general ha funcionado, pero **queda solucionar ese foco puntual del fondo**. Asigna a mantenimiento en la reunión del lunes la revisión directa de esa lámpara específica para comprobar si requiere un cambio de proyector o el aviso al electricista."
+      },
+      {
+        "id": "O4_heat_low_evidence",
+        "description": "Only a verbal report from the manager (low evidence)",
+        "expected": [
+          "FLAG"
+        ],
+        "decisions": [
+          "FLAG",
+          "FLAG",
+          "FLAG"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Calor en la nave nueva por la tarde (ciclo 1)\n\nPaso 1: La información aportada procede de un comentario verbal de la gerente sin respaldo documental, lo que supone un nivel de evidencia BAJO. Por tanto, **la ejecución no está suficientemente confirmada**. Para validarla se requiere un registro verificable, como la comprobación presencial de la gerente a las 15:15 o la anotación correspondiente en la hoja de observaciones del personal.\n\nDecisión: 🚩 FLAG DE IMPLEMENTACIÓN\n\nPara poder evaluar el impacto de la medida en el siguiente ciclo, la gerente debe **aportar una comprobación registrada por escrito** en la hoja de observaciones del personal, confirmando si recepción abrió los portones según el criterio fijado."
+      },
+      {
+        "id": "O5_parking_too_early",
+        "description": "Only the first step done (query to Playtomic); the change hasn't reached members; complaints continue",
+        "expected": [
+          "CONTINUAR",
+          "FLAG"
+        ],
+        "decisions": [
+          "CONTINUAR",
+          "CONTINUAR",
+          "CONTINUAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Aparcamiento lleno a las ocho de la tarde (ciclo 1)\n\nPaso 1: Has comprobado en persona el correo enviado a Playtomic el 29/09, por lo que es una **ejecución confirmada con nivel medio**.\n\nPaso 2: Para notar un primer efecto real necesitas recibir la respuesta de Playtomic, cuadrar la parrilla un lunes y avisar a los socios con 7 días de antelación. Para confirmar que el aparcamiento no se satura de forma sostenida harían falta al menos dos semanas más con las reservas escalonadas. Con solo un ciclo transcurrido y la consulta aún pendiente, **aún no hay tiempo suficiente**.\n\nPaso 3: No procede evaluarlo hasta cumplir el tiempo del paso 2.\n\nPaso 4: No procede evaluarlo.\n\nPaso 5: No procede evaluarlo.\n\nDecisión: 🔵 CONTINUAR\n\nEl siguiente paso es que la gerente vuelva a **reclamar la respuesta a Playtomic** para confirmar si la plataforma permite desfasar los horarios. En cuanto contesten, podréis revisar la parrilla en la reunión del lunes y preparar el aviso con 7 días de antelación a los socios."
+      },
+      {
+        "id": "O6_heat_season_change",
+        "description": "Routine done and recorded, complaints fell — but only because it got colder (season change)",
+        "expected": [
+          "CONTINUAR"
+        ],
+        "decisions": [
+          "CONTINUAR",
+          "CONTINUAR",
+          "CONTINUAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Calor en la nave nueva por la tarde (ciclo 2)\n\nPaso 1: Has revisado la hoja de observaciones del personal, donde la gerente anotó la apertura de portones en los días calurosos. Tienes una **ejecución confirmada con evidencia media**.\n\nPaso 2: La ventilación mostró un primer efecto puntual en esos días. Sin embargo, para confirmar que la medida funciona de manera sostenida se necesitan más días de calor. Al haber bajado las temperaturas en octubre, la falta de quejas se debe al cambio de estación, por lo que **falta confirmar el efecto sostenido**.\n\nDecisión: 🔵 CONTINUAR\n\nMantén el protocolo en pausa durante los meses de fresco y anota en observaciones del personal si hay algún día caluroso suelto para **evaluarlo con calor real**."
+      },
+      {
+        "id": "O7_no_mentions_no_confirmation",
+        "description": "Done (signed record) but no mentions either way and no owner confirmation of the result",
+        "expected": [
+          "CONTINUAR"
+        ],
+        "decisions": [
+          "CONTINUAR",
+          "CONTINUAR",
+          "CONTINUAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Música alta en la cafetería (ciclo 1)\n\nPaso 1: Has aportado la hoja firmada por recepción con las comprobaciones del martes y el viernes a las 19:30. Es una **ejecución confirmada con evidencia alta**.\n\nPaso 2: Bajar el volumen y marcar el dial permite ver un primer efecto en 1 semana (a). Sin embargo, al tratarse de una concesión externa, hacen falta al menos 2 o 3 semanas para asegurar que el personal no vuelve a subirlo con el paso de los días (b). Ha transcurrido 1 ciclo: el arranque es positivo, pero **falta confirmar que se sostiene**.\n\nDecisión: 🔵 CONTINUAR\n\nMantenemos la acción en seguimiento porque **aún falta comprobar la constancia** del volumen durante un par de semanas más. Pide al turno de tarde de recepción que mantenga la revisión en las observaciones del personal antes de la siguiente reunión de equipo."
+      },
+      {
+        "id": "O8_not_done",
+        "description": "The action hasn't been carried out yet",
+        "expected": [
+          "FLAG"
+        ],
+        "decisions": [
+          "FLAG",
+          "FLAG",
+          "FLAG"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Máquina de bebidas sin existencias (ciclo 0)\n\nPaso 1: Has indicado que todavía no habéis hablado con la empresa de la cafetería, por lo que la acción está **pendiente de confirmación real**. Para darla por ejecutada con un nivel sólido, hace falta que la gerente confirme por escrito el nuevo calendario con la empresa y que recepción anote sus comprobaciones en las observaciones del personal.\n\nDecisión: 🚩 FLAG DE IMPLEMENTACIÓN\n\nEl plan no se ha puesto en marcha porque **falta acordar el nuevo calendario** de reposición con la empresa de la cafetería. Conviene que la gerente contacte con ellos para fijar las recargas antes de las tardes de mayor afluencia y que recepción revise la máquina dos tardes para verificarlo."
+      },
+      {
+        "id": "O9_approach_failed",
+        "description": "Done consistently for 3 cycles, complaints the same or worse, owner sees no change",
+        "expected": [
+          "PIVOTAR"
+        ],
+        "decisions": [
+          "PIVOTAR",
+          "PIVOTAR",
+          "PIVOTAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Toallas agotadas en el vestuario por la tarde (ciclo 3)\n\nPaso 1: La hoja de control está firmada a diario durante las 6 semanas analizadas, por lo que tenemos una **ejecución confirmada con nivel alto**.\n\nPaso 2: Un cambio operativo diario muestra impacto en la primera semana y necesita unas tres semanas para confirmar que se mantiene; con 3 ciclos y 6 semanas completas, **ha transcurrido tiempo suficiente**.\n\nPaso 3: El criterio de éxito es lograr una **reducción clara y sostenida de quejas** sobre la falta de toallas durante el turno de tarde.\n\nPaso 4: Las 5 menciones registradas tras el cambio son quejas directas por toallas agotadas entre las 20:30 y las 21:15, coincidiendo con tu observación de que **el problema persiste sin mejora**.\n\nPaso 5: La acción se ha ejecutado según lo previsto, pero las quejas se mantienen al mismo ritmo que antes, por lo que **corresponde cambiar de enfoque**.\n\nDecisión: 🟠 PIVOTAR\n\nSe programó una reposición fija a las 18:00, pero **una única reposición temprana resulta insuficiente para absorber la hora punta hasta el cierre**, de modo que las toallas se agotan de nuevo hacia las 21:00. Para tratarlo en la reunión de los lunes, la hipótesis a probar es añadir una segunda reposición rápida a las 20:15 desde recepción o duplicar el volumen de toallas limpias que se colocan en la revisión de las 18:00."
+      },
+      {
+        "id": "O10_real_contradiction",
+        "description": "Staff say it improved, but several members say it's the same or worse",
+        "expected": [
+          "PIVOTAR"
+        ],
+        "decisions": [
+          "PIVOTAR",
+          "PIVOTAR",
+          "PIVOTAR"
+        ],
+        "errors": 0,
+        "correct": 3,
+        "preferred": 3,
+        "runs": 3,
+        "consistent": true,
+        "sample_output": "🔁 CONTINUIDAD — Suciedad en los vestuarios por la noche (ciclo 2)\n\nPaso 1: Hay una hoja de control firmada a diario durante 4 semanas, lo que supone un nivel alto de evidencia de que la tarea se realizó. Por tanto, la **ejecución está confirmada con nivel alto**.\n\nPaso 2: Un cambio operativo diario muestra sus primeros efectos en la primera semana y necesita unas 3 o 4 semanas para comprobar si es sostenible. Tras 4 semanas y 2 ciclos completos, **ha pasado el tiempo suficiente**.\n\nPaso 3: El criterio de éxito realista para este caso es una **reducción clara de quejas nocturnas** en las encuestas y notas del personal frente al periodo previo.\n\nPaso 4: Las 4 menciones registradas tras el cambio tratan directamente sobre vestuarios sucios a última hora (duchas con barro, papeles y suciedad a las 22:00). Pasamos de 3 quejas a 4 quejas en el mismo plazo, por lo que **las quejas se mantienen activas**.\n\nPaso 5: La impresión verbal de recepción choca con las 3 encuestas de socios y la nota del propio personal. El repaso a las 20:00 no evita que el vestuario acabe sucio tras los últimos turnos de juego, lo que confirma que **el plan actual no funciona**.\n\nDecisión: 🟠 PIVOTAR\n\nSe probó añadir una pasada rápida de limpieza a las 20:00 a cargo de recepción. La evidencia demuestra que **la limpieza previa no cubre la hora punta**, ya que los partidos terminan hasta las 22:30 y el vestuario se vuelve a deteriorar justo cuando más gente se ducha. Para el próximo intento, la hipótesis de cambio debería centrarse en mover esa revisión al cierre o contratar un refuerzo directo con la empresa externa de limpieza al final de la jornada."
+      }
+    ],
+    "runs": 3,
+    "accuracy": 1.0,
+    "preferred_rate": 1.0,
+    "consistency": 1.0
+  },
+  "kits": {
+    "cases": [
+      {
+        "id": "K1_heat_seasonal",
+        "checks": {
+          "two_checks": 3,
+          "staff_notes": 3,
+          "no_member_effort": 3,
+          "no_price_in_member_text": 2,
+          "maintenance_mornings": 3,
+          "seasonal_end": 3
+        },
+        "runs": 3,
+        "outputs": [
+          {
+            "plan": "### El problema\nVarios socios y el personal de recepción coinciden en que la nave nueva acumula demasiado calor y se siente cargada por las tardes a finales de septiembre.\n\n### Qué se puede hacer\nAl tratarse de una nave cerrada con picos de calor en horas de tarde, te propongo dos opciones según la inversión que quieras asumir antes de que termine la temporada cálida:\n\n1. **Ajustar la ventilación natural cruzada** aprovechando el solape de turnos de recepción (15:00) para abrir portones o accesos altos durante 30 minutos antes de la hora punta, vigilando que las corrientes no levanten suciedad hacia las pistas. *(Coste: 0 €)*\n2. **Adquirir ventiladores industriales portátiles** de suelo (gasto asumible por debajo del límite de aprobación de gerencia) para forzar la circulación de aire en los fondos de la nave durante las tardes calurosas hasta mediados de octubre. *(Coste estimado: 150 € - 300 €)*\n\n### Por qué vale la pena\nGarantizar una temperatura adecuada en la nave nueva evita que los socios rechacen esas pistas en favor de las antiguas, protegiendo la **fidelización y ocupación de tardes**.\n\n---\n⏱️ **Esfuerzo:** Medio  \n📚 **Fuente:** buenas prácticas generales  \n🟡 **Confianza:** Moderada",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### Pauta interna: protocolo de ventilación de la nave nueva (septiembre - mediados de octubre)\n\nConviene aplicar esta rutina operativa de lunes a domingo mientras duren las temperaturas elevadas de tarde:\n\n1. **Apertura de portones y accesos altos**: durante el solape de turnos de recepción (15:00 a 15:30), **abrir los accesos para ventilar** la nave nueva mediante corriente cruzada durante 30 minutos.\n2. **Control de suciedad**: al abrir, vigilar que el viento no arrastre polvo ni hojas hacia el césped; si se levanta suciedad, reducir la apertura a un tercio.\n3. **Ubicación de ventiladores de suelo**: en caso de adquirir las unidades industriales portátiles (aprobación directa de gerencia por importe inferior a 300 €), situarlos en los fondos de pista orientados hacia las zonas de menor circulación de aire.\n4. **Finalización de la rutina**: este procedimiento **se suspenderá a mediados de octubre**, coincidiendo con la bajada general de temperaturas.\n\n---\n\n### Mensaje para el grupo de WhatsApp del personal (para enviar tras la reunión del lunes)\n\n> Buenas tardes a todos. Durante las próximas semanas y hasta mediados de octubre vamos a aplicar una pauta de ventilación en la nave nueva para evitar la acumulación de calor por las tardes. \n> \n> En el solape de turnos de recepción (15:00 a 15:30) abriremos los accesos altos/portones durante 30 minutos para crear corriente cruzada, vigilando siempre que no entre suciedad a las pistas. Si tenéis clases o pasáis por allí a primera hora de la tarde, os agradecemos que apuntéis cualquier comentario sobre el ambiente en las observaciones semanales. ¡Gracias!\n\n---\n\n📋 Ejecución:\nResponsable: Recepción (turnos de mañana y tarde en el solape) y gerencia (adquisición de ventiladores si procede).\nPlazo sugerido: Inicio inmediato tras la reunión del lunes, activo hasta mediados de octubre.\nCómo verificar: (1) El martes a las 17:30, recepción de tarde comprueba la sensación térmica en la nave nueva y anota el resultado en las observaciones del personal; (2) el jueves a las 19:00, el coordinador deportivo revisa las pistas de la nave nueva durante las clases de tarde y registra sus impresiones en las observaciones del personal."
+          },
+          {
+            "plan": "### 1. El problema\nEn las últimas semanas de septiembre, varios socios y el equipo de recepción han detectado que la nave nueva se calienta y se carga en exceso durante las tardes, coincidiendo con las horas de mayor radiación solar.\n\n### 2. Qué podemos hacer\n\n1. **Crear un protocolo de ventilación cruzada** aprovechando el solape de turnos de recepción a las 15:00 para abrir accesos y compuertas antes de los partidos de la tarde (manteniéndolo hasta que bajen las temperaturas en otoño y vigilando que las corrientes no desvíen la trayectoria de las bolas).\n2. **Instalar ventiladores de gran caudal silenciosos** en la estructura superior para remover el aire estancado en días calurosos, con un presupuesto asumible (entre 300 € y 1.500 €) que puedes aprobar directamente sin esperar a la revisión trimestral.\n\n### 3. Por qué vale la pena\nGarantizar unas condiciones de juego cómodas en la nave nueva evita que los socios se desplacen a otras instalaciones y **protege la ocupación de hora punta**.\n\n---\n⏱️ **Esfuerzo:** Medio  \n📚 **Fuente:** buenas prácticas generales  \n🟡 **Confianza:** Moderado",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### Pieza 1: Protocolo interno de ventilación para recepción\n\n**Contexto y aplicación:** Procedimiento diario temporal para los días calurosos hasta la bajada de temperaturas en otoño.\n\n> **Protocolo de ventilación de la nave nueva (15:00 h)**\n>\n> 1. **Apertura de accesos:** Durante el solape de turnos de recepción (15:00 a 15:30), **abrir las compuertas superiores y accesos** de la nave nueva para generar corriente de aire antes del inicio de los partidos de tarde.\n> 2. **Control de corrientes:** Antes de dar paso a las reservas de las 16:30, **comprobar que el flujo de aire** no altere la trayectoria de la pelota en pista. Si la corriente es excesiva, ajustar la apertura de puertas laterales manteniendo solo las compuertas altas.\n> 3. **Cierre de accesos:** Al finalizar el último turno de juego, el personal de cierre comprobará que todos los accesos queden completamente cerrados.\n> 4. **Duración de la medida:** Esta rutina se mantendrá activa durante las semanas de calor y **se suspenderá en otoño** cuando bajen las temperaturas máximas.\n\n---\n\n### Pieza 2: Criterios para la solicitud de presupuestos de ventiladores\n\n**Contexto:** Para que la gerente solicite 2 o 3 opciones a instaladores locales antes de la aprobación final del propietario (gasto entre 300 € y 1.500 €).\n\n> **Especificaciones para instaladores / proveedores:**\n>\n> - **Tipo de equipo:** Ventiladores de techo de gran caudal para nave industrial deportiva (tipo HVLS o industrial silencioso).\n> - **Nivel sonoro:** Prioridad absoluta a motores silenciosos de bajo decibelio para no interferir en la acústica de los partidos de pádel.\n> - **Ubicación:** Fijación en la estructura superior/vigas de la nave nueva, asegurando altura libre reglamentaria sobre las pistas.\n> - **Presupuesto objetivo:** Entre 300 € y 1.500 € (incluyendo instalación básica).\n\n---\n\n📋 Ejecución:\nResponsable: Gerente del club (gestión de presupuestos) y equipo de recepción (ejecución del protocolo diario)  \nPlazo sugerido: Aplicación inmediata del protocolo de ventilación y 7 días para recopilar presupuestos  \nCómo verificar: (1) El personal de recepción del turno de tarde comprueba el martes a las 18:00 la temperatura y la ausencia de corrientes molestas en la nave nueva, anotando el resultado en las observaciones del personal; (2) El personal de recepción de tarde repite la misma comprobación el jueves a las 18:00 y registra sus conclusiones en las observaciones del personal."
+          },
+          {
+            "plan": "### 1. El problema\nEn las tardes de finales de septiembre, los socios y el personal de recepción han notado que la nave nueva retiene demasiado calor y el ambiente se queda cargado durante los partidos.\n\n### 2. Qué se puede hacer\nAl tratarse de un problema térmico puntual que puede volver en primavera, dispones de dos opciones según el coste:\n\n1. **Abrir ventilación cruzada en el solape** de turnos de recepción (de 15:00 a 15:30) para renovar el aire de la nave antes de que comience la hora punta, manteniéndolo como pauta hasta finales de octubre cuando bajen las temperaturas. *(Como precaución, asegura las puertas para evitar corrientes violentas que muevan polvo hacia el césped).*\n2. **Pedir presupuesto para extractores mecánicos** de aire en el techo de la nave nueva a un instalador, para valorar la inversión en la próxima revisión trimestral de presupuesto antes de que llegue el calor fuerte del año que viene.\n\n### 3. Por qué vale la pena para el club\nGarantizar una temperatura agradable dentro de la nave evita que los jugadores migren a otros clubes con mejor climatización y permite **proteger la ocupación en hora punta**.\n\n---\n⏱️ **Esfuerzo:** Medio  \n📚 **Fuente:** buenas prácticas generales  \n🟡 **Confianza:** Moderado",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### 1. Pauta para el equipo de recepción: ventilación cruzada de la nave nueva\n*(Para comunicar en la reunión de los lunes y dejar anotada en el grupo de WhatsApp del personal)*\n\nCon el objetivo de rebajar la temperatura y renovar el aire antes de la hora punta, durante las tardes de calor hasta finales de octubre se establece la siguiente rutina diaria:\n\n> Hola a todos. A partir de hoy y hasta finales de octubre, aprovechamos los 30 minutos de solape entre turnos (de 15:00 a 15:30) para ventilar la nave nueva.\n> \n> **Pautas de ventilación:**\n> 1. A las 15:00, **abrir las puertas enfrentadas** de la nave nueva para generar corriente de aire natural.\n> 2. **Fijar siempre los topes** de seguridad en las puertas para evitar portazos y corrientes bruscas que levanten polvo hacia las pistas.\n> 3. A las 15:30, **cerrar las puertas exteriores** antes del inicio de los turnos de tarde.\n\n---\n\n### 2. Solicitud de presupuesto técnico a instaladores de ventilación industrial\n*(Para enviar por correo electrónico a empresas instaladoras locales y tener la valoración lista antes de la próxima revisión trimestral de presupuesto)*\n\n> **Asunto:** Solicitud de presupuesto y visita técnica – Extractores de aire para nave de pádel\n> \n> Hola,\n> \n> Me pongo en contacto con vosotros para **solicitar presupuesto de extracción mecánica** de aire en la cubierta de una nave deportiva de pádel.\n> \n> Buscamos una solución para evacuar la bolsa de calor acumulada en el techo y renovar el aire interior durante los meses de calor. \n> \n> Os agradeceríamos concertar una visita a nuestras instalaciones para revisar la estructura de la cubierta, dimensiones del recinto y recomendar el caudal y número de extractores necesarios.\n> \n> ¿Qué disponibilidad tenéis durante los próximos días para pasaros por el club?\n> \n> Muchas gracias y un saludo,  \n> [Nombre / Gerencia del Club]\n\n---\n\n📋 Ejecución:\nResponsable: Gerente (solicitud de presupuestos) y equipo de recepción (rutina diaria de 15:00 a 15:30).\nPlazo sugerido: Pauta de ventilación a partir de hoy; contacto con instaladores antes del próximo viernes.\nCómo verificar: (1) El recepcionista del turno de tarde comprueba este miércoles a las 18:00 la sensación térmica y renovación de aire en la nave nueva y (2) repite la comprobación el viernes a la misma hora con los primeros jugadores de la tarde, registrando en ambos casos el resultado en las observaciones del personal."
+          }
+        ]
+      },
+      {
+        "id": "K2_sand_workload",
+        "checks": {
+          "two_checks": 3,
+          "staff_notes": 3,
+          "no_member_effort": 3,
+          "no_price_in_member_text": 3,
+          "maintenance_mornings": 1
+        },
+        "runs": 3,
+        "outputs": [
+          {
+            "plan": "**1. El problema**\nLa arena se está acumulando en las esquinas y fondos de las pistas, lo que genera botes irregulares y resbalones molestos para los jugadores durante los partidos.\n\n**2. Qué podemos hacer**\n- **Redistribuir la arena hacia el centro** y las zonas de mayor desgaste (línea de saque y red) durante el recorrido matinal de mantenimiento, antes de que entren las primeras reservas.\n- **Fijar la rutina los lunes** en la reunión de equipo para que el encargado de mantenimiento lo registre en su hoja interna, realizándolo siempre con el césped seco para evitar que la arena se apelmace.\n\n**3. Por qué merece la pena**\nUna pista con la arena bien repartida **garantiza un juego fluido y seguro**, protegiendo la reputación del club sin añadir ningún coste económico.\n\n---\n⏱️ **Esfuerzo:** Bajo  \n📚 **Fuente:** Normas de mantenimiento de pistas (Diputación de Sevilla) — tareas regulares de redistribución y limpieza de arena en césped artificial.  \n🟢 **Confianza:** Alta",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n**Pauta para la reunión de equipo (lunes, 15:00)**\n\nPara que la gerente coordine la incorporación de esta rutina con el encargado de mantenimiento durante la reunión semanal:\n\n> - **Asignación de rutina matinal:** incorporar al recorrido diario de apertura (antes del primer turno de juego) la revisión visual de esquinas y fondos.\n> - **Criterio de trabajo:** conviene **redistribuir la arena acumulada** con el cepillo hacia el centro de la pista, la línea de saque y la red, realizando la tarea únicamente cuando el césped esté seco para evitar que la arena se apelmace.\n> - **Registro:** anotar la realización en la hoja de control del cuarto de mantenimiento una vez finalizada la pasada matinal en cada pista.\n\n---\n\n**Plantilla de registro para el cuarto de mantenimiento**\n\nFicha impresa para ubicar en el cuarto de mantenimiento junto al calendario de cepillado general, permitiendo al encargado marcar la redistribución diaria sin mezclarla con el parte de incidencias de recepción.\n\n===TRACKER_SPEC===\n{\"titulo\": \"Control diario de redistribución de arena en pistas\", \"columnas\": [\"Fecha\", \"Pistas revisadas (1 a N)\", \"Césped seco (Sí/No)\", \"Redistribución realizada (Firma/Check)\", \"Observaciones\"], \"fila_ejemplo\": [\"14/10/2025\", \"Pistas 1, 2, 3 y 4\", \"Sí\", \"Firma\", \"Mayor acumulación en fondo pista 2 corregida\"]}\n===FIN_TRACKER_SPEC===\n\n---\n\n📋 Ejecución:\nResponsable: Gerente (asignación en reunión) y Encargado de mantenimiento (ejecución diaria).\nPlazo sugerido: Asignar en la reunión del lunes para iniciar la rutina el martes por la mañana.\nCómo verificar: (1) El miércoles a mediodía, el coordinador de la escuela comprueba el bote regular y la ausencia de montículos en fondos durante las primeras clases, anotando el resultado en las observaciones del personal. (2) El viernes por la tarde, la gerente realiza una comprobación visual en pistas y revisa la hoja del cuarto de mantenimiento, registrando la confirmación en las observaciones del personal."
+          },
+          {
+            "plan": "### El problema\nSe está acumulando arena en los fondos y las esquinas de las pistas porque el cepillado general de una vez por semana no da abasto con el uso actual de las pistas.\n\n### Qué se puede hacer\nEl mantenimiento diario ya incluye un recorrido matinal por las pistas, por lo que basta con ajustar esa rutina sin alterar los turnos ni contratar horas extra:\n\n* **Repartir la arena de fondos y esquinas** dos o tres mañanas por semana con el cepillo manual, centrándose en las zonas donde más se desplaza por el juego.\n* **Anotar las pasadas en la hoja** del cuarto de mantenimiento para llevar el control de qué pistas se han repasado cada día.\n\n*Detalle a tener en cuenta:* Si a primera hora el césped tiene humedad o condensación, es mejor esperar a que seque antes de cepillar para no apelmazar la arena.\n\n### Por qué vale la pena\nMantener la arena bien distribuida **evita resbalones y malas sensaciones de bote**, protegiendo la experiencia de juego de los socios y cuidando la fibra del césped a coste cero.\n\n---\n⏱️ **Esfuerzo:** Bajo  \n📚 **Fuente:** Normas de conservación de pistas de pádel (Diputación de Sevilla) — frecuencia y tareas de redistribución de arena  \n🟢 **Confianza:** Alta",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### 1. Pauta interna de mantenimiento: ajuste del cepillado matinal de pistas\n\nPara tratar en la reunión de equipo del lunes a las 15:00 con el encargado de mantenimiento:\n\n* Durante el recorrido matinal habitual de lunes a sábado, conviene incorporar la **redistribución manual de arena** en los fondos y esquinas de las pistas entre dos y tres mañanas por semana, priorizando las zonas de mayor arrastre por el juego.\n* En caso de rocío o condensación matinal sobre el césped, se recomienda **esperar a que seque** completamente antes de pasar el cepillo para evitar que la arena se apelmace.\n* El operario debe **anotar cada repaso realizado** en la hoja de control situada en el cuarto de mantenimiento, indicando las pistas trabajadas y las zonas repasadas.\n\n\n===TRACKER_SPEC===\n{\"titulo\": \"Registro de redistribución de arena y cepillado de pistas\", \"columnas\": [\"Fecha\", \"Pistas\", \"Zona repasada (fondos / esquinas / general)\", \"Estado de superficie (seca / húmeda)\", \"Firma\"], \"fila_ejemplo\": [\"14/10/2024\", \"Pistas 1, 2 y 3\", \"Fondos y esquinas\", \"Seca\", \"Mantenimiento\"]}\n===FIN_TRACKER_SPEC===\n\n📋 Ejecución:\nResponsable: Gerente (asignación) y encargado de mantenimiento (ejecución diaria).\nPlazo sugerido: Implementar desde el martes siguiente a la reunión de equipo.\nCómo verificar: (1) El coordinador deportivo revisa el bote y la uniformidad de la arena en los fondos el miércoles tras las primeras clases y registra sus impresiones en las observaciones del personal. (2) La gerente comprueba el viernes al mediodía la hoja de control del cuarto de mantenimiento y el estado de las esquinas, anotando la confirmación en las observaciones del personal."
+          },
+          {
+            "plan": "### 1. El problema\nSe está acumulando arena en los fondos y esquinas de las pistas, lo que provoca calvas de arena en las zonas de mayor tránsito y montículos en los laterales.\n\n### 2. Qué podemos hacer\nAl ser un ajuste de operativa interna sin coste directo, podemos resolverlo con una reorganización sencilla del mantenimiento de mañana:\n\n* **Ajustar la rutina de cepillado matinal** para que el encargado de mantenimiento redistribuya la arena desde los fondos y esquinas hacia el centro y la zona de saque, en lugar de limitarse a una pasada general a la semana.\n* **Asignar la nueva pauta el lunes** en la reunión de equipo, haciendo que el seguimiento quede anotado en la hoja de control habitual del cuarto de mantenimiento.\n\n*(Nota: el cepillado debe realizarse siempre con la pista completamente seca para no apelmazar el sílice ni forzar las fibras del césped).*\n\n### 3. Por qué merece la pena\nUna correcta distribución de la arena **evita resbalones y botes irregulares**, mejorando de inmediato la experiencia de juego de los socios y alargando la vida útil del césped sin coste adicional.\n\n---\n⏱️ **Esfuerzo:** Bajo  \n📚 **Fuente:** Normas de conservación de pistas de pádel (Diputación de Sevilla) — frecuencia y redistribución regular de arena  \n🟢 **Confianza:** Alta",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### 1. Pauta de asignación para la reunión de equipo (lunes, 15:00)\n\nGuion para que la gerente o el propietario introduzca el ajuste al encargado de mantenimiento durante la reunión habitual:\n\n> \"A partir de esta semana vamos a ajustar la rutina matinal de pista. En lugar de limitarnos al cepillado general semanal, dedicaremos unos minutos diarios en la ronda de mañana a redistribuir la arena acumulada en fondos y esquinas hacia las zonas de mayor desgaste (zona de saque y centro). En el cuarto de mantenimiento queda la ficha con el sentido de cepillado y la hoja de control actualizada para marcar las pistas trabajadas cada día.\"\n\n---\n\n### 2. Ficha técnica de trabajo: redistribución de arena en pista\n\nDocumento para colocar en el tablón del cuarto de mantenimiento como guía de operativa:\n\n* **Condición previa indispensable:** realizar el cepillado únicamente con el **césped completamente seco** para no apelmazar el sílice ni dañar la fibra.\n* **Sentido del cepillado:** pasar el cepillo o rastra desde los fondos y esquinas **hacia la zona de saque** y el centro de la pista, evitando movimientos circulares que generen montículos.\n* **Frecuencia y reparto de carga:** al disponer de un único turno de mañana, conviene **repartir las pistas por días** (por ejemplo, 2 o 3 pistas al día durante la ronda matinal previa al primer turno) para no sobrecargar el inicio de jornada.\n* **Registro:** anotar cada intervención en la hoja de control del cuarto de mantenimiento justo al terminar la tarea.\n\n===TRACKER_SPEC===\n{\"titulo\": \"Control de redistribución y cepillado de arena\", \"columnas\": [\"Fecha\", \"Pista\", \"Arena redistribuida (Fondos/Esquinas a Centro)\", \"Pista seca (Sí/No)\", \"Firma mantenimiento\"], \"fila_ejemplo\": [\"07/04/2025\", \"Pista 1 y 2\", \"Sí\", \"Sí\", \"J. M.\"]}\n===FIN_TRACKER_SPEC===\n\n📋 Ejecución:\nResponsable: Encargado de mantenimiento (ejecución diaria) y Gerente (asignación y seguimiento).\nPlazo sugerido: Implementar a partir del próximo lunes tras la reunión de equipo.\nCómo verificar: (1) El miércoles a primera hora, el encargado de mantenimiento comprueba tras el primer pase que no quedan montículos en las esquinas y anota el resultado en las observaciones del personal. (2) El viernes antes de la apertura, la gerente revisa visualmente el estado del césped en las pistas tratadas y registra la confirmación en las observaciones del personal."
+          }
+        ]
+      },
+      {
+        "id": "K3_parking_members",
+        "checks": {
+          "two_checks": 3,
+          "staff_notes": 3,
+          "no_member_effort": 3,
+          "no_price_in_member_text": 3,
+          "maintenance_mornings": 3
+        },
+        "runs": 3,
+        "outputs": [
+          {
+            "plan": "### El problema\nVarios socios han indicado en las encuestas que resulta difícil encontrar sitio para aparcar por la tarde, sobre todo durante los cambios de turno en la franja de 18:00 a 22:30.\n\n### Qué se puede hacer\n1. **Repintar y delimitar las plazas** del recinto aprovechando esquinas y huecos muertos para motos o bicis, lo que permite ganar capacidad inmediata con un coste mínimo que puede aprobar directamente la gerente.\n2. **Consultar con soporte de Playtomic** la opción de desfasar 15 minutos el arranque de turnos entre pistas (por ejemplo, la mitad a las horas en punto y la otra mitad a y cuarto), evitando que coincidan todas las entradas y salidas de vehículos al mismo tiempo.\n\n### Por qué vale la pena\nEliminar la fricción al llegar evita retrasos en el inicio de los partidos y mejora la **puntualidad de las reservas**, cuidando la experiencia en las horas de mayor ocupación del club.\n\n---\n⏱️ **Esfuerzo:** Medio\n📚 **Fuente:** buenas prácticas generales\n🟢 **Confianza:** Alto",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### 1. Consulta técnica al soporte de Playtomic\nTexto listo para enviar desde el panel de soporte de Playtomic Manager o por correo a tu gestor de cuenta:\n\n> Hola, equipo de soporte:\n> \n> Os escribo desde el club para haceros una consulta sobre la configuración de pistas en horas punta (18:00 a 22:30).\n> \n> Actualmente trabajamos con turnos fijos de 90 minutos. Queremos saber si es técnicamente posible **desfasar 15 minutos el horario** de inicio entre pistas (por ejemplo, la mitad de las pistas empezando a las horas en punto o a las medias, y la otra mitad a y cuarto o a menos cuarto), manteniendo la duración fija de 90 minutos sin que descuadre la parrilla general.\n> \n> ¿Podéis indicarnos cómo configurarlo desde Playtomic Manager o si requiere algún ajuste manual por vuestra parte?\n> \n> Muchas gracias.\n\n---\n\n### 2. Pautas de replanteo y pintado del aparcamiento\nInstrucciones para tratar en la reunión del lunes con la gerente y el responsable de mantenimiento:\n\n- **Aprobación de material:** La compra de pintura vial y plantilla reflectante supone un gasto menor de 300 €, por lo que puede **aprobar la compra la gerente** de forma directa.\n- **Replanteo previo:** El encargado de mantenimiento identificará durante una mañana las esquinas sin uso y fondos de calle donde no quepa un coche pero sí sea viable **delimitar plazas de moto y bici**.\n- **Ejecución del trabajo:** La pintura se realizará en turno de mañana de lunes a viernes, aprovechando las franjas de menor ocupación de vehículos para no interferir en el acceso de los socios.\n\n---\n\n### 3. Aviso para la comunidad de WhatsApp de socios\n*(Para incluir en el aviso semanal una vez completado el repintado de plazas)*\n\n> ¡Hola a todos!\n> \n> Hemos reorganizado el aparcamiento del club y habilitado nuevos espacios señalizados para motos y bicicletas junto a la entrada.\n> \n> Si venís en dos ruedas, ya tenéis plazas reservadas y delimitadas para dejar vuestro vehículo de forma más cómoda.\n> \n> ¡Nos vemos en las pistas!\n\n---\n\n📋 Ejecución:\nResponsable: Gerente (gestión con Playtomic y compra) y Mantenimiento (pintado de plazas)\nPlazo sugerido: 7 a 10 días\nCómo verificar: (1) Recepción de tarde revisa la fluidez del aparcamiento durante el cambio de turno de las 19:30 un miércoles laborable y (2) repite la comprobación el viernes siguiente en la misma franja, anotando en las observaciones del personal si ha disminuido la saturación y si las nuevas plazas de motos y bicis están en uso."
+          },
+          {
+            "plan": "### El problema\nVarios socios han señalado en las encuestas que resulta muy complicado encontrar sitio en el aparcamiento por la tarde, especialmente durante el cambio de turno de los partidos de 90 minutos.\n\n### Qué se puede hacer\n1. **Repintar y delimitar las plazas** del recinto para maximizar el espacio útil, evitando que vehículos mal alineados inutilicen huecos o entorpezcan la circulación interna.\n2. **Consultar con soporte de Playtomic** si es viable desfasar 15 minutos el horario de inicio entre distintas pistas, logrando que las entradas y salidas de los jugadores no coincidan todas al mismo tiempo.\n\n### Por qué vale la pena\nEliminas la frustración previa al juego y **aseguras la puntualidad en pistas**, protegiendo la experiencia del socio en la franja de mayor actividad y facturación del club.\n\n---\n⏱️ **Esfuerzo:** Medio  \n📚 **Fuente:** buenas prácticas generales  \n🟡 **Confianza:** Moderado",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### 1. Consulta técnica a soporte de Playtomic\nTexto para enviar a través del canal habitual de soporte de Playtomic Manager:\n\n> Hola, equipo de Playtomic:\n> \n> Os escribo desde el club [Nombre del Club]. Queremos consultar si es técnicamente viable configurar en Playtomic Manager horarios de inicio desfasados por pista en los turnos de tarde (por ejemplo, que un grupo de pistas empiece a las 18:00 y otro a las 18:15 en reservas de 90 minutos).\n> \n> Si es posible, ¿podríais indicarnos cómo realizar este ajuste en el panel de gestión o si requiere alguna configuración por vuestra parte?\n> \n> Muchas gracias.\n\n---\n\n### 2. Planificación para el repintado y delimitación de plazas\n- Conviene **revisar la distribución actual** del recinto para calcular el número de plazas útiles con un ancho estándar (2,40 a 2,50 metros por plaza) y delimitar claramente los sentidos de circulación.\n- Se recomienda **presentar el presupuesto de pintura** de señalización vial en la reunión del lunes (si el coste es inferior a 300 €, lo aprueba la gerente).\n- Conviene **organizar los trabajos por tramos** durante las mañanas de lunes a viernes, aprovechando el turno de mantenimiento para no inutilizar todo el aparcamiento al mismo tiempo.\n\n---\n\n### 3. Comunicado para la comunidad de WhatsApp (para publicar 7 días antes de aplicar el cambio, solo si Playtomic confirma la viabilidad)\nTexto para el grupo de avisos de la comunidad:\n\n> ¡Hola a todos!\n> \n> A partir del próximo [día de la semana, fecha], escalonamos los horarios de inicio de los partidos de tarde para que la entrada y salida de las pistas sea más ágil y cómoda.\n> \n> Algunas pistas mantendrán los turnos habituales (a las horas en punto o a y media) y otras comenzarán a y cuarto o a menos cuarto (por ejemplo, 18:15 o 19:45).\n> \n> Podéis ver el horario de inicio exacto de cada pista directamente en Playtomic al hacer vuestra reserva. ¡Nos vemos en las pistas!\n\n---\n\n📋 Ejecución:\nResponsable: Gerente (consulta técnica y compra de material) y Mantenimiento (delimitación y pintura).\nPlazo sugerido: 2 semanas.\nCómo verificar: (1) La persona de recepción del turno de tarde comprueba la fluidez del tráfico y el uso de las plazas durante el cambio de turno de las 19:30 un martes y anota el resultado en las observaciones del personal; (2) La persona de recepción de tarde repite la comprobación el jueves a las 21:00 y registra sus notas en las observaciones del personal."
+          },
+          {
+            "plan": "### 1. El problema\nVarios socios han indicado en las encuestas que resulta muy difícil aparcar por la tarde, concentrándose el tapón principalmente en los momentos de cambio de turno entre partidos.\n\n### 2. Qué se puede hacer\n1. **Repintar y delimitar las plazas** por la mañana para aprovechar cada metro del recinto y **consultar al soporte de Playtomic** la opción técnica de desfasar 15 minutos el inicio de ciertas pistas, escalonando así las entradas y salidas de coches sin pedir cambios de hábitos a los jugadores.\n2. **Explorar un acuerdo de aparcamiento** con algún negocio o solar cercano para disponer de plazas extra de apoyo exclusivamente durante la franja punta de tarde (18:00 a 21:30).\n\n*(Nota: Desfasar horarios en el sistema requiere confirmar primero con soporte que no genere huecos muertos en la parrilla de reservas).*\n\n### 3. Por qué vale la pena\nFacilitar la llegada en hora punta evita que los jugadores entren a pista con prisas o molestos, lo que **protege la satisfacción del socio** en la franja más rentable del club.\n\n---\n⏱️ **Esfuerzo:** Medio  \n📚 **Fuente:** buenas prácticas generales  \n🟡 **Confianza:** Moderado",
+            "kit": "📄 KIT DE EJECUCIÓN\n\n### Pieza 1: Instrucción interna — Repintado y reorganización de plazas del aparcamiento\n*Para presentar en la reunión de equipo del lunes y coordinar con el operario de mantenimiento.*\n\nConviene **planificar el repintado matutino** del aparcamiento para optimizar el espacio disponible y delimitar claramente cada plaza:\n\n1. **Revisión del espacio actual:** Durante el turno de mañana, el encargado de mantenimiento revisará la distribución actual y medirá las zonas libres para trazar el número óptimo de plazas sin obstaculizar la maniobra de entrada y salida.\n2. **Adquisición de material:** Si el coste de la pintura vial y señalización no supera los 300 €, la gerente autorizará la compra directa; si el presupuesto estimado se sitúa entre 300 € y 1.500 €, se trasladará la aprobación al propietario.\n3. **Ejecución del trabajo:** Se recomienda **ejecutar el pintado por tramos** durante las mañanas de menor afluencia (entre las 8:00 y las 12:00), asegurando que la pintura seque antes de la llegada de los primeros turnos de tarde.\n\n---\n\n### Pieza 2: Mensaje de consulta técnica para el soporte de Playtomic\n*Para que la gerente lo envíe a través de los canales habituales de soporte de Playtomic Manager.*\n\n> Hola, equipo de Playtomic.\n> \n> Os escribimos desde la gerencia del club para haceros una consulta sobre la configuración de nuestra parrilla de reservas.\n> \n> Actualmente en hora punta (laborables de 18:00 a 22:30) trabajamos con turnos fijos de 90 minutos. Queremos evaluar la viabilidad de desfasar 15 minutos el horario de inicio en algunas pistas (por ejemplo, que la mitad inicien a las 18:00 y la otra mitad a las 18:15) para escalonar la llegada de coches al recinto.\n> \n> ¿Es posible aplicar este desfase únicamente en pistas concretas y en esa franja horaria sin que la configuración genere huecos muertos no reservables en el resto de la jornada?\n> \n> Quedamos a la espera de vuestra respuesta para ver cómo configurarlo. Muchas gracias por la ayuda.\n\n---\n\n### Pieza 3: Plantilla de contacto con negocios o propietarios de solares colindantes\n*Para que la gerente o el propietario exploren un posible acuerdo de uso de plazas en horario de tarde.*\n\n> Estimado/a [Nombre / Responsable del negocio o solar],\n> \n> Me pongo en contacto con vosotros desde el club de pádel ubicado en [Calle/Zona].\n> \n> Hemos observado que vuestras instalaciones/espacio quedan habitualmente sin actividad en horario de tarde-noche. Nos gustaría explorar la posibilidad de alcanzar un acuerdo de colaboración para utilizar parte de vuestras plazas de aparcamiento de forma puntual y exclusiva de lunes a jueves, entre las 18:00 y las 21:30.\n> \n> Estaríamos encantados de mantener una breve reunión para valorar las condiciones, el acceso y una posible contraprestación que resulte de mutuo beneficio.\n> \n> Si os parece bien, podemos coordinar una llamada o vernos en vuestras oficinas cuando mejor os convenga.\n> \n> Un cordial saludo,  \n> [Nombre del club / Teléfono de contacto]\n\n---\n\n📋 Ejecución:\nResponsable: Gerente del club\nPlazo sugerido: 2 semanas\nCómo verificar: (1) La persona de recepción del turno de tarde observa el flujo de vehículos en el cambio de turno entre las 19:25 y las 19:40 el primer miércoles tras el repintado y anota el resultado en las observaciones del personal; (2) la recepción de tarde realiza una segunda comprobación el jueves de la semana siguiente en el cambio de las 20:55 y registra en las observaciones del personal si persiste la congestión o si ha mejorado la rotación."
+          }
+        ]
+      }
+    ],
+    "runs": 3,
+    "rule_compliance": 0.9375
+  },
+  "cost": {
+    "calls": 60,
+    "errors": 0,
+    "retried": 0,
+    "cost_usd": 0.7123,
+    "per_agent": {
+      "insights_tagging": {
+        "calls": 12,
+        "seconds": 79.03900000000002,
+        "cost_usd": 0.121426,
+        "tokens": 46005
+      },
+      "outcome_check": {
+        "calls": 30,
+        "seconds": 270.663,
+        "cost_usd": 0.35235500000000003,
+        "tokens": 194735
+      },
+      "action_planning": {
+        "calls": 9,
+        "seconds": 97.87100000000001,
+        "cost_usd": 0.120839,
+        "tokens": 87635
+      },
+      "execution_kit": {
+        "calls": 9,
+        "seconds": 68.032,
+        "cost_usd": 0.117662,
+        "tokens": 94691
+      }
+    }
+  },
+  "minutes": 3.8
+}

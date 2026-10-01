@@ -1,0 +1,17 @@
+[
+  {
+    "id": "K1_heat_seasonal",
+    "checks": ["two_checks", "staff_notes", "no_member_effort", "no_price_in_member_text", "maintenance_mornings", "seasonal_end"],
+    "pattern": "🔍 PATRÓN — Calor en la nave nueva por la tarde\n🟢 ACTIVO\n⚡ Prioridad: Media (10/15)\n🧾 Evidencia: 3 menciones en 3 fechas (ENC-025, ENC-032, OBS-001) — fuentes: personal + encuesta\n🎯 Qué significa: Se percibe calor y ambiente cargado dentro de la nave nueva por la tarde, a finales de septiembre. Lo confirman dos encuestas de socios y una nota de recepción."
+  },
+  {
+    "id": "K2_sand_workload",
+    "checks": ["two_checks", "staff_notes", "no_member_effort", "no_price_in_member_text", "maintenance_mornings"],
+    "pattern": "🔍 PATRÓN — Acumulación de arena en las pistas\n🟢 ACTIVO\n⚡ Prioridad: Media (11/15)\n🧾 Evidencia: 3 menciones en 3 fechas (ENC-039, INC-002, OBS-003) — fuentes: incidencias + personal + encuesta\n🎯 Qué significa: Hay acumulación de arena en los fondos y esquinas de las pistas. Lo confirman una encuesta de un socio, una incidencia registrada en recepción y una nota de mantenimiento."
+  },
+  {
+    "id": "K3_parking_members",
+    "checks": ["two_checks", "staff_notes", "no_member_effort", "no_price_in_member_text", "maintenance_mornings"],
+    "pattern": "🔍 PATRÓN — Aparcamiento lleno en hora punta de tarde\n🟢 ACTIVO\n⚡ Prioridad: Media (10/15)\n🧾 Evidencia: 4 menciones en 4 fechas (ENC-003, ENC-007, ENC-018, ENC-036) — fuentes: encuesta\n🎯 Qué significa: Cuatro encuestas de socios señalan dificultades para encontrar sitio en el aparcamiento, sobre todo en los cambios de turno de la tarde."
+  }
+]
