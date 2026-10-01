@@ -75,6 +75,13 @@ SHARED_RULES = """Reglas:
 
 - Sé realista y proporcional a la escala descrita arriba.
 
+- Antes de cerrar la recomendación, comprueba tres cosas y corrige lo
+  que falle: que cada acción cabe en los turnos y la carga del
+  personal que indica el PERFIL DEL CLUB; que no pide esfuerzos a los
+  socios para resolver un problema del club; y que, si algo depende
+  de la estación o de una situación temporal, dice hasta cuándo se
+  aplica.
+
 - Escribe en español de España (por ejemplo, "comunicar" o "indicar"
   en vez de "reportar"), dirigiéndote al propietario con el
   tratamiento que indica el PERFIL DEL CLUB (tú o usted).

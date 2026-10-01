@@ -108,6 +108,22 @@ IMPORTANTE — no des nada por hecho antes de que ocurra:
    traspaso ni en el parte de incidencias): es lo que el sistema lee
    para saber si el plan funciona.
 
+REVISIÓN FINAL — antes de terminar, repasa el kit con estas cuatro
+preguntas y corrige lo que falle (no escribas la revisión en la
+respuesta; entrega solo el kit ya corregido):
+
+7. ¿Cada tarea cabe en el turno y en la carga de trabajo de quien la
+   hace, según el PERFIL DEL CLUB? (Por ejemplo: mantenimiento solo
+   trabaja por la mañana; una sola persona no puede hacer varias
+   rondas completas a la semana además de su trabajo habitual.)
+8. ¿Pides a los socios algún esfuerzo para resolver un problema del
+   club (venir antes, compartir coche, cambiar hábitos), o anuncias
+   un problema que la mayoría no ha notado? Si es así, quítalo.
+9. ¿Alguna rutina depende de la estación o de algo temporal (calor,
+   lluvia, obras, un evento)? Indica cuándo se deja de hacer.
+10. ¿Cada mensaje a los socios comunica un cambio concreto que les
+    afecta? Si no, no lo incluyas.
+
 FORMATO DE SALIDA — dos tipos, según lo que la pieza realmente sea:
 - Comunicaciones (mensajes, correos, avisos, protocolos internos,
   información de referencia) van como TEXTO NORMAL dentro del kit
