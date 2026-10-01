@@ -1,0 +1,9 @@
+=== REGISTRO DE INCIDENCIAS — RECEPCIÓN ===
+=== Semana del 12 al 18 de octubre (simulado, anonimizado) ===
+
+INC-010, lunes 12 de octubre, 19:45
+Registrado por: Recepción (turno tarde)
+Área: Reservas
+Descripción: La reserva de las 19:30 empieza unos 10 minutos tarde porque el partido anterior no termina a su hora.
+Acción: Recepción se acerca a la pista. La pista de al lado está libre y se ofrecen los minutos al final.
+Estado: Cerrada

@@ -1,0 +1,188 @@
+{
+  "week_start": "2026-10-12",
+  "seed": 20261012,
+  "implemented": [
+    "court12_light",
+    "indoor_temperature",
+    "outside_lights",
+    "sand"
+  ],
+  "events": [
+    {
+      "event": "booking_overrun",
+      "dates": [
+        "2026-10-12"
+      ]
+    },
+    {
+      "event": "cleaning_issue",
+      "dates": [
+        "2026-10-13"
+      ]
+    }
+  ],
+  "survey": [
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-049",
+      "date": "2026-10-12",
+      "weekday": "lunes"
+    },
+    {
+      "band": "tarde",
+      "tone": "neutral",
+      "problems": [],
+      "positive_theme": null,
+      "id": "ENC-050",
+      "date": "2026-10-12",
+      "weekday": "lunes"
+    },
+    {
+      "band": "noche",
+      "tone": "mixed",
+      "problems": [
+        "booking_overrun"
+      ],
+      "positive_theme": null,
+      "id": "ENC-051",
+      "date": "2026-10-12",
+      "weekday": "lunes"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-052",
+      "date": "2026-10-14",
+      "weekday": "miércoles"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "teachers_class",
+      "id": "ENC-053",
+      "date": "2026-10-15",
+      "weekday": "jueves"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-054",
+      "date": "2026-10-15",
+      "weekday": "jueves"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-055",
+      "date": "2026-10-16",
+      "weekday": "viernes"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "atmosphere",
+      "id": "ENC-056",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "mañana",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "reception_staff",
+      "id": "ENC-057",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "mañana",
+      "tone": "mixed",
+      "problems": [
+        "parking"
+      ],
+      "positive_theme": null,
+      "id": "ENC-058",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "atmosphere",
+      "id": "ENC-059",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-060",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-061",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    },
+    {
+      "band": "noche",
+      "tone": "positive",
+      "problems": [],
+      "positive_theme": "general",
+      "id": "ENC-062",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    }
+  ],
+  "incidents": [
+    {
+      "topic": "booking_overrun",
+      "kind": "event",
+      "id": "INC-010",
+      "date": "2026-10-12",
+      "weekday": "lunes"
+    }
+  ],
+  "staff_notes": [
+    {
+      "role": "Entrenador",
+      "topic": "member_feedback_positive",
+      "id": "OBS-021",
+      "date": "2026-10-13",
+      "weekday": "martes"
+    },
+    {
+      "role": "Recepción",
+      "topic": "classes_demand",
+      "id": "OBS-022",
+      "date": "2026-10-15",
+      "weekday": "jueves"
+    },
+    {
+      "role": "Entrenador",
+      "topic": "member_feedback_positive",
+      "id": "OBS-023",
+      "date": "2026-10-17",
+      "weekday": "sábado"
+    }
+  ]
+}
