@@ -5,7 +5,8 @@ Not a manual: each page already explains itself ("¿Qué pasa en esta
 página?"). Pala does what no single page does — it reads ALL the club's
 patterns at once and answers in a few lines:
 - 🧭 what to do now, in priority order, and where to do it;
-- 📊 how the club is doing (resolved / progressing / pending);
+- 📊 how the club is doing: resolved / working / pending / satisfaction,
+  including whether the fixes are working (the club's impact figures);
 - 🔁 what to prepare for the next check-ins, and when they're due;
 - 📅 tasks for the Monday team meeting, one owner each;
 - 🚫 every idea already rejected, so nobody proposes it again;
@@ -20,6 +21,12 @@ Phase 3: Pala also sees the patterns detected and waiting for their
 recommendation (pending_recommendations), each pattern's priority, what
 the four sources said automatically at the last check-in (kept apart from
 what the owner said), and tells rejected ideas from postponed ones.
+
+Impact: Pala also receives the club's impact figures, already calculated in
+plain Python by agents/impact.py (time to resolution, fixes that worked,
+complaint change, satisfaction). Pala never calculates them itself: it only
+explains them, with their limits (small sample, simulated data, open
+patterns not counted yet).
 """
 
 import re
@@ -38,7 +45,9 @@ PAGE_MAP = """- "Resumen": tarjetas de "Tu siguiente paso" y el estado de cada p
   Descartar, o "Decidir más tarde"). Se revisan uno a uno.
 - "2 · Preparar": tarjeta del patrón → botón "Generar kit →"; kits aprobados → "Ver kit →" (trackers en Excel).
 - "3 · Seguir": tarjeta del patrón → botón "Revisar →" (se indica si se hizo, con qué prueba, y si mejoró).
-- "4 · Historial": tarjeta del patrón → "Ver historia →" (historia completa y lo descartado)."""
+- "4 · Historial e impacto": vista "📊 Impacto del club" (las cifras de resultados, los casos cerrados y la
+  satisfacción semana a semana) y vista "📈 Historia de cada patrón" → tarjeta del patrón → "Ver historia →"
+  (historia completa y lo descartado)."""
 
 
 def _one_line(text: str, limit: int | None = 220) -> str:
@@ -173,8 +182,18 @@ def pending_digest() -> str:
     return "\n".join(lines) or "Ninguno."
 
 
+def impact_digest() -> str:
+    """The club's impact figures, already calculated by agents/impact.py
+    (plain Python). Pala only explains them; it never recalculates."""
+    try:
+        import impact
+        return impact.impact_text()
+    except Exception:  # noqa: BLE001 - Pala still answers everything else
+        return "No disponible en este momento."
+
+
 def build_prompt(question: str, history: list[dict], digest: str, counts: dict, club_profile: str,
-                 pending: str = "Ninguno.") -> str:
+                 pending: str = "Ninguno.", impact_figures: str = "No disponible en este momento.") -> str:
     past = "\n".join(
         f"{'Propietario' if m['role'] == 'user' else 'Pala'}: {m['content']}"
         for m in history[-6:]
@@ -225,9 +244,37 @@ CÓMO RESPONDER:
   ninguna página. Nombra una página de la app (con su botón) solo cuando
   el siguiente paso se hace allí, y di cuándo: por ejemplo, "cuando
   Playtomic responda, regístralo en 3 · Seguir → Revisar →".
-- Cómo va el club: tres líneas — Resuelto / Avanzando / Pendiente. En
-  Pendiente, di el motivo de cada patrón: si espera algo concreto (por
-  ejemplo, una respuesta de Playtomic) o si simplemente aún no toca.
+- ¿Cómo va el club? (y cualquier pregunta sobre resultados, impacto o si
+  los arreglos funcionan): responde SIEMPRE con una frase corta de
+  respuesta y debajo esta lista de cuatro puntos, cada uno en su propia
+  línea, empezando por "- ", en este orden y con estas etiquetas exactas:
+  - ✅ **Resuelto:** cuántos casos se cerraron, con su nombre corto entre
+    paréntesis (por ejemplo, "luces fuera de las pistas y pista 12"),
+    cuántos con el primer plan y cuánto se tarda normalmente (pasa los
+    días a semanas: 21 días = unas 3 semanas; di "normalmente", nunca
+    "de media").
+  - 📉 **Funcionando:** cómo cambiaron las quejas en los casos cerrados
+    ("de 3 a 1") y, si IMPACTO DEL CLUB trae una "Comparación", lo que
+    dice en pocas palabras ("y no en los abiertos, así que apunta a los
+    arreglos").
+  - ⏳ **Pendiente:** cuántos patrones siguen abiertos, repartidos en
+    grupos según PATRONES DEL CLUB (por ejemplo, "2 avanzan con un
+    ajuste, 2 esperan algo externo y 2 aún no tienen seguimiento"; cada
+    patrón abierto en un solo grupo, y que los grupos sumen el total), y
+    cómo van sus quejas (la cifra "en seguimiento", aunque no sea buena),
+    nombrando solo el patrón o los dos patrones que más la explican, con
+    su motivo en pocas palabras ("esperando a Playtomic"). Las fechas de
+    los próximos seguimientos no van aquí: son de otra pregunta.
+  - ⭐ **Satisfacción:** el % de respuestas positivas de la última semana
+    y, si la muestra es pequeña, "es una primera señal".
+  Cada punto, una o dos frases cortas como mucho. Termina con una línea aparte: "Más
+  detalle en 4 · Historial e impacto."
+  Usa SOLO las cifras de IMPACTO DEL CLUB, tal cual, sin recalcularlas.
+  Las quejas, en números ("de 3 a 1"), nunca en porcentaje. No uses
+  abreviaturas como "sem." ni términos técnicos como "mediana" o
+  "solidez". Nunca digas que un arreglo causó el cambio de la
+  satisfacción: como mucho, que coinciden en el tiempo. Si una cifra no
+  está, di "aún no hay datos" en ese punto.
 - Próximos seguimientos: por cada patrón, cuándo toca (fecha recomendada
   o la condición de la que depende) y qué prueba reunir antes.
 - Reunión del lunes: tareas concretas, cada una con UN solo responsable
@@ -251,7 +298,7 @@ CÓMO RESPONDER:
   mezcles ni atribuyas uno al otro.
 - Un patrón concreto: su historia en 3 líneas (qué se detectó, qué se hizo,
   cómo va, incluido lo que indicó el propietario) y, para más detalle,
-  "4 · Historial" → su tarjeta.
+  "4 · Historial e impacto" → "📈 Historia de cada patrón" → su tarjeta.
 - Máximo unas 8 líneas. Pon en **negrita** solo los nombres de los patrones.
 - Usa SOLO los datos de abajo. Si algo no está, dilo. No inventes cifras,
   fechas ni resultados. Nunca digas que has hecho o cambiado algo: solo
@@ -266,7 +313,8 @@ CÓMO ESCRIBIR:
   "pruebas" (no "evidencias"), "confirmar que se ha hecho" (no "certificar
   la ejecución"), "valorar si funciona" (no "desbloquear la evaluación"),
   "la hoja de inscripciones firmada" (no "validación firmada"),
-  "indicado" o "comentado" (no "reportado").
+  "indicado" o "comentado" (no "reportado"), "la mediana" se puede decir
+  como "lo normal" o "lo habitual".
 
 HOY: {today}
 
@@ -286,6 +334,9 @@ PATRONES DETECTADOS QUE ESPERAN SU RECOMENDACIÓN (aún sin plan):
 PATRONES DEL CLUB (datos reales):
 {digest}
 
+IMPACTO DEL CLUB (cifras ya calculadas por la app; explícalas, no las recalcules):
+{impact_figures}
+
 PERFIL DEL CLUB (roles, reunión semanal, tratamiento):
 {club_profile}
 
@@ -296,6 +347,24 @@ PREGUNTA:
 {question}
 
 Responde ahora."""
+
+
+CLUB_LABELS = {"Resuelto": "✅", "Funcionando": "📉", "Pendiente": "⏳", "Satisfacción": "⭐"}
+
+
+def _tidy_answer(text: str) -> str:
+    """Makes sure the four labelled points of "¿Cómo va el club?" are each on
+    their own line as a list (with their emoji), even if Gemini writes them
+    as one paragraph, and that the closing pointer sits on its own line."""
+    if not text or sum(f"**{l}:**" in text for l in CLUB_LABELS) < 2:
+        return text
+    for label, icon in CLUB_LABELS.items():
+        text = re.sub(rf"\s*(?:-\s*)?(?:[✅📉⏳⭐]\s*)?\*\*{label}:\*\*",
+                      f"\n- {icon} **{label}:**", text)
+    text = re.sub(r"\s*(Más detalle en 4 · Historial)", r"\n\n\1", text)
+    # a blank line before the list, so Markdown shows it as a list
+    text = re.sub(r"^((?!- )[^\n]+)\n- ", r"\1\n\n- ", text.strip(), count=1)
+    return text
 
 
 def _blocked_without_login() -> bool:
@@ -339,9 +408,9 @@ def run_faq_agent(question: str, history: list[dict] | None = None) -> str:
     except Exception:
         counts = {}
     prompt = build_prompt(question, history or [], club_digest(), counts, load_club_profile(),
-                          pending=pending_digest())
+                          pending=pending_digest(), impact_figures=impact_digest())
     try:
-        return generate(prompt, agent="pala")
+        return _tidy_answer(generate(prompt, agent="pala"))
     except GeminiUnavailable as e:
         return str(e)
 

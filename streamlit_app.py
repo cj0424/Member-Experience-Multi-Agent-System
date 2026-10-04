@@ -3,19 +3,20 @@ streamlit_app.py — entry point. Run with:
     python -m streamlit run streamlit_app.py
 
 1. Defines the navigation, so the sidebar follows the owner's journey:
-   Resumen → 1 · Detectar → 2 · Preparar → 3 · Seguir → 4 · Historial.
+   Resumen → 1 · Detectar → 2 · Preparar → 3 · Seguir → 4 · Historial e impacto.
    Each page lives in its own file, with its own design:
    - home.py                      → Resumen (dashboard)
    - pages/2_Nuevos_Patrones.py   → 1 · Detectar
    - pages/3_Kits_de_Ejecucion.py → 2 · Preparar
    - pages/4_Seguimiento.py       → 3 · Seguir
-   - pages/5_Historial.py         → 4 · Historial
+   - pages/5_Historial.py         → 4 · Historial e impacto (two views:
+                                    the club's impact, and each pattern's story)
 2. Adds the floating "💬 Ayuda" button, once, so it appears on every page.
    It opens a chat with Pala, the club's assistant (agents/faq_agent.py), which reads all
    the club's patterns at once and answers in a few lines: what to do now
-   (page → card → button, and why), how the club is doing, what to prepare
-   for the next check-ins, tasks for the Monday meeting, rejected ideas, or
-   a short story of one pattern. Under each answer, buttons take the owner
+   (page → card → button, and why), how the club is doing (status and
+   whether the fixes are working), what to prepare for the next check-ins,
+   tasks for the Monday meeting, rejected ideas, or one pattern's story. Under each answer, buttons take the owner
    straight to the pages it mentions. It never changes any data.
 """
 
@@ -26,15 +27,18 @@ import streamlit as st
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "agents"))
 
+# Four quick questions, each with a different job: what to do, how it's going
+# (status + whether the fixes work), what to prepare, and what to discuss on
+# Monday. Anything else (rejected ideas, one pattern's story…) can be typed.
 SUGGESTIONS = [
     "🧭 ¿Qué hago ahora?",
     "📊 ¿Cómo va el club?",
     "🔁 ¿Qué necesito para los próximos seguimientos?",
     "📅 Tareas para la reunión del lunes",
-    "🚫 ¿Qué ideas ya hemos descartado?",
 ]
 
 # Pages the assistant can send the owner to, as named in its answers.
+# "4 · Historial" also matches "4 · Historial e impacto".
 PAGE_LINKS = [
     ("1 · Detectar", "pages/2_Nuevos_Patrones.py", "🔍"),
     ("2 · Preparar", "pages/3_Kits_de_Ejecucion.py", "📋"),
@@ -159,6 +163,6 @@ navigation = st.navigation([
     st.Page("pages/2_Nuevos_Patrones.py", title="1 · Detectar", icon="🔍"),
     st.Page("pages/3_Kits_de_Ejecucion.py", title="2 · Preparar", icon="📋"),
     st.Page("pages/4_Seguimiento.py", title="3 · Seguir", icon="🔁"),
-    st.Page("pages/5_Historial.py", title="4 · Historial", icon="📈"),
+    st.Page("pages/5_Historial.py", title="4 · Historial e impacto", icon="📈"),
 ])
 navigation.run()

@@ -1,11 +1,21 @@
 """
 pages/5_Historial.py
 
-Step 4 of the journey — Historial. Read-only: the full story of each
-pattern from pattern_history — how it was detected, every plan version
-(approved, revised, discarded), every kit, and every check-in with the
-Outcome Check reasoning, grouped by attempt. Nothing here writes to
-Supabase.
+Step 4 of the journey — Historial e impacto. Read-only. Two views, chosen
+with a switch at the top:
+
+- 📊 Impacto del club: how long problems take to solve, how many fixes
+  worked with the first plan, whether complaints dropped, and how member
+  satisfaction is changing week by week. Calculated in plain Python by
+  agents/impact.py (no Gemini), on the club's calendar.
+- 📈 Historia de cada patrón: the full story of each pattern from
+  pattern_history — how it was detected, every plan version (approved,
+  revised, discarded), every kit, and every check-in with the Outcome
+  Check reasoning, grouped by attempt.
+
+Opened from the sidebar, the page starts on the Impact view. Opened from a
+"Ver historial completo" / "📈 Historia" button, it starts on that
+pattern's story. Nothing here writes to Supabase.
 """
 
 import streamlit as st
@@ -13,13 +23,15 @@ import sys
 import os
 import re
 import html
+import plotly.graph_objects as go
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
 
 import db
+import impact
 from auth import require_login, can, actor_label
 
-st.set_page_config(page_title="Historial — Club de Pádel", layout="wide")
+st.set_page_config(page_title="Historial e impacto — Club de Pádel", layout="wide")
 role = require_login("ver")
 
 
@@ -682,6 +694,121 @@ div[class*="st-key-jr_active"] [data-testid="stPageLink"] a * { color: #FFFFFF !
 .tag-esc { background-color: #7f1d1d; color: #FFFFFF; }
 .tag-disc { background-color: #94a3b8; color: #FFFFFF; }
 
+/* ---------- View switch (Impacto / Historia) ---------- */
+
+.st-key-hs_view_box { margin: 6px 0 10px 0; }
+.st-key-hs_view_box [data-testid="stButtonGroup"] button {
+    min-height: 54px !important;
+    padding: 10px 26px !important;
+}
+.st-key-hs_view_box [data-testid="stButtonGroup"] button p {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+}
+
+/* ---------- Impacto del club ---------- */
+
+.imp-note {
+    background: #F1F5F9;
+    border-left: 4px solid #1E3F59;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 15px;
+    color: #1E3F59;
+    margin: 6px 0 18px 0;
+    max-width: 920px;
+}
+.imp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 10px;
+}
+.imp-card {
+    background: #FFFFFF;
+    border: 1px solid #DBDFE3;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+.imp-card.c1 { border-top: 3px solid #ACD803; }
+.imp-card.c2 { border-top: 3px solid #274A22; }
+.imp-card.c3 { border-top: 3px solid #1E3F59; }
+.imp-card.c4 { border-top: 3px solid #C2410C; }
+.imp-label { font-size: 15px; font-weight: 700; color: #252445; }
+.imp-value {
+    font-family: 'Paytone One', sans-serif;
+    font-size: 2rem;
+    color: #030338;
+    line-height: 1.2;
+    margin: 4px 0;
+}
+.imp-sub { font-size: 15px; color: #475569; line-height: 1.45; }
+.imp-extra { font-size: 15px; color: #1E3F59; font-weight: 600; margin-top: 8px; line-height: 1.45; }
+.imp-open { font-size: 15px; color: #748092; margin: 4px 0 22px 0; }
+
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.case-card {
+    background: #FFFFFF;
+    border: 1px solid #DBDFE3;
+    border-radius: 14px;
+    padding: 16px 20px;
+}
+.case-name { font-size: 18px; font-weight: 800; color: #030338; margin-bottom: 10px; }
+.case-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
+.case-step {
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #F8FAF7;
+    border: 1px solid #DBDFE3;
+    color: #252445;
+}
+.case-step.done { background: #EFF5D1; border-color: #ACD803; color: #274A22; }
+.case-arrow { color: #94a3b8; font-size: 13px; }
+.case-line { font-size: 16px; color: #1e293b; margin-bottom: 10px; }
+.case-signals { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 10px 0; }
+.sig {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #DBDFE3;
+    background: #F8FAF7;
+    color: #94a3b8;
+}
+.sig.on { background: #F0FDF4; border-color: #86EFAC; color: #14532d; }
+.strength { font-size: 15px; color: #1e293b; margin: 0 0 4px 0; }
+.strength b { color: #030338; }
+.str-alta { color: #15803d !important; }
+.str-media { color: #B45309 !important; }
+.str-baja { color: #B91C1C !important; }
+.imp-compare {
+    background: #EFF5D1;
+    border-left: 4px solid #ACD803;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #1e293b;
+    margin: 0 0 18px 0;
+    max-width: 920px;
+}
+.imp-compare.neutral { background: #F1F5F9; border-left-color: #94a3b8; }
+.bars { display: flex; align-items: flex-end; gap: 24px; margin-top: 14px; }
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 130px; }
+.bar-track { height: 60px; display: flex; align-items: flex-end; }
+.bar { width: 44px; border-radius: 6px 6px 0 0; }
+.bar.before { background: #94a3b8; }
+.bar.after { background: #ACD803; }
+.bar-lbl { font-size: 14px; color: #475569; white-space: nowrap; }
+.bar-num { font-size: 15px; font-weight: 800; color: #030338; }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1202,52 +1329,297 @@ def render_pattern_story(p: dict):
 
 
 # ---------------------------------------------------------------------------
+# Impacto del club — numbers from agents/impact.py (plain Python, no Gemini)
+# ---------------------------------------------------------------------------
+
+def _num(value, decimals: int = 1) -> str:
+    """Spanish number format: 2,5 instead of 2.5, no trailing ,0."""
+    text = f"{value:.{decimals}f}".rstrip("0").rstrip(".")
+    return text.replace(".", ",")
+
+
+def _weeks_text(days: float) -> str:
+    """21 días → "3 semanas"; 10 días → "1,5 semanas"; under a week → days."""
+    if days < 7:
+        return _plural(round(days), "día", "días")
+    weeks = round(days / 7 * 2) / 2
+    return f"{_num(weeks)} {'semana' if weeks == 1 else 'semanas'}"
+
+
+def _plural(n: int, one: str, many: str) -> str:
+    return f"{n} {one if n == 1 else many}"
+
+
+def impact_card(css: str, label: str, value: str, sub: str, extra: str = "") -> str:
+    extra_html = f'<div class="imp-extra">{html.escape(extra)}</div>' if extra else ""
+    return (f'<div class="imp-card {css}"><div class="imp-label">{html.escape(label)}</div>'
+            f'<div class="imp-value">{html.escape(value)}</div>'
+            f'<div class="imp-sub">{html.escape(sub)}</div>{extra_html}</div>')
+
+
+def case_card_html(case: dict) -> str:
+    def step(text, done=False):
+        return f'<span class="case-step{" done" if done else ""}">{html.escape(text)}</span>'
+
+    def wk(n):
+        return f"semana {n}" if n else "—"
+
+    arrow = '<span class="case-arrow">→</span>'
+    steps = arrow.join([
+        step(f"Detectado en la {wk(case['detected_week'])}"),
+        step(f"Arreglo desde la {wk(case['fix_week'])}"),
+        step(f"Cerrado en la {wk(case['closed_week'])}", done=True),
+    ])
+    details = [f"Resuelto en {_weeks_text(case['days'])}"]
+    if case["new_approaches"]:
+        details.append(_plural(case["new_approaches"], "enfoque nuevo", "enfoques nuevos"))
+    ba = case["complaints"]
+    bars = ""
+    if ba:
+        top = max(ba["before"], ba["after"], 1)
+
+        def bar(value, cls, label):
+            height = max(3, round(60 * value / top))
+            return (f'<div class="bar-col"><span class="bar-num">{value}</span>'
+                    f'<div class="bar-track"><div class="bar {cls}" style="height:{height}px"></div></div>'
+                    f'<span class="bar-lbl">{label}</span></div>')
+
+        weeks = _plural(ba["weeks"], "semana", "semanas")
+        bars = (f'<div class="bars">{bar(ba["before"], "before", f"{weeks} antes")}'
+                f'{bar(ba["after"], "after", f"{weeks} después")}</div>')
+    else:
+        details.append("aún sin semanas analizadas después del arreglo")
+    return (f'<div class="case-card"><div class="case-name">{html.escape(case["name"])}</div>'
+            f'<div class="case-steps">{steps}</div>'
+            f'<div class="case-line">{html.escape(" · ".join(details))}</div>'
+            f'{signals_html(case.get("signals"))}{bars}</div>')
+
+
+def signals_html(sg: dict | None) -> str:
+    """The four pieces of evidence behind a closed case, plus how solid they are together."""
+    if not sg:
+        return ""
+    tier = sg.get("execution_tier")
+    checked = {"ALTA": "Arreglo comprobado con registro firmado",
+               "MEDIA": "Arreglo comprobado en persona"}.get(tier, "Arreglo sin comprobar en persona")
+    weeks = sg.get("clean_weeks")
+    if weeks is None:
+        quiet = "Sin datos de semanas posteriores"
+    elif sg.get("none_since_fix"):
+        quiet = f"Ninguna queja desde el arreglo ({_plural(weeks, 'semana', 'semanas')})"
+    elif weeks == 1 and not sg.get("quiet"):
+        quiet = "Solo 1 semana sin quejas (hacen falta 2)"
+    elif weeks == 1:
+        quiet = "Sin quejas nuevas en la última semana"
+    elif weeks > 1:
+        quiet = f"Sin quejas nuevas en las últimas {weeks} semanas"
+    else:
+        quiet = "Hubo una queja en la última semana (hacen falta 2 sin quejas)"
+    items = [
+        (tier in ("ALTA", "MEDIA"), checked),
+        (sg.get("result_confirmed"), "Resultado confirmado por el club"),
+        (sg.get("complaints_down"), "Las quejas bajaron"),
+        (sg.get("quiet"), quiet),
+    ]
+    chips = "".join(f'<span class="sig{" on" if ok else ""}">{"✓" if ok else "·"} {html.escape(text)}</span>'
+                    for ok, text in items)
+    strength = sg.get("strength", "baja")
+    return (f'<div class="case-signals">{chips}</div>'
+            f'<div class="strength">Solidez de las pruebas: <b class="str-{strength}">{strength}</b> '
+            f'({sg.get("count", 0)} de 4 señales)</div>')
+
+
+def render_satisfaction(weeks: list[dict]):
+    labels = [f"Semana {w['week'] or '?'}<br>{_plural(w['answers'], 'respuesta', 'respuestas')}" for w in weeks]
+    shares = [w["share"] for w in weeks]
+    fig = go.Figure(go.Scatter(
+        x=labels, y=shares,
+        mode="lines+markers+text",
+        line=dict(color="#1E3F59", width=3),
+        marker=dict(size=12, color="#ACD803", line=dict(width=2, color="#1E3F59")),
+        text=[f"{s}%" for s in shares],
+        textposition="top center",
+        textfont=dict(size=14, color="#030338"),
+        hovertext=[f"{w['positive']} de {w['answers']} respuestas positivas" for w in weeks],
+        hoverinfo="text",
+    ))
+    fig.update_layout(
+        height=280,
+        margin=dict(l=20, r=20, t=30, b=20),
+        yaxis=dict(range=[0, 110], ticksuffix="%", gridcolor="#EEF1F4", zeroline=False,
+                   tickfont=dict(size=13, color="#475569")),
+        xaxis=dict(showgrid=False, tickfont=dict(size=14, color="#475569")),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+    )
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+
+
+def render_impact():
+    try:
+        data = impact.get_impact()
+    except Exception as e:  # noqa: BLE001 - never break the page
+        st.warning("Ahora mismo no se puede calcular el impacto. Inténtalo de nuevo en un momento.")
+        st.caption(f"Detalle: {e}")
+        return
+
+    closed = data["closed"]
+    sample = (f"{_plural(closed, 'caso cerrado', 'casos cerrados')}: tómalo como una primera señal."
+              if data["small_sample"] else f"{_plural(closed, 'caso cerrado', 'casos cerrados')}.")
+    st.markdown(f'<div class="imp-note">Datos simulados, medidos en las semanas del club. {sample}</div>',
+                unsafe_allow_html=True)
+
+    # 1. Four summary cards
+    days = data["resolution_days_median"]
+    if days is None:
+        c1 = impact_card("c1", "⏱️ Tiempo de resolución", "—", "aún no hay casos cerrados")
+    else:
+        c1 = impact_card("c1", "⏱️ Tiempo de resolución", _weeks_text(days),
+                         f"lo habitual en {'el caso cerrado' if closed == 1 else f'los {closed} casos cerrados'}")
+
+    if data["reached_result"]:
+        c2 = impact_card("c2", "✅ Arreglos que funcionaron",
+                         f"{data['first_plan_worked']} de {data['reached_result']}", "con el primer plan")
+    else:
+        c2 = impact_card("c2", "✅ Arreglos que funcionaron", "—", "aún no hay resultados")
+
+    cc, cf = data["complaints_closed"], data["complaints_in_followup"]
+    extra = (f"Patrones aún abiertos: {cf['before']} → {cf['after']} quejas"
+             if cf["patterns"] and data.get("comparison") not in ("fixes", "general") else "")
+    if cc["cases"]:
+        where = "el caso cerrado" if cc["cases"] == 1 else f"los {cc['cases']} casos cerrados"
+        c3 = impact_card("c3", "📉 Cambio en quejas", f"{cc['before']} → {cc['after']}",
+                         f"quejas antes y después del arreglo, en {where}", extra)
+    else:
+        c3 = impact_card("c3", "📉 Cambio en quejas", "—", "aún sin semanas tras los arreglos", extra)
+
+    last = data["satisfaction_last"]
+    if last:
+        c4 = impact_card("c4", "⭐ Satisfacción", f"{last['share']}%",
+                         f"{last['positive']} de {last['answers']} respuestas positivas en la semana {last['week']}")
+    else:
+        c4 = impact_card("c4", "⭐ Satisfacción", "—", "aún no hay respuestas de la encuesta")
+
+    st.markdown(f'<div class="imp-grid">{c1}{c2}{c3}{c4}</div>', unsafe_allow_html=True)
+
+    still_open = data["open_count"] + data["escalated_count"]
+    if still_open:
+        text = ("1 patrón sigue sin cerrar y aún no cuenta en estos números." if still_open == 1
+                else f"{still_open} patrones siguen sin cerrar y aún no cuentan en estos números.")
+        st.markdown(f'<div class="imp-open">ℹ️ {text}</div>', unsafe_allow_html=True)
+
+    compare = data.get("comparison")
+    if compare == "fixes":
+        st.markdown(
+            f'<div class="imp-compare">📊 <b>Donde se arregló, las quejas bajaron</b> ({cc["before"]} → {cc["after"]}); '
+            f'<b>donde aún no se ha arreglado, no</b> ({cf["before"]} → {cf["after"]}). Por eso, lo más probable es que la bajada '
+            'venga de los arreglos y no de unas semanas más tranquilas.</div>', unsafe_allow_html=True)
+    elif compare == "general":
+        st.markdown(
+            f'<div class="imp-compare neutral">📊 Las quejas bajaron tanto donde se arregló ({cc["before"]} → '
+            f'{cc["after"]}) como donde aún no ({cf["before"]} → {cf["after"]}). Puede ser un periodo más '
+            'tranquilo en general, no solo el efecto de los arreglos.</div>', unsafe_allow_html=True)
+
+    with st.expander("¿Cómo se calcula cada número?"):
+        st.markdown(
+            "**Semanas:** la semana 1 es la primera semana de opiniones analizada.\n\n"
+            "**Tiempo de resolución:** semanas entre la detección y el cierre. Si hay varios casos, se toma el del medio.\n\n"
+            "**Arreglos que funcionaron:** casos cerrados con el primer plan, de todos los que ya tienen resultado.\n\n"
+            "**Cambio en quejas:** quejas después del arreglo, comparadas con las mismas semanas antes de "
+            "detectarlo (hasta 4), en las cuatro fuentes. No se usan porcentajes: con tan pocas quejas, "
+            "exagerarían el cambio.\n\n"
+            "**Satisfacción:** de las respuestas a la encuesta que mencionan algo, cuántas son positivas.\n\n"
+            "**Solidez de las pruebas:** cuántas de las cuatro señales de cada caso se cumplen. "
+            "4 = alta; 2 o 3 = media; 0 o 1 = baja.\n\n"
+            "**Comparación:** si las quejas bajan donde se arregló y no en el resto, lo más probable es que "
+            "la bajada venga de los arreglos.\n\n"
+            "Todo se mide con las semanas de los comentarios, no con la fecha en que se pulsó un botón."
+        )
+
+    # 2. One story per closed case
+    st.subheader("Casos cerrados")
+    if data["cases"]:
+        cards = "".join(case_card_html(c) for c in data["cases"])
+        st.markdown(f'<div class="case-grid">{cards}</div>', unsafe_allow_html=True)
+    else:
+        st.caption("Cuando el primer patrón se cierre, aquí verás su historia: cuándo se detectó, "
+                   "cuándo empezó el arreglo, cuándo se cerró y cómo cambiaron las quejas.")
+
+    # 3. Satisfaction week by week
+    st.subheader("Satisfacción semana a semana")
+    if data["satisfaction"]:
+        render_satisfaction(data["satisfaction"])
+        st.caption("Cada punto muestra cuántas respuestas lo forman. Con pocas respuestas, "
+                   "una o dos pueden mover mucho el porcentaje.")
+    else:
+        st.caption("Aún no hay respuestas de la encuesta analizadas.")
+
+
+# ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
 
-st.title("📈 Historial")
+VIEW_IMPACT = "📊 Impacto del club"
+VIEW_STORY = "📈 Historia de cada patrón"
+
+st.title("📈 Historial e impacto")
 render_journey(4)
-agent_line("Registro de todo lo que han hecho los 4 agentes y lo que decidiste tú")
+agent_line("Lo que han hecho los 4 agentes, lo que decidiste tú y su impacto en el club")
 
 with st.expander("¿Qué pasa en esta página?"):
     st.markdown(
-        "**Qué ves aquí:** para cada patrón, todo lo que ha pasado, en orden: cuándo se detectó y con qué evidencia, "
+        "**Impacto del club:** cuánto se tarda en resolver un problema, cuántos arreglos funcionaron con el "
+        "primer plan, si bajaron las quejas y cómo evoluciona la satisfacción de los socios. Solo cuentan los "
+        "patrones cerrados; los que siguen en seguimiento se indican aparte.\n\n"
+        "**Historia de cada patrón:** todo lo que ha pasado, en orden: cuándo se detectó y con qué evidencia, "
         "cada versión del plan (también las que pediste cambiar), el kit aprobado y cada seguimiento con el "
         "razonamiento del agente.\n\n"
         "**Intentos:** si un plan no funcionó y se aprobó un enfoque nuevo, verás el **Intento 2** debajo del 1.\n\n"
-        "**Solo lectura:** aquí no se cambia nada. Para actuar, usa Nuevos Patrones, Kits o Seguimiento."
+        "**Solo lectura:** aquí no se cambia nada. Para actuar, usa 1 · Detectar, 2 · Preparar o 3 · Seguir."
     )
 
 if "hs_open" not in st.session_state:
     st.session_state.hs_open = None
-# Arriving from the dashboard's "Ver historial completo" button
+# Arriving from a "Ver historial completo" / "📈 Historia" button: open that pattern's story
 if st.session_state.get("hist_pattern"):
     st.session_state.hs_open = st.session_state.pop("hist_pattern")
+    st.session_state["hs_view"] = VIEW_STORY
+if st.session_state.get("hs_view") not in (VIEW_IMPACT, VIEW_STORY):
+    st.session_state["hs_view"] = VIEW_IMPACT
 
-patterns = db.get_all_patterns()
+with st.container(key="hs_view_box"):
+    st.segmented_control("Vista", [VIEW_IMPACT, VIEW_STORY], key="hs_view",
+                         label_visibility="collapsed")
+view = st.session_state.get("hs_view") or VIEW_IMPACT
 
-with st.container(key="hs_filter"):
-    choice = st.radio("Filtrar", list(FILTERS.keys()), horizontal=True, label_visibility="collapsed")
-wanted = FILTERS[choice]
-shown = [p for p in patterns if wanted is None or p.get("status") == wanted]
+if view == VIEW_IMPACT:
+    render_impact()
+else:
+    patterns = db.get_all_patterns()
 
-st.subheader(f"Patrones ({len(shown)})")
-if not shown:
-    st.info("No hay patrones en esta categoría.")
+    with st.container(key="hs_filter"):
+        choice = st.radio("Filtrar", list(FILTERS.keys()), horizontal=True, label_visibility="collapsed")
+    wanted = FILTERS[choice]
+    shown = [p for p in patterns if wanted is None or p.get("status") == wanted]
 
-for p in shown:
-    is_open = st.session_state.hs_open == p["id"]
-    key = f"hs_open_{p['id']}" if is_open else f"hs_item_{p['id']}"
-    tag_html = stage_tag(p, db.count_checkins(p["id"], p.get("attempt") or 1))
-    with st.container(key=key):
-        c1, c2, c3 = st.columns([5, 1.5, 1.3], vertical_alignment="center")
-        c1.markdown(f'<div class="item-name">{html.escape(p["pattern_name"])}</div>', unsafe_allow_html=True)
-        c2.markdown(tag_html, unsafe_allow_html=True)
-        with c3:
-            label = "Ocultar ↑" if is_open else "Ver historia →"
-            if st.button(label, key=f"hs_btn_{p['id']}", type="secondary" if is_open else "primary"):
-                st.session_state.hs_open = None if is_open else p["id"]
-                st.rerun()
-        if is_open:
-            st.divider()
-            render_pattern_story(p)
+    st.subheader(f"Patrones ({len(shown)})")
+    if not shown:
+        st.info("No hay patrones en esta categoría.")
+
+    for p in shown:
+        is_open = st.session_state.hs_open == p["id"]
+        key = f"hs_open_{p['id']}" if is_open else f"hs_item_{p['id']}"
+        tag_html = stage_tag(p, db.count_checkins(p["id"], p.get("attempt") or 1))
+        with st.container(key=key):
+            c1, c2, c3 = st.columns([5, 1.5, 1.3], vertical_alignment="center")
+            c1.markdown(f'<div class="item-name">{html.escape(p["pattern_name"])}</div>', unsafe_allow_html=True)
+            c2.markdown(tag_html, unsafe_allow_html=True)
+            with c3:
+                label = "Ocultar ↑" if is_open else "Ver historia →"
+                if st.button(label, key=f"hs_btn_{p['id']}", type="secondary" if is_open else "primary"):
+                    st.session_state.hs_open = None if is_open else p["id"]
+                    st.rerun()
+            if is_open:
+                st.divider()
+                render_pattern_story(p)
