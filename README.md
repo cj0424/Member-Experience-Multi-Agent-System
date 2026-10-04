@@ -78,7 +78,7 @@ The results above show that the agents work correctly. The **Historial e impacto
 
 For every closed case, the page also checks the proof behind it: was the fix confirmed, did the club see a result, did complaints go down, and have new ones stopped. It also compares fixed problems with those still open, so the club can tell whether an improvement comes from the fixes or just from a quieter few weeks.
 
-Since the current impact view runs entirely on simulated data, it serves as a proof of concept that the underlying method works. While modeled after a padel club, this same multi-agent loop could easily scale to other membership-based businesses, such as gyms, coworking spaces, and language schools.
+While modeled after a padel club, this same multi-agent loop could easily scale to other membership-based businesses, such as gyms, coworking spaces, and language schools.
 
 ## Reliability and security
 
