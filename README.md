@@ -47,7 +47,7 @@ flowchart TD
 | **Insights** | Labels each comment by topic, complaint or praise, and safety risk. When the same problem shows up on different days or from different sources, it becomes a pattern, ranked by priority and linked to the comments behind it |
 | **Action Planning** | Proposes how to fix a pattern, with options and costs, based on how the club runs: its operating procedures, rules, staff shifts, budget and season |
 | **Execution Kit** | Turns the approved plan into ready-to-use material, each piece with an owner, a deadline and a success check |
-| **Outcome Check** | Compares feedback before and after the fix, then closes the case, keeps watching, tries a new approach, or flags work that isn't confirmed |
+| **Outcome Check** | Reviews the submitted evidence in five steps and decides if the case is: CLOSE (resolved), CONTINUE (it is still early), PIVOT (it didn't work and proposes a different approach), or FLAG (pending execution). |
 
 On top of all four, a chat assistant answers from the system's live data. Managers can ask where things stand, what's due for a check-in, or what to bring to Monday's meeting, and a weekly briefing lands on their phone by Telegram (WhatsApp is supported in the code).
 
