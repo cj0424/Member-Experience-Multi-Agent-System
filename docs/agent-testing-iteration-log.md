@@ -1,6 +1,6 @@
 # Member Experience Multi-Agent System — Testing & Iteration Log
 
-**Project:** Member-Experience-Multi-Agent-System — a case study for an independent padel club in Madrid.
+**Project:** Member-Experience-Multi-Agent-System for an independent padel club in Madrid.
 **Data note:** the club is not named, and all data is simulated. Google reviews are real reviews of a Madrid club, collected by hand, anonymised and paraphrased, and used as a fixed sample. The survey, incident log, staff notes, club profile, trackers and check-in inputs are simulated: realistic for a Spanish padel club, but not describing any real one. Why, and what it means for the results: [`data/SIMULATION_ASSUMPTIONS.md`](../data/SIMULATION_ASSUMPTIONS.md).
 **What this is:** a dated record of every version each part of the system went through, what changed, why, and whether it passed — written during development and testing.
 
