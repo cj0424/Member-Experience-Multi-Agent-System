@@ -53,7 +53,7 @@ A built-in **Chat Assistant** handles live-data queries directly, saving manager
 
 ## Tested on a padel club
 
-To test Pala on realistic data, I modelled an independent padel club in Madrid: a member experience survey, a reception incident log, staff notes and Google reviews, plus staff shifts, spending limits and seasons. All the data used are simulated.
+To test Pala on realistic data, I modelled an independent padel club in Madrid so all the data used are simulated.
 
 These results come from weeks 1–4. Week 5 was added only to record the end-to-end demo.
 
