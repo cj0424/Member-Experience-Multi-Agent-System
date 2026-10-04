@@ -49,7 +49,7 @@ flowchart TD
 | **Execution Kit** | Turns the approved plan into ready-to-use material, each piece with an owner, a deadline and a success check |
 | **Outcome Check** | Reviews the submitted evidence in five steps and decides if the case is: CLOSE (resolved), CONTINUE (it is still early), PIVOT (it didn't work and proposes a different approach), or FLAG (pending execution). |
 
-On top of all four, a chat assistant answers from the system's live data. Managers can ask where things stand, what's due for a check-in, or what to bring to Monday's meeting, and a weekly briefing lands on their phone by Telegram (WhatsApp is supported in the code).
+A built-in chat assistant handles live-data queries directly, saving managers from navigating through every page. Managers can quickly ask about the padel club's health, next steps, or meeting prep to identify flags instantly. The system also delivers a weekly status update via Telegram.
 
 ## Tested on a padel club
 
