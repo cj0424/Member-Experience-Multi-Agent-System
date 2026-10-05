@@ -40,14 +40,14 @@ flowchart TD
 
 <sub>🔵 feedback · 🟢 AI agents · 🟡 human decisions · 🔴 real-world action · ⚪ memory</sub>
 
-**Why four agents instead of one?** The four jobs happen at different times and need different things: Insights runs every week across all the feedback, Action Planning and Execution Kit work on one problem at a time, and Outcome Check only runs weeks later. Splitting them creates natural points where people approve before anything moves on, and it means the agent that judges a fix is never the one that proposed it. They pass work to each other through a shared memory that lasts across weeks, and when a fix doesn't work, Outcome Check sends the case back to Action Planning with everything already tried, so the next plan doesn't repeat it.
+**Why four agents instead of one?** The four jobs happen at different times and need different focus: **Insights** runs every week across all feedback, **Action Planning** and **Execution Kit** work on one specific problem at a time, and **Outcome Check** only runs weeks later. Splitting them creates natural checkpoints where managers approve changes before anything moves forward. It also ensures the agent judging the results is never the same one that proposed the fix, keeping the process fair and accurate. 
 
-| Agent | What it does |
-|---|---|
-| **Insights** | Labels each comment by topic, complaint or praise, and safety risk. When the same problem shows up on different days or from different sources, it becomes a pattern, ranked by priority and linked to the comments behind it |
-| **Action Planning** | Proposes how to fix a pattern, with options and costs, based on how the club runs: its operating procedures, rules, staff shifts, budget and season |
-| **Execution Kit** | Turns the approved plan into ready-to-use material, each piece with an owner, a deadline and a success check |
-| **Outcome Check** | Reviews the submitted evidence in five steps and decides if the case is: CLOSE (resolved), CONTINUE (it is still early), PIVOT (it didn't work and proposes a different approach), or FLAG (pending execution). |
+| Agent | Description |
+| :--- | :--- |
+| **Insights** | Labels each comment by topic, complaint or praise, and safety risk; once a problem repeats across days or sources, it becomes a pattern ranked by priority and automatically categorized by risk level (Baja, Media, Alta). |
+| **Action Planning** | Proposes how to fix a pattern, with options and costs, based on how the club's operating procedures, rules, staff shifts, budget, and season schedule work. |
+| **Execution Kit** | Turns the approved plan into ready-to-use materials, assigning a specific owner, a deadline, and a success check to every single task. |
+| **Outcome Check** | Reviews the submitted evidence in five steps to determine the status (closed, still early, unsuccessful and proposing a new approach, or pending execution). |
 
 A built-in **Chat Assistant** handles live-data queries directly, saving managers from navigating through every page. Managers can quickly ask about the padel club's health, next steps, or meeting prep to identify flags instantly. The system also delivers a weekly status update via Telegram.
 
