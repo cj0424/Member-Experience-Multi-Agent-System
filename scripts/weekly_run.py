@@ -9,10 +9,12 @@ What it does, in order:
    Insights analysis (no human step: new patterns wait in "Pendientes de
    recomendación", saved in Supabase, for the owner to review one by one).
 2. Summary: Pala writes the Monday message (what's waiting in the app, this
-   week's tasks with one owner each, what's on hold).
+   week's tasks with one owner each, what's on hold), with **bold** for the
+   titles and key details.
 3. Delivery: sends it through the configured channel (agents/notify.py:
-   Telegram for the demo, WhatsApp in production), and always saves it in
-   Supabase (notifications), so it also shows on the Dashboard.
+   Telegram for the demo, WhatsApp in production), each in its own bold
+   format, and always saves a plain-text copy in Supabase (notifications),
+   so it also shows cleanly on the Dashboard.
 
 Scheduling it (Windows Task Scheduler, or GitHub Actions once deployed) is a
 separate step: this script is exactly what the schedule will run.
@@ -33,7 +35,7 @@ from evidence.pipeline import list_weeks  # noqa: E402
 from faq_agent import run_weekly_summary  # noqa: E402
 from graph import discovery_graph, new_thread, run_until_pause, week_label  # noqa: E402
 from llm import GeminiUnavailable  # noqa: E402
-from notify import channel, configured, send  # noqa: E402
+from notify import channel, configured, plain_text, send  # noqa: E402
 
 
 def new_week_available() -> bool:
@@ -71,10 +73,11 @@ def main():
         status, used = "not_sent", "none"
         error = "--no-send" if args.no_send else f"{channel()} sin configurar"
     else:
-        sent, error = send(body)
+        sent, error = send(body)          # bold, in each channel's own format
         status, used = ("sent" if sent else "error"), channel()
-    db.save_notification(body, used, status, error=error, week_label=label)
-    print("\n" + body + "\n")
+    clean = plain_text(body)              # the Dashboard shows it without symbols
+    db.save_notification(clean, used, status, error=error, week_label=label)
+    print("\n" + clean + "\n")
     print(f"Estado: {status}" + (f" ({error})" if error else ""))
 
 

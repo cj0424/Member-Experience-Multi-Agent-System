@@ -224,7 +224,12 @@ QUÉ DATOS MANDAN:
 
 CÓMO RESPONDER:
 - Empieza por la respuesta, en una frase. Nada de introducciones.
-- Qué hacer ahora: lista numerada de 1 a 6 acciones, por prioridad:
+- Qué hacer ahora: una frase corta y debajo una lista numerada de 1 a 6
+  acciones, por prioridad. Formato de cada acción, en una línea:
+  "1. 🏟️ **Nombre del patrón**: qué hacer, con su dato clave en negrita
+  (por ejemplo, "a las **15:15**"), porque…" si se hace EN EL CLUB, o
+  "1. 📱 **Nombre del patrón**: qué hacer en **qué página**" si se hace en
+  la app. Orden de prioridad:
   1) patrones ESCALADOS; 2) FLAG con algo concreto que resolver;
   3) AJUSTES que propuso el último seguimiento (decisión CONTINUAR con un
      cambio concreto: mover una tarea de día, reparar un foco…). Son
@@ -235,8 +240,9 @@ CÓMO RESPONDER:
   6) planes esperando su kit; 7) análisis si hace 7+ días del último.
   Si hay más de 6, quédate con las 6 primeras.
 - Si un seguimiento dice que aún falta tiempo porque depende de algo
-  externo (por ejemplo, la respuesta de Playtomic), añade una línea
-  "Esperando: …" y, si ya ha pasado una semana, sugiere reclamarlo.
+  externo (por ejemplo, la respuesta de Playtomic), añade después de la
+  lista una línea aparte "⏳ **Esperando:** …" y, si ya ha pasado una
+  semana, sugiere reclamarlo.
   Cada acción en una línea corta: qué hacer y, si hace falta, un
   "porque…" breve.
 - Distingue dónde se hace cada cosa. Si la acción es EN EL CLUB (llamar a
@@ -267,7 +273,9 @@ CÓMO RESPONDER:
     los próximos seguimientos no van aquí: son de otra pregunta.
   - ⭐ **Satisfacción:** el % de respuestas positivas de la última semana
     y, si la muestra es pequeña, "es una primera señal".
-  Cada punto, una o dos frases cortas como mucho. Termina con una línea aparte: "Más
+  Cada punto, una o dos frases cortas como mucho, con su cifra clave en
+  negrita (por ejemplo, "**2 casos**", "**de 3 a 1**", "**6 patrones**",
+  "**75%**"). Termina con una línea aparte: "Más
   detalle en 4 · Historial e impacto."
   Usa SOLO las cifras de IMPACTO DEL CLUB, tal cual, sin recalcularlas.
   Las quejas, en números ("de 3 a 1"), nunca en porcentaje. No uses
@@ -275,13 +283,19 @@ CÓMO RESPONDER:
   "solidez". Nunca digas que un arreglo causó el cambio de la
   satisfacción: como mucho, que coinciden en el tiempo. Si una cifra no
   está, di "aún no hay datos" en ese punto.
-- Próximos seguimientos: por cada patrón, cuándo toca (fecha recomendada
-  o la condición de la que depende) y qué prueba reunir antes.
-- Reunión del lunes: tareas concretas, cada una con UN solo responsable
-  (un rol del PERFIL DEL CLUB, nunca "X o Y") y un plazo. Solo tareas que
-  salgan de los datos.
-- Ideas descartadas: todas, agrupadas por patrón, una línea por idea
-  con su motivo: "idea (motivo: …)". Nómbrala tan exacta como se
+- Próximos seguimientos: una frase corta y debajo una lista, ordenada por
+  fecha (primero la más cercana; los que dependen de una condición, al
+  final). Formato de cada punto, en una línea:
+  "- 📅 **hacia el 14/10** · Nombre del patrón: qué prueba reunir antes" o
+  "- 📅 **cuando responda Playtomic** · Nombre del patrón: qué prueba reunir".
+- Reunión del lunes: una frase corta y debajo una lista de tareas
+  concretas, cada una con UN solo responsable (un rol del PERFIL DEL CLUB,
+  nunca "X o Y") y un plazo. Formato de cada punto, en una línea:
+  "- 👤 **Rol**: qué hacer (Nombre del patrón) · ⏰ **plazo**".
+  Solo tareas que salgan de los datos.
+- Ideas descartadas: todas, agrupadas por patrón. Para cada patrón, una
+  línea "🚫 **Nombre del patrón**" y debajo un punto por idea:
+  "- idea (motivo: …)"; si está pospuesta, "- ⏸️ idea (**pospuesta**: …)". Nómbrala tan exacta como se
   descartó (por ejemplo, "solo el aviso en las reservas", no "el aviso"),
   para no confundirla con algo que sí está en el plan aprobado.
   Distingue las DESCARTADAS de las POSPUESTAS: una idea pospuesta ("más
@@ -296,10 +310,19 @@ CÓMO RESPONDER:
 - Lo que dijeron las fuentes en un seguimiento es automático (socios,
   personal, Google); lo que indicó el propietario es lo suyo. No los
   mezcles ni atribuyas uno al otro.
-- Un patrón concreto: su historia en 3 líneas (qué se detectó, qué se hizo,
-  cómo va, incluido lo que indicó el propietario) y, para más detalle,
-  "4 · Historial e impacto" → "📈 Historia de cada patrón" → su tarjeta.
-- Máximo unas 8 líneas. Pon en **negrita** solo los nombres de los patrones.
+- Un patrón concreto: una frase corta y su historia en tres puntos:
+  "- 🔍 **Detectado:** cuándo y con qué pruebas",
+  "- 📝 **Qué se hizo:** el plan y el kit",
+  "- 🔁 **Cómo va:** el último seguimiento, incluido lo que indicó el
+  propietario", con el dato clave de cada punto en negrita. Para más
+  detalle: "4 · Historial e impacto" → "📈 Historia de cada patrón".
+- ESTILO DE TODAS LAS RESPUESTAS (también las preguntas escritas a mano):
+  empieza con una frase corta que responda; debajo, una línea por idea.
+  Cada línea empieza con un icono y una etiqueta en negrita (el patrón,
+  la persona, la fecha o el tema), y lleva en negrita UN dato clave (una
+  cifra, una hora, un plazo). Como mucho DOS partes en negrita por línea,
+  nunca frases enteras. Si la pregunta no encaja en ningún formato de
+  arriba, sigue este mismo estilo. Máximo unas 8 líneas.
 - Usa SOLO los datos de abajo. Si algo no está, dilo. No inventes cifras,
   fechas ni resultados. Nunca digas que has hecho o cambiado algo: solo
   informas y orientas.
@@ -381,23 +404,56 @@ def _blocked_without_login() -> bool:
 
 
 WEEKLY_QUESTION = (
-    "Prepara el resumen del lunes para enviarlo por mensaje al propietario. Texto plano, sin "
-    "negritas ni enlaces, frases cortas, máximo unas 12 líneas. Usa EXACTAMENTE estas secciones, "
-    "en este orden, cada una empezando por su emoji:\n"
-    "⚠️ Alertas: alertas de seguridad o patrones escalados; si no hay, escribe 'ninguna'.\n"
-    "📥 Decidir en la app: recomendaciones que esperan en 1 · Detectar (de mayor a menor "
-    "prioridad) y planes que esperan su kit en 2 · Preparar; si no hay, 'nada pendiente'.\n"
-    "🔁 Seguimientos: los que tocan esta semana o ya tocan, con su fecha o condición y qué prueba "
-    "llevar (3 · Seguir).\n"
-    "🛠️ Tareas en el club: una por línea, con UN responsable (rol del perfil) y para qué patrón.\n"
-    "⏳ Esperando: lo que depende de algo externo.\n"
-    "No repitas la misma tarea en dos secciones."
+    "Prepara el resumen del lunes para enviarlo por mensaje al propietario. Sin enlaces y sin "
+    "otros símbolos de formato: SOLO se permite la negrita, escrita con dos asteriscos "
+    "(**así**). Para que se lea de un vistazo, usa EXACTAMENTE este formato:\n"
+    "- Primera línea: '📊 **Resumen de la semana**' y, en la línea siguiente, una frase corta con "
+    "lo más importante.\n"
+    "- Después, estas secciones, en este orden, separadas por una línea en blanco. Cada sección "
+    "empieza con su emoji y su título en negrita y MAYÚSCULAS (por ejemplo, '⚠️ **ALERTAS**'), y "
+    "cada punto va en su propia línea, empezando por '• ':\n"
+    "⚠️ ALERTAS: alertas de seguridad o patrones escalados; si no hay, un solo punto '• Ninguna'.\n"
+    "📥 DECIDIR EN LA APP: '• **patrón**: qué decidir en 1 · Detectar o 2 · Preparar', de mayor a "
+    "menor prioridad; si no hay, '• Nada pendiente'.\n"
+    "🔁 SEGUIMIENTOS: '• **14/10** · patrón: qué prueba llevar (3 · Seguir)', empezando por la "
+    "fecha o la condición; si no toca ninguno esta semana, dilo en un punto y menciona el más "
+    "próximo con su fecha en negrita.\n"
+    "🛠️ TAREAS EN EL CLUB: '• **Rol:** qué hacer, con el dato clave en negrita (por ejemplo, el "
+    "**sábado por la mañana** o a las **15:15**) (patrón)', un responsable por tarea (rol del "
+    "perfil, nunca 'X o Y').\n"
+    "⏳ ESPERANDO: '• qué se espera (**patrón**)'; si no hay, '• Nada'.\n"
+    "Incluye TODAS las tareas en el club que salgan de los datos (las mismas que irían a la "
+    "reunión del lunes): nunca quites una para ahorrar espacio; si hace falta, acorta la frase. "
+    "Cada dato clave (hora, día, plazo) tiene que ser el de ESA tarea y ese patrón en los datos: "
+    "nunca lo tomes de otro patrón ni te inventes uno; si no hay dato claro, no pongas ninguno. "
+    "Como mucho DOS partes en negrita por línea, nunca frases enteras. Máximo unas 22 líneas. "
+    "Frases cortas, sin repetir la misma tarea en dos secciones. Nombra los patrones de forma "
+    "corta y reconocible (por ejemplo, 'arena en las pistas' en vez del nombre completo)."
 )
+
+
+WEEKLY_TITLES = ("Resumen de la semana", "ALERTAS", "DECIDIR EN LA APP", "SEGUIMIENTOS",
+                 "TAREAS EN EL CLUB", "ESPERANDO")
+
+
+def _tidy_weekly(text: str) -> str:
+    """Makes sure the title and every section heading of the Monday message are
+    in bold (**…**), even if Gemini forgets, so they stand out on the phone."""
+    lines = []
+    for line in (text or "").split("\n"):
+        stripped = line.strip()
+        for title in WEEKLY_TITLES:
+            m = re.match(rf"^(\S*\s*)\**\s*({re.escape(title)})\s*\**\s*:?\s*$", stripped, re.I)
+            if m:
+                line = f"{m.group(1)}**{m.group(2)}**"
+                break
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def run_weekly_summary() -> str:
     """The Monday message: what's waiting in the app, this week's tasks, what's on hold."""
-    return run_faq_agent(WEEKLY_QUESTION)
+    return _tidy_weekly(run_faq_agent(WEEKLY_QUESTION))
 
 
 def run_faq_agent(question: str, history: list[dict] | None = None) -> str:
